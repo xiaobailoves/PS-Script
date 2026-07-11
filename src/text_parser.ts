@@ -45,13 +45,13 @@ export function lpTextParser(path: string): LpFile | null
 
     // 分行读取
     var state = 'start'; //'start','filehead','context'
-    var notDealStr;
-    var notDealLabelheadMsg;
-    var nowFilename;
-    var labelData = new Array();
-    var filenameList = new Array();
-    var groupData;
-    var lineMsg;
+    var notDealStr: string = "";
+    var notDealLabelheadMsg: any = {};
+    var nowFilename: string = "";
+    var labelData: any = {};
+    var filenameList: string[] = [];
+    var groupData: any = [];
+    var lineMsg: any = { Type: "unknown" };
 
     for (var i = 0; !f.eof; i++) {
         var lineStr = f.readln();

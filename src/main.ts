@@ -14,7 +14,7 @@
 
 namespace LabelPlus {
 
-interface CustomOptionsPicker { (opts: CustomOptions, toFile?: boolean): CustomOptions | null };
+interface CustomOptionsPicker { (opts: CustomOptions, toFile: boolean): CustomOptions | null };
 interface PanelDesc {
     x?: number,
     y?: number,
@@ -26,11 +26,12 @@ class LabelPlusInput extends GenericUI {
     private lpFile: LpFile | null = null;
 
     private settingsPnl: any;
-    private inputPnl: any;
     private outputPnl: any;
     private stylePnl: any;
     private automationPnl: any;
     private HelpPnl: any;
+
+    inputPnl: any;
 
     constructor() {
         super();
@@ -835,7 +836,7 @@ class LabelPlusInput extends GenericUI {
         return pnl;
     }
 
-    private geCustomOptions = (toFile: boolean): CustomOptions | null => {
+    geCustomOptions = (toFile: boolean): CustomOptions | null => {
         let new_opts = new CustomOptions();
         for (let i = 0; i < this.optPickers.length; i++) {
             let ret = this.optPickers[i](new_opts, toFile);
@@ -875,7 +876,7 @@ LabelPlusInput.prototype.validatePanel = function (pnl: any, ini: any, tofile: b
     return opts; // go process()
 };
 
-LabelPlusInput.prototype.process = function (opts: CustomOptions, doc)
+LabelPlusInput.prototype.process = function (opts: CustomOptions, doc: any)
 {
     let result = false;
 
