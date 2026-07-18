@@ -182,6 +182,14 @@ function openImageWorkspace(img_filename: string, template_path: string): ImageW
 
     // open background image
     let bgDoc: Document;
+
+    img_filename = img_filename.substring(0, img_filename.lastIndexOf('.'));
+    for (let i = 0; i < image_suffix_list.length; i++) {
+        if (FileIsExists(opts.source + dirSeparator + img_filename + image_suffix_list[i])){
+            img_filename = img_filename + image_suffix_list[i];
+            break;
+        }
+    }
     try {
         let bgFile = new File(opts.source + dirSeparator + img_filename);
         bgDoc = app.open(bgFile);

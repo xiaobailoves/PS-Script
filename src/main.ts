@@ -26,12 +26,11 @@ class LabelPlusInput extends GenericUI {
     private lpFile: LpFile | null = null;
 
     private settingsPnl: any;
+    private inputPnl: any;
     private outputPnl: any;
     private stylePnl: any;
     private automationPnl: any;
     private HelpPnl: any;
-
-    inputPnl: any;
 
     constructor() {
         super();
@@ -836,7 +835,7 @@ class LabelPlusInput extends GenericUI {
         return pnl;
     }
 
-    geCustomOptions = (toFile: boolean): CustomOptions | null => {
+    private geCustomOptions = (toFile: boolean): CustomOptions | null => {
         let new_opts = new CustomOptions();
         for (let i = 0; i < this.optPickers.length; i++) {
             let ret = this.optPickers[i](new_opts, toFile);
@@ -848,61 +847,73 @@ class LabelPlusInput extends GenericUI {
         return new_opts;
     }
 
-}
+    
 
-LabelPlusInput.prototype.createPanel = function (pnl: any, ini: never) {
-    this.mainPannel(pnl);
-    this.moveWindow(100, 100);
-}
-
-// validate user panel, generate CustomOptions
-// tofile: if it is saving config to file
-LabelPlusInput.prototype.validatePanel = function (pnl: any, ini: any, tofile: boolean) :CustomOptions | boolean {
-    let opts = this.geCustomOptions(tofile);
-    if (opts == null) {
-        return true; // continue, will not close the indow
+    createPanel(pnl: any, ini: never) {
+        this.mainPannel(pnl);
+        this.moveWindow(100, 100);
     }
 
-    // check image source exsits
-    for (let i = 0; i < opts.imageSelected.length; i++) {
-        let item = opts.imageSelected[i];
-        if (!FileIsExists(opts.source + dirSeparator + item.matched_file)) {
-            alert(I18n.ERROR_HAVE_NO_MATCH_IMG, 'error', true);
-            Emit(this.inputPnl.checkSourceMatchButton.onClick);
+    // validate user panel, generate CustomOptions
+    // tofile: if it is saving config to file
+    validatePanel(pnl: any, ini: any, tofile: boolean) :CustomOptions | boolean {
+        let opts = this.geCustomOptions(tofile);
+        if (opts == null) {
             return true; // continue, will not close the indow
         }
-    }
 
-    return opts; // go process()
-};
+        // check image source exsits
+        for (let i = 0; i < opts.imageSelected.length; i++) {
+            let item = opts.imageSelected[i].matched_file;
+            let file_name = item.substring(0, item.lastIndexOf('.'));
+            let path = opts.source + dirSeparator + file_name;
+            
+            let is_exist : boolean = false;
+            for(let j = 0; j < image_suffix_list.length; j++) {
+                let new_path = path + image_suffix_list[j];
+                if(FileIsExists(new_path)) {
+                    is_exist = true;
+                    break;
+                }
+            }
+            if (!is_exist) {
+                alert(I18n.ERROR_HAVE_NO_MATCH_IMG, 'error', true);
+                Emit(this.inputPnl.checkSourceMatchButton.onClick);
+                return true; // continue, will not close the indow
+            }
+        }
 
-LabelPlusInput.prototype.process = function (opts: CustomOptions, doc: any)
-{
-    let result = false;
+        return opts; // go process()
+    };
 
-    try {
-        writeIni(DEFAULT_INI_PATH, opts); // auto save ini
-        result = importFiles(opts);
-    } catch (e) {
-        log_err('All log:');
-        log_err(alllog);
-        log_err('Unexpected Error:');
-        log_err(Stdlib.exceptionMessage(e));
-    }
-    if (result && (errlog == "")) {
-        alert(I18n.COMPLETE);
-        return;
-    }
-    else if (result && (errlog != "")) {
-        alert(I18n.COMPLETE_WITH_ERROR, "error", true);
-    }
-    else if (!result) {
-        alert(I18n.COMPLETE_FAILED, "error", true);
-    }
+    process(opts: CustomOptions, doc: any)
+    {
+        let result = false;
 
-    var logwin = new LogWindow('Error');
-    logwin.append(errlog);
-    logwin.show();
+        try {
+            writeIni(DEFAULT_INI_PATH, opts); // auto save ini
+            result = importFiles(opts);
+        } catch (e) {
+            log_err('All log:');
+            log_err(alllog);
+            log_err('Unexpected Error:');
+            log_err(Stdlib.exceptionMessage(e));
+        }
+        if (result && (errlog == "")) {
+            alert(I18n.COMPLETE);
+            return;
+        }
+        else if (result && (errlog != "")) {
+            alert(I18n.COMPLETE_WITH_ERROR, "error", true);
+        }
+        else if (!result) {
+            alert(I18n.COMPLETE_FAILED, "error", true);
+        }
+
+        var logwin = new LogWindow('Error');
+        logwin.append(errlog);
+        logwin.show();
+    }
 }
 
 function writeIni (iniFile: string, ini: CustomOptions) {
