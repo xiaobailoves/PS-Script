@@ -45,13 +45,13 @@ export function lpTextParser(path: string): LpFile | null
 
     // 分行读取
     var state = 'start'; //'start','filehead','context'
-    var notDealStr;
+    var notDealStr: string = "";
     var notDealLabelheadMsg;
-    var nowFilename;
-    var labelData = new Array();
+    var nowFilename: string = "";
+    var labelData : any = {};
     var filenameList = new Array();
-    var groupData;
-    var lineMsg;
+    var groupData: any;
+    var lineMsg: any = {};
 
     for (var i = 0; !f.eof; i++) {
         var lineStr = f.readln();
@@ -163,13 +163,13 @@ function judgeLineType(str: string) {
 
     // FIXME handle invalid string format error
     str = str.trim();
-    if (str.substr(0, 6) == '>>>>>>') { // assumed to be a file name
+    if (str.substring(0, 6) == '>>>>>>') { // assumed to be a file name
         str = str.slice(2 + str.indexOf(">["));
         if ((index = str.search(/\]<{6,}$/)) < 0)
             return result;
         result.Title = str.substring(0, index);
         result.Type = 'filehead';
-    } else if (str.substr(0, 6) == '------') { // assumed to be a label
+    } else if (str.substring(0, 6) == '------') { // assumed to be a label
         str = str.slice(2 + str.indexOf("-["));
         if ((index = str.search(/\]-{6,}\[/)) < 0)
             return result;

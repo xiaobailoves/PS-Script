@@ -9,3 +9,13 @@ declare class jamJSON {
 	static parse(text: string, validate?: boolean, allowComments?: boolean): any;
 	static stringify(value: any, space?: string | number, prefix?: string | number): string;
 }
+
+interface Layers {
+	[index: number]: any;
+}
+interface ArtLayers {
+	[index: number]: ArtLayer;
+}
+interface Channels {
+	[index: number]: Channel;
+}
