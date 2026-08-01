@@ -245,6 +245,7 @@ function openImageWorkspace(img_filename: string, template_path: string): ImageW
         catch {
             dialogOverlayLayer = wsDoc.artLayers.add();
             dialogOverlayLayer.name = TEMPLATE_LAYER.DIALOG_OVERLAY;
+            pendingDelLayerList.push(dialogOverlayLayer); // pending delete when overlay is off
         }
     }
 
