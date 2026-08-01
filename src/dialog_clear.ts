@@ -120,14 +120,14 @@ export function dialogClear(doc: Document, bgLayer: ArtLayer, overLayer: ArtLaye
             { x: width - 1, y: height -1 },
         ];
         for (let j = 0; j < corners.length; j++) {
-            let x = corners[j].x;
-            let y = corners[j].y;
-            let color = getColor(doc, UnitValue(x, 'px'), UnitValue(y, 'px'));
+            let cx = corners[j].x;
+            let cy = corners[j].y;
+            let color = getColor(doc, UnitValue(cx, 'px'), UnitValue(cy, 'px'));
             if (color.rgb.hexValue == tmp_color.rgb.hexValue) {
-                log("detect corner (" + x + "," + y + ") is tmp_color");
+                log("detect corner (" + cx + "," + cy + ") is tmp_color");
                 continue;
             }
-            MyAction.magicWand(x, y, 0, false, true, 'addTo');
+            MyAction.magicWand(cx, cy, 0, false, true, 'addTo');
         }
 
         tmp_layer.remove();

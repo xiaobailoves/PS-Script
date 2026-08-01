@@ -48,7 +48,7 @@ export function lpTextParser(path: string): LpFile | null
     var notDealStr: string = "";
     var notDealLabelheadMsg;
     var nowFilename: string = "";
-    var labelData : any = {};
+    var labelData: { [key: string]: any[] } = {};
     var filenameList = new Array();
     var groupData: any;
     var lineMsg: any = {};

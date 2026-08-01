@@ -67,7 +67,6 @@ namespace I18n {
     export var ERROR_OPT_FONT_NOT_FOUND: string = "找不到配置中保存的字体";
 
     declare var app: any;
-    // if (true) {
     if (!(app.locale in {"zh_CN":1, "zh_TW":1, "zh_HK":1})) {
         BUTTON_RUN = "Run";
         BUTTON_CANCEL = "Cancel";

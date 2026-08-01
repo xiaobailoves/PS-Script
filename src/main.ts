@@ -149,8 +149,8 @@ class LabelPlusInput extends GenericUI {
             }
             for (let i = 0; i < lpFile.groups.length; i++) {
                 let g = lpFile.groups[i];
-                inputPnl.chooseGroupListBox[i] = inputPnl.chooseGroupListBox.add('item', g, i);
-                inputPnl.chooseGroupListBox[i].selected = true;
+                let groupItem = inputPnl.chooseGroupListBox.add('item', g, i);
+                groupItem.selected = true;
 
                 // dialog overlay
                 {
@@ -158,7 +158,7 @@ class LabelPlusInput extends GenericUI {
                     if (doPnl.groupTextBox.text == "") { // first group
                         doPnl.groupTextBox.text = g;
                     }
-                    doPnl.addGroupList[i] = doPnl.addGroupList.add('item', g, i);
+                    doPnl.addGroupList.add('item', g, i);
                 }
             }
             return {};
@@ -173,7 +173,7 @@ class LabelPlusInput extends GenericUI {
                     return null;
                 }
                 let lpFile = lpTextParser(pnl.lpTextFileTextBox.text);
-                if (lpFile == null) {
+                if (lpFile === null) {
                     alert(I18n.ERROR_PARSER_LPTEXT_FAIL);
                     return null;
                 }
@@ -235,7 +235,7 @@ class LabelPlusInput extends GenericUI {
                 let mgr = win.mgr;
                 let res = mgr.validatePanel(win.appPnl, win.ini, true);
 
-                if (typeof (res) != 'boolean') {
+                if (typeof (res) !== 'boolean') {
                     writeIni(f, res);
                 }
             }
@@ -455,7 +455,13 @@ class LabelPlusInput extends GenericUI {
             Emit(pnl.ignoreNoLabelImgCheckBox.onClick);
         }
         if (opts.outputType !== undefined) {
-            pnl.outputTypeList.selection = pnl.outputTypeList.find(OptionOutputType[opts.outputType]);
+            let typeName = OptionOutputType[opts.outputType];
+            if (typeName !== undefined) {
+                let item = pnl.outputTypeList.find(typeName);
+                if (item !== null) {
+                    pnl.outputTypeList.selection = item;
+                }
+            }
         }
         if (opts.notClose !== undefined) {
             pnl.notCloseCheckBox.value = opts.notClose;
@@ -696,7 +702,7 @@ class LabelPlusInput extends GenericUI {
         }
 
         // pnl
-        xx =+ 10;
+        xx += 10;
         yy += 23;
         pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 460, yy + 75]);
 
@@ -828,7 +834,7 @@ class LabelPlusInput extends GenericUI {
         // help bar
         xx = this.winRect.w - 220;
         yy = 5;
-        this.HelpPnl = pnl.add('panel', [ , 0, "", [xx, yy, xx + 200, yy + 25]]);
+        this.HelpPnl = pnl.add('panel', [xx, yy, xx + 200, yy + 25]);
         ret = this.uiHelpPanel(this.HelpPnl);
 
         this.allPanelEnable(this.lpFile != null);
@@ -839,7 +845,7 @@ class LabelPlusInput extends GenericUI {
         let new_opts = new CustomOptions();
         for (let i = 0; i < this.optPickers.length; i++) {
             let ret = this.optPickers[i](new_opts, toFile);
-            if (ret == null) {
+            if (ret === null) {
                 return null
             }
             new_opts = ret;
@@ -858,7 +864,7 @@ class LabelPlusInput extends GenericUI {
     // tofile: if it is saving config to file
     validatePanel(pnl: any, ini: any, tofile: boolean) :CustomOptions | boolean {
         let opts = this.geCustomOptions(tofile);
-        if (opts == null) {
+        if (opts === null) {
             return true; // continue, will not close the indow
         }
 

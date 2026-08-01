@@ -5,7 +5,7 @@ namespace LabelPlus {
 
 export function assert(condition: any, msg?: string): asserts condition {
     if (!condition) {
-        throw new Error("error: assert " + condition);
+        throw new Error(msg ? "error: " + msg : "error: assert " + condition);
     }
 }
 

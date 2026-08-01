@@ -7,6 +7,28 @@
 ### Removed
 
 
+## [1.7.5] - 2026-08-01
+### Fixed
+- 修复 bgLayer 回退创建时图层名被错误命名为"dialog-overlay"的问题，导致涂白和图层排序功能异常
+- 修复自定义模板文件不存在时脚本直接崩溃的问题，现改为记录错误并跳过该图片继续处理
+- 修复无模板模式下文字大小计算错误，`min()` 的第二个参数误用了 `height` 而非 `width`
+- 修复 HelpPnl bounds 数组格式损坏，参数中存在空值和类型错误
+- 修复日志输出中三元运算符优先级错误（×3处），导致动作执行结果始终显示为"done"
+- 修复 `xx =+ 10` 赋值操作符书写错误（应为 `xx += 10`），导致自动化面板 UI 布局偏移
+- 修复 `assert()` 函数吞掉自定义错误消息参数，丢掉了调用方提供的调试信息
+- 修复 `dialog_clear.ts` 中 corners 循环变量遮蔽外层 label 坐标变量，容易引发维护性问题
+- 修复 `LogWindow.js` 中 `instanceof "Folder"` 参数类型错误（字符串应为构造函数），导致 Folder 类型检查始终失败
+- 修复 `LogWindow.js` 中 `throwError()` 直接抛出原始值、`f.error` 可能为 undefined 的问题
+- 修复恢复配置中 `outputType` 时缺少越界保护，超出枚举范围会导致下拉列表选中状态异常
+### Changed
+- 统一 `== null` 为 `=== null`，`!= 'boolean'` 为 `!== 'boolean'`，提升代码风格一致性
+- 移除 `GenericUI.jsx` 中 `getFont()` 方法内 return 后的 13 行死代码（引用了未定义变量 `sel`、`familyStyles`）
+- 移除 `i18n.ts` 中被注释的 `// if (true) {` 调试代码
+- 移除 `main.ts` 中对 ListBox/DropDownList 控件无意义的索引赋值操作
+- `importer.ts` 中 `for...of` 遍历改为反向 for 循环，增强数组操作安全性
+- `text_parser.ts` 中 `labelData` 类型从 `any` 改为索引签名类型 `{ [key: string]: any[] }`
+- 开发依赖 `typescript` 从 `^4.9.5` 升级至 `^5.8.3`
+
 ## [1.7.4] - 2024-09-21
 ### Changed
 - 兼容翻译文本编码格式UTF-8 with BOM或UTF-8，增强与其他兼容的工具导出的文本的兼容性，原先似乎与操作系统相关，win下为UTF-8 with BOM
