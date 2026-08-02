@@ -37,7 +37,7 @@ class LabelPlusInput extends GenericUI {
         this.saveIni = false;
         this.hasBorder = false;
         this.settingsPanel = false;
-        this.winRect = { x: 200, y: 200, w: 875, h: 590 };
+        this.winRect = { x: 200, y: 200, w: 875, h: 645 };
         this.center = true;
         this.title = I18n.APP_NAME + " " + VERSION;
         this.notesSize = 0;
@@ -334,16 +334,16 @@ class LabelPlusInput extends GenericUI {
         yOfs = yy;
         pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 150, yy + 20], I18n.LABEL_SELECT_IMG);
         yy += 23;
-        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 150, yy + 265], [], { multiselect: true });
+        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 150, yy + 260], [], { multiselect: true });
 
         // select label group
         yy = yOfs;
         xx = xOfs + 175;
         pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 150, yy + 20], I18n.LABEL_SELECT_GROUP);
         yy += 23;
-        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 150, yy + 265], [], { multiselect: true });
+        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 150, yy + 260], [], { multiselect: true });
         xx = xOfs;
-        yy += 270;
+        yy += 265;
 
         // tip for multiple selection
         pnl.add('statictext', [xx, yy, xx + 330, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
@@ -443,6 +443,19 @@ class LabelPlusInput extends GenericUI {
 
         // do not create layer group
         pnl.noLayerGroupCheckBox = pnl.add('checkbox', [xx, yy, xx + 250, yy + 20], I18n.CHECKBOX_NO_LAYER_GROUP);
+        xx = xOfs;
+        yy += 23;
+
+        // ppi
+        pnl.setPPICheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_PPI);
+        pnl.setPPICheckBox.onClick = () => {
+            pnl.ppiTextBox.enabled = pnl.setPPICheckBox.value;
+        }
+        xx += 105;
+        pnl.ppiTextBox = pnl.add('edittext', [xx, yy, xx + 50, yy + 20]);
+        pnl.ppiTextBox.enabled = false;
+        pnl.ppiTextBox.text = "300";
+        xx = xOfs;
         yy += 23;
 
         let opts = this.opts;
@@ -471,6 +484,11 @@ class LabelPlusInput extends GenericUI {
             pnl.noLayerGroupCheckBox.value = opts.noLayerGroup;
             Emit(pnl.noLayerGroupCheckBox.onClick);
         }
+        if (opts.ppi !== undefined && opts.ppi !== 0) {
+            pnl.setPPICheckBox.value = true;
+            pnl.ppiTextBox.text = opts.ppi.toString();
+            Emit(pnl.setPPICheckBox.onClick);
+        }
 
         let getOption = (opts: CustomOptions, toFile: boolean): CustomOptions | null => {
             if (!toFile) {
@@ -489,6 +507,7 @@ class LabelPlusInput extends GenericUI {
             opts.ignoreNoLabelImg = pnl.ignoreNoLabelImgCheckBox.value;
             opts.notClose = pnl.notCloseCheckBox.value;
             opts.noLayerGroup = pnl.noLayerGroupCheckBox.value;
+            opts.ppi = (pnl.setPPICheckBox.value) ? Number(pnl.ppiTextBox.text) : 0;
             return opts;
         }
 
@@ -556,17 +575,16 @@ class LabelPlusInput extends GenericUI {
 
         // set font
         {
-            pnl.setFontCheckBox = pnl.add('checkbox', [xx, yy, xx + 50, yy + 20], I18n.CHECKBOX_SET_FONT);
+            pnl.setFontCheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_FONT);
             pnl.setFontCheckBox.onClick = () => {
                 let value = pnl.setFontCheckBox.value;
                 pnl.font.family.enabled = value;
                 pnl.font.style.enabled = value;
                 pnl.font.fontSize.enabled = value;
             }
-            xx += 60;
-            pnl.font = pnl.add('group', [xx, yy + 2, xx + 400, yy + 25]);
-            this.createFontPanel(pnl.font);
-            pnl.font.label.text = " ";
+            xx += 105;
+            pnl.font = pnl.add('group', [xx, yy + 2, xx + 365, yy + 25]);
+            this.createFontPanel(pnl.font, undefined, "", 0);
             pnl.font.family.enabled = false;
             pnl.font.style.enabled = false;
             pnl.font.fontSize.enabled = false;
@@ -574,6 +592,31 @@ class LabelPlusInput extends GenericUI {
             xx = xOfs;
             yy += 25;
         }
+
+        // anti-alias
+        pnl.setAntiAliasCheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_ANTI_ALIAS);
+        pnl.setAntiAliasCheckBox.onClick = () => {
+            pnl.antiAliasList.enabled = pnl.setAntiAliasCheckBox.value;
+        }
+        xx += 105;
+        let aaItems = ["犀利", "锐利", "浑厚", "平滑", "无"];
+        pnl.antiAliasList = pnl.add('dropdownlist', [xx, yy - 1, xx + 80, yy + 21], aaItems);
+        pnl.antiAliasList.enabled = false;
+        pnl.antiAliasList.selection = pnl.antiAliasList.items[0];
+        xx = xOfs;
+        yy += 23;
+
+        // text color
+        pnl.setTextColorCheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_TEXT_COLOR);
+        pnl.setTextColorCheckBox.onClick = () => {
+            pnl.textColorTextBox.enabled = pnl.setTextColorCheckBox.value;
+        }
+        xx += 105;
+        pnl.textColorTextBox = pnl.add('edittext', [xx, yy, xx + 80, yy + 20]);
+        pnl.textColorTextBox.enabled = false;
+        pnl.textColorTextBox.text = "#000000";
+        xx = xOfs;
+        yy += 23;
 
         // leading
         pnl.setTextLeadingCheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_LEADING);
@@ -626,6 +669,20 @@ class LabelPlusInput extends GenericUI {
             }
             Emit(pnl.setFontCheckBox.onClick);
         }
+        if (opts.antiAlias !== undefined && opts.antiAlias !== 0) {
+            let isOn = opts.antiAlias > 0;
+            let val = Math.abs(opts.antiAlias);
+            pnl.setAntiAliasCheckBox.value = isOn;
+            let aaMap = [0, 0, 0, "犀利", "锐利", "浑厚", "平滑", "无"];
+            let aaName = aaMap[val] || "犀利";
+            pnl.antiAliasList.selection = pnl.antiAliasList.find(aaName);
+            Emit(pnl.setAntiAliasCheckBox.onClick);
+        }
+        if (opts.textColor !== undefined && opts.textColor !== "") {
+            pnl.setTextColorCheckBox.value = true;
+            pnl.textColorTextBox.text = opts.textColor;
+            Emit(pnl.setTextColorCheckBox.onClick);
+        }
         if (opts.textLeading !== undefined) {
             if (opts.textLeading === 0) {
                 pnl.setTextLeadingCheckBox.value = false;
@@ -635,7 +692,6 @@ class LabelPlusInput extends GenericUI {
             }
             Emit(pnl.setTextLeadingCheckBox.onClick);
         }
-
         let getOption = (opts: CustomOptions): CustomOptions  | null => {
             opts.docTemplate =
                 pnl.docTemplatePnl.autoTemplateRb.value ? OptionDocTemplate.Auto : (
@@ -652,6 +708,10 @@ class LabelPlusInput extends GenericUI {
                 opts.font = "";
                 opts.fontSize = 0;
             }
+            let aaMap: { [key: string]: number } = { "犀利": 3, "锐利": 2, "浑厚": 4, "平滑": 5, "无": 1 };
+            let aliasVal = aaMap[pnl.antiAliasList.selection.text] || 3;
+            opts.antiAlias = (pnl.setAntiAliasCheckBox.value) ? aliasVal : -aliasVal;
+            opts.textColor = (pnl.setTextColorCheckBox.value) ? pnl.textColorTextBox.text : "";
             opts.textLeading = (pnl.setTextLeadingCheckBox.value) ? pnl.textLeadingTextBox.text : 0;
             opts.textDirection = <OptionTextDirection> I18n.LIST_TEXT_DIT_ITEMS.indexOf(pnl.textDirList.selection.text);
             return opts;
@@ -804,7 +864,7 @@ class LabelPlusInput extends GenericUI {
         yy += 60;
 
         // input options
-        this.inputPnl = pnl.add('panel', [xx, yy, xx + 355, yy + 420]);
+        this.inputPnl = pnl.add('panel', [xx, yy, xx + 355, yy + 430]);
         ret = this.uiInputPanel(this.inputPnl);
         this.addToPickerList(ret.getOption);
         xx += 365;
@@ -814,16 +874,16 @@ class LabelPlusInput extends GenericUI {
         yy = yOfs;
 
         // output options
-        this.outputPnl = pnl.add('panel', [xx, yy, xx + 480, yy + 120]);
+        this.outputPnl = pnl.add('panel', [xx, yy, xx + 480, yy + 145]);
         ret = this.uiOutputPanel(this.outputPnl);
         this.addToPickerList(ret.getOption);
-        yy += 130;
+        yy += 150;
 
         // style
-        this.stylePnl = pnl.add('panel', [xx, yy, xx + 480, yy + 170]);
+        this.stylePnl = pnl.add('panel', [xx, yy, xx + 480, yy + 210]);
         ret = this.uiStylePanel(this.stylePnl);
         this.addToPickerList(ret.getOption);
-        yy += 180;
+        yy += 215;
 
         // automation
         this.automationPnl = pnl.add('panel', [xx, yy, xx + 480, yy + 170]);

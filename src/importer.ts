@@ -82,6 +82,8 @@ function importLabel(img: ImageInfo, label: LabelInfo): boolean
         direction: textDir,
         lgroup: img.ws.groups[label.group].layerSet,
         lending: opts.textLeading ? opts.textLeading : undefined,
+        color: (opts.textColor !== "") ? hexToColor(opts.textColor) : undefined,
+        antiAlias: (opts.antiAlias > 0) ? opts.antiAlias : undefined,
     };
 
     // 使用模板时，用户不设置字体大小，不做更改；不使用模板时，如果用户不设置大小，自动调整到合适的大小
@@ -267,6 +269,12 @@ function openImageWorkspace(img_filename: string, template_path: string): ImageW
             item = bgDoc.layers[i].duplicate(item, ElementPlacement.PLACEAFTER);
         }
     }
+    // override PPI
+    if (opts.ppi !== 0) {
+        wsDoc.resizeImage(undefined, undefined, opts.ppi, ResampleMethod.NONE);
+        log("override PPI to " + opts.ppi);
+    }
+
     bgDoc.close(SaveOptions.DONOTSAVECHANGES);
 
     // 若文档类型为索引色模式 更改为RGB模式
@@ -462,7 +470,22 @@ interface TextInputOptions {
     direction?: Direction;
     lgroup?: LayerSet;
     lending?: number;        // 自动行距
+    color?: SolidColor;      // 文本颜色
+    antiAlias?: number;      // 消除锯齿 1=None 2=Sharp 3=Crisp 4=Strong 5=Smooth
 };
+
+// hex颜色字符串转SolidColor, 如 "#ff0000" 或 "ff0000"
+function hexToColor(hex: string): SolidColor {
+    hex = hex.replace("#", "");
+    let r = parseInt(hex.substr(0, 2), 16);
+    let g = parseInt(hex.substr(2, 2), 16);
+    let b = parseInt(hex.substr(4, 2), 16);
+    let color = new SolidColor();
+    color.rgb.red = r;
+    color.rgb.green = g;
+    color.rgb.blue = b;
+    return color;
+}
 
 // 创建文本图层
 function newTextLayer(doc: Document, text: string, x: number, y: number, topts: TextInputOptions = {}): ArtLayer
@@ -499,6 +522,17 @@ function newTextLayer(doc: Document, text: string, x: number, y: number, topts: 
     if ((topts.lending) && (topts.lending != 0)) {
         textItemRef.useAutoLeading = true;
         textItemRef.autoLeadingAmount = topts.lending;
+    }
+
+    if (topts.color) {
+        textItemRef.color = topts.color;
+    }
+
+    if (topts.antiAlias !== undefined && topts.antiAlias !== 0) {
+        /// @ts-ignore
+        let aaMap = [undefined, AntiAlias.NONE, AntiAlias.SHARP, AntiAlias.CRISP, AntiAlias.STRONG, AntiAlias.SMOOTH];
+        /// @ts-ignore
+        textItemRef.antiAliasMethod = aaMap[topts.antiAlias];
     }
 
     artLayerRef.name     = text;
