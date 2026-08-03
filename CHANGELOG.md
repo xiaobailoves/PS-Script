@@ -4,6 +4,7 @@
 ### Added
 ### Changed
 ### Fixed
+- 修复导入过程中 `app.displayDialogs` 在错误退出时未恢复的问题，导致 PS 不再弹任何对话框
 ### Removed
 
 
