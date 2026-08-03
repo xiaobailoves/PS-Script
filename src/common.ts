@@ -77,11 +77,12 @@ export function getFileSuffix(filename: string) {
 
 export function doAction(action: string, actionSet: string): boolean
 {
-    if (Stdlib.hasAction(action, actionSet) === true) {
+    // try direct call first — Stdlib.hasAction may fail in newer PS
+    try {
         app.doAction(action, actionSet);
         return true;
-    }
-    else {
+    } catch (e) {
+        log("doAction \"" + action + "\" in \"" + actionSet + "\" failed: " + e);
         return false;
     }
 }
@@ -110,6 +111,7 @@ export const DEFAULT_INI_PATH: string = APP_DATA_FOLDER + dirSeparator + "lp_ps_
 export const DEFAULT_DUMP_PATH: string = APP_DATA_FOLDER + dirSeparator + "lp_ps_script.dump";
 export let alllog: string = "";
 export let errlog: string = "";
+export let progressWindow: any = null;
 
 Stdlib.log.setFile(DEFAULT_LOG_PATH);
 export function log(msg: any) { Stdlib.log(msg); alllog += msg + '\n'; }

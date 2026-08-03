@@ -38,6 +38,7 @@ export class CustomOptions {
     textDirection: OptionTextDirection = OptionTextDirection.Keep; // text direction option
     textColor: string = ""; // override text color, hex string, "" = disabled
     antiAlias: number = 0; // override anti-alias, 0=disabled, 1=None, 2=Sharp, 3=Crisp, 4=Strong, 5=Smooth
+    verticalRoman: boolean = false; // use _roman template for standard vertical roman alignment
     ppi: number = 0; // override output PPI, 0 means disabled
 
     actionGroup: string = ""; // action group name

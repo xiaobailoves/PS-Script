@@ -40,6 +40,7 @@ interface ImageInfo {
     name: string;
     name_pair: string;
     labels: LpLabel[];
+    textColor?: SolidColor; // pre-computed text color
 };
 
 function importLabel(img: ImageInfo, label: LabelInfo): boolean
@@ -82,7 +83,7 @@ function importLabel(img: ImageInfo, label: LabelInfo): boolean
         direction: textDir,
         lgroup: img.ws.groups[label.group].layerSet,
         lending: opts.textLeading ? opts.textLeading : undefined,
-        color: (opts.textColor !== "") ? hexToColor(opts.textColor) : undefined,
+        color: img.textColor,
         antiAlias: (opts.antiAlias > 0) ? opts.antiAlias : undefined,
     };
 
@@ -99,7 +100,7 @@ function importLabel(img: ImageInfo, label: LabelInfo): boolean
     if (opts.actionGroup) {
         img.ws.doc.activeLayer = textLayer;
         let result = doAction(label.group, opts.actionGroup);
-        log("run action " + label.group + "[" + opts.actionGroup + "]..." + (result ? "done" : "fail"));
+        log("run action " + label.group + "[" + opts.actionGroup + "]..." + (result ? "done" : "not found or failed"));
     }
     return true;
 }
@@ -112,7 +113,7 @@ function importImage(img: ImageInfo): boolean
     if (opts.actionGroup) {
         img.ws.doc.activeLayer = img.ws.doc.layers[img.ws.doc.layers.length - 1];
         let result = doAction("_start", opts.actionGroup);
-        log("run action _start[" + opts.actionGroup + "]..." + (result ? "done" : "fail"));
+        log("run action _start[" + opts.actionGroup + "]..." + (result ? "done" : "not found or failed"));
     }
 
     // 找出需要涂白的标签,记录他们的坐标,执行涂白
@@ -133,8 +134,17 @@ function importImage(img: ImageInfo): boolean
         delArrayElement<ArtLayer>(img.ws.pendingDelLayerList, img.ws.dialogOverlayLayer); // do not delete dialog-overlay-layer
     }
 
+    // pre-compute text color once per image
+    if (opts.textColor !== "") {
+        img.textColor = hexToColor(opts.textColor);
+    }
+
     // 遍历LabelData
     for (let j = 0; j < img.labels.length; j++) {
+        if (ScriptUI.environment.keyboardState['escape']) {
+            log("User cancelled during label import");
+            break;
+        }
         let l = img.labels[j];
         if (opts.groupSelected.indexOf(l.group) == -1) // the group did not select by user, return directly
             continue;
@@ -173,7 +183,7 @@ function importImage(img: ImageInfo): boolean
     if (opts.actionGroup) {
         img.ws.doc.activeLayer = img.ws.doc.layers[img.ws.doc.layers.length - 1];
         let result = doAction("_end", opts.actionGroup);
-        log("run action _end[" + opts.actionGroup + "]..." + (result ? "done" : "fail"));
+        log("run action _end[" + opts.actionGroup + "]..." + (result ? "done" : "not found or failed"));
     }
     return true;
 }
@@ -366,6 +376,9 @@ export function importFiles(custom_opts: CustomOptions): boolean
 {
     opts = custom_opts;
 
+    /// @ts-ignore
+    app.refresh(false); // speed up batch processing
+
     log("Start import process!!!");
     log("Properties start ------------------");
     log(Stdlib.listProps(opts));
@@ -375,6 +388,8 @@ export function importFiles(custom_opts: CustomOptions): boolean
     let lpFile = lpTextParser(opts.lpTextFilePath);
     if (lpFile == null) {
         log_err("error: " + I18n.ERROR_PARSER_LPTEXT_FAIL);
+        /// @ts-ignore
+        app.refresh(true);
         return false;
     }
     log("parse lptext done...");
@@ -384,6 +399,8 @@ export function importFiles(custom_opts: CustomOptions): boolean
         let tmp = textReplaceReader(opts.textReplace);
         if (tmp === null) {
             log_err("error: " + I18n.ERROR_TEXT_REPLACE_EXPRESSION);
+            /// @ts-ignore
+            app.refresh(true);
             return false;
         }
         textReplace = tmp;
@@ -397,17 +414,29 @@ export function importFiles(custom_opts: CustomOptions): boolean
         template_path = opts.docTemplateCustomPath;
         if (!FileIsExists(template_path)) {
             log_err("error: " + I18n.ERROR_NOT_FOUND_TEMPLATE + " " + template_path);
+            /// @ts-ignore
+            app.refresh(true);
             return false;
         }
         break;
     case OptionDocTemplate.Auto:
         let tempdir = GetScriptFolder() + dirSeparator + "ps_script_res" + dirSeparator;
-        let tempname = app.locale.split("_")[0].toLocaleLowerCase() + ".psd"; // such as "zh_CN" -> zh.psd
+        let lang = app.locale.split("_")[0].toLocaleLowerCase();
 
-        let try_list: string[] = [
-            tempdir + tempname,
-            tempdir + "en.psd"
-        ];
+        let try_list: string[] = [];
+        if (opts.verticalRoman) {
+            try_list = [
+                tempdir + lang + "_roman.psd",
+                tempdir + "en_roman.psd",
+                tempdir + lang + ".psd",
+                tempdir + "en.psd"
+            ];
+        } else {
+            try_list = [
+                tempdir + lang + ".psd",
+                tempdir + "en.psd"
+            ];
+        }
         for (let i = 0; i < try_list.length; i++) {
             if (FileIsExists(try_list[i])) {
                 template_path = try_list[i];
@@ -416,6 +445,8 @@ export function importFiles(custom_opts: CustomOptions): boolean
         }
         if (template_path === "") {
             log_err("error: " + I18n.ERROR_PRESET_TEMPLATE_NOT_FOUND);
+            /// @ts-ignore
+            app.refresh(true);
             return false;
         }
         log("auto match template: " + template_path);
@@ -426,8 +457,30 @@ export function importFiles(custom_opts: CustomOptions): boolean
         break;
     }
 
+    // progress palette
+    /// @ts-ignore
+    var progressWin = new Window('palette', I18n.APP_NAME + " " + VERSION, [200, 200, 500, 300]);
+    /// @ts-ignore
+    var progressLabel = progressWin.add('statictext', [30, 20, 470, 45], "准备中...");
+    /// @ts-ignore
+    progressWin.add('statictext', [30, 50, 470, 75], "导入过程中按 ESC 可中途停止");
+    /// @ts-ignore
+    progressWin.center();
+    /// @ts-ignore
+    progressWin.show();
+
     // 遍历所选图片
     for (let i = 0; i < opts.imageSelected.length; i++) {
+        /// @ts-ignore
+        progressLabel.text = "正在处理: " + (i + 1) + "/" + opts.imageSelected.length + " — " + opts.imageSelected[i].file;
+        /// @ts-ignore
+        progressWin.update();
+        /// @ts-ignore
+        if (ScriptUI.environment.keyboardState['escape']) {
+            progressWin.close();
+            log("User cancelled, stop processing remaining images");
+            break;
+        }
         let orgin_name :string = opts.imageSelected[i].file; // 翻译文件中的图片文件名
         let matched_name: string = opts.imageSelected[i].matched_file;
         let name_pair = LabelPlus.str_filename_pair(orgin_name, matched_name);
@@ -458,9 +511,12 @@ export function importFiles(custom_opts: CustomOptions): boolean
         log(name_pair + ": done");
     }
     log("All Done!");
+    /// @ts-ignore
+    if (progressWin) progressWin.close();
+    /// @ts-ignore
+    app.refresh(true);
     return true;
 };
-
 
 // 文本导入选项，参数为undefined时表示不设置该项
 interface TextInputOptions {

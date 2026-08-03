@@ -39,6 +39,7 @@ namespace I18n {
     export var CHECKBOX_SET_LEADING: string = "行距";
     export var CHECKBOX_SET_TEXT_COLOR: string  = "文字颜色";
     export var CHECKBOX_SET_ANTI_ALIAS: string  = "消除锯齿";
+    export var CHECKBOX_VERTICAL_ROMAN: string  = "标准垂直罗马对齐";
     export var CHECKBOX_SET_PPI: string = "设置PPI";
     export var LABEL_TEXT_DIRECTION: string = "文字方向：";
     export var LIST_TEXT_DIT_ITEMS: string[] = [ "默认", "横向", "纵向" ];
@@ -104,6 +105,7 @@ namespace I18n {
         CHECKBOX_SET_LEADING = "Leading";
         CHECKBOX_SET_TEXT_COLOR = "Text Color";
         CHECKBOX_SET_ANTI_ALIAS = "Anti-Alias";
+        CHECKBOX_VERTICAL_ROMAN = "Vertical Roman";
         CHECKBOX_SET_PPI = "Set PPI";
         LABEL_TEXT_DIRECTION = "Text Direction:";
         LIST_TEXT_DIT_ITEMS = [ "Default", "Horizontal", "Vertical" ];

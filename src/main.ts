@@ -593,7 +593,8 @@ class LabelPlusInput extends GenericUI {
             yy += 25;
         }
 
-        // anti-alias
+        // anti-alias (left) | text color (right)
+        let colR = 250; // right column start
         pnl.setAntiAliasCheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_ANTI_ALIAS);
         pnl.setAntiAliasCheckBox.onClick = () => {
             pnl.antiAliasList.enabled = pnl.setAntiAliasCheckBox.value;
@@ -603,32 +604,29 @@ class LabelPlusInput extends GenericUI {
         pnl.antiAliasList = pnl.add('dropdownlist', [xx, yy - 1, xx + 80, yy + 21], aaItems);
         pnl.antiAliasList.enabled = false;
         pnl.antiAliasList.selection = pnl.antiAliasList.items[0];
-        xx = xOfs;
-        yy += 23;
-
-        // text color
-        pnl.setTextColorCheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_TEXT_COLOR);
+        // text color on the right
+        pnl.setTextColorCheckBox = pnl.add('checkbox', [colR, yy, colR + 100, yy + 20], I18n.CHECKBOX_SET_TEXT_COLOR);
         pnl.setTextColorCheckBox.onClick = () => {
             pnl.textColorTextBox.enabled = pnl.setTextColorCheckBox.value;
         }
-        xx += 105;
-        pnl.textColorTextBox = pnl.add('edittext', [xx, yy, xx + 80, yy + 20]);
+        pnl.textColorTextBox = pnl.add('edittext', [colR + 105, yy, colR + 185, yy + 20]);
         pnl.textColorTextBox.enabled = false;
         pnl.textColorTextBox.text = "#000000";
         xx = xOfs;
         yy += 23;
 
-        // leading
-        pnl.setTextLeadingCheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_LEADING);
+        // vertical roman (left) | leading (right)
+        pnl.verticalRomanCheckBox = pnl.add('checkbox', [xx, yy, xx + 230, yy + 20], I18n.CHECKBOX_VERTICAL_ROMAN);
+        // leading on the right
+        pnl.setTextLeadingCheckBox = pnl.add('checkbox', [colR, yy, colR + 100, yy + 20], I18n.CHECKBOX_SET_LEADING);
         pnl.setTextLeadingCheckBox.onClick = () => {
             pnl.textLeadingTextBox.enabled = pnl.setTextLeadingCheckBox.value;
         }
-        xx += 105;
-        pnl.textLeadingTextBox = pnl.add('edittext', [xx, yy, xx + 50, yy + 20]);
+        let lx = colR + 105;
+        pnl.textLeadingTextBox = pnl.add('edittext', [lx, yy, lx + 50, yy + 20]);
         pnl.textLeadingTextBox.enabled = false;
         pnl.textLeadingTextBox.text = "120";
-        xx += 55;
-        pnl.add('statictext', [xx, yy, xx + 40, yy + 20], "%");
+        pnl.add('statictext', [lx + 55, yy, lx + 95, yy + 20], "%");
         xx = xOfs;
         yy += 23;
 
@@ -673,15 +671,18 @@ class LabelPlusInput extends GenericUI {
             let isOn = opts.antiAlias > 0;
             let val = Math.abs(opts.antiAlias);
             pnl.setAntiAliasCheckBox.value = isOn;
-            let aaMap = [0, 0, 0, "犀利", "锐利", "浑厚", "平滑", "无"];
-            let aaName = aaMap[val] || "犀利";
-            pnl.antiAliasList.selection = pnl.antiAliasList.find(aaName);
+            let aaIdx: { [key: number]: number } = { 3: 0, 2: 1, 4: 2, 5: 3, 1: 4 };
+            let idx = aaIdx[val] || 0;
+            pnl.antiAliasList.selection = pnl.antiAliasList.items[idx];
             Emit(pnl.setAntiAliasCheckBox.onClick);
         }
         if (opts.textColor !== undefined && opts.textColor !== "") {
             pnl.setTextColorCheckBox.value = true;
             pnl.textColorTextBox.text = opts.textColor;
             Emit(pnl.setTextColorCheckBox.onClick);
+        }
+        if (opts.verticalRoman !== undefined && opts.verticalRoman) {
+            pnl.verticalRomanCheckBox.value = true;
         }
         if (opts.textLeading !== undefined) {
             if (opts.textLeading === 0) {
@@ -712,6 +713,7 @@ class LabelPlusInput extends GenericUI {
             let aliasVal = aaMap[pnl.antiAliasList.selection.text] || 3;
             opts.antiAlias = (pnl.setAntiAliasCheckBox.value) ? aliasVal : -aliasVal;
             opts.textColor = (pnl.setTextColorCheckBox.value) ? pnl.textColorTextBox.text : "";
+            opts.verticalRoman = pnl.verticalRomanCheckBox.value;
             opts.textLeading = (pnl.setTextLeadingCheckBox.value) ? pnl.textLeadingTextBox.text : 0;
             opts.textDirection = <OptionTextDirection> I18n.LIST_TEXT_DIT_ITEMS.indexOf(pnl.textDirList.selection.text);
             return opts;
@@ -732,7 +734,12 @@ class LabelPlusInput extends GenericUI {
             pnl.textReplaceTextBox.enabled = pnl.textReplaceCheckBox.value;
         };
         xx += 260;
-        pnl.textReplaceTextBox = pnl.add('edittext', [xx, yy, xx + 180, yy + 20]);
+        pnl.textReplaceTextBox = pnl.add('edittext', [xx, yy, xx + 120, yy + 20]);
+        xx += 125;
+        pnl.textReplacePresetBtn = pnl.add('button', [xx, yy - 2, xx + 50, yy + 20], '标点');
+        pnl.textReplacePresetBtn.onClick = () => {
+            pnl.textReplaceTextBox.text = "?->？|!->！|!!->！！|～->~|!?->！？";
+        }
         xx = xOfs;
         yy += 23;
 
@@ -743,13 +750,25 @@ class LabelPlusInput extends GenericUI {
             pnl.runActionGroupList.enabled = pnl.runActionGroupCheckBox.value;
         }
         xx += 260;
-        let ary = Stdlib.getActionSets();
-        pnl.runActionGroupList = pnl.add('dropdownlist', [xx, yy, xx + 180, yy + 20], ary);
-        pnl.runActionGroupList.selection = pnl.runActionGroupList.find("LabelPlusAction");
-        if (pnl.runActionGroupList.selection == undefined) {
-            pnl.runActionGroupList.selection = pnl.runActionGroupList[0];
+        let sets = Stdlib.getActionSets();
+        let setNames: string[] = [];
+        for (let s = 0; s < sets.length; s++) {
+            setNames.push(sets[s].name);
+        }
+        pnl.runActionGroupList = pnl.add('dropdownlist', [xx, yy, xx + 140, yy + 20], setNames);
+        if (setNames.length > 0) {
+            let findDefault = pnl.runActionGroupList.find("LabelPlusAction");
+            pnl.runActionGroupList.selection = (findDefault !== null) ? findDefault : pnl.runActionGroupList.items[0];
         }
         pnl.runActionGroupList.enabled = false;
+        let helpBtn = pnl.add('button', [xx + 145, yy - 2, xx + 175, yy + 20], "?");
+        helpBtn.onClick = () => {
+            alert("动作组内需包含以下动作名：\n\n" +
+                "  _start — 每张图片处理前执行\n" +
+                "  [分组名] — 每个标签创建后执行（如：框内、框外）\n" +
+                "  _end — 每张图片处理后执行\n\n" +
+                "可在 PS 动作面板中创建/重命名，动作名需完全一致。");
+        };
 
         xx = xOfs;
         yy += 23;
@@ -764,7 +783,7 @@ class LabelPlusInput extends GenericUI {
         // pnl
         xx += 10;
         yy += 23;
-        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 460, yy + 75]);
+        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 460, yy + 90]);
 
         {
             let xx = xOfs;
@@ -779,8 +798,8 @@ class LabelPlusInput extends GenericUI {
 
             xx = xOfs;
             yy += 20;
-            pnl.overlayPnl.overlayGroupLabel = doPnl.add('statictext', [xx, yy, xx + 600, yy + 20], I18n.LABEL_DIALOG_OVERLAY_GROUP);
-            yy += 20;
+            pnl.overlayPnl.overlayGroupLabel = doPnl.add('statictext', [xx, yy, xx + 430, yy + 36], I18n.LABEL_DIALOG_OVERLAY_GROUP, { multiline: true });
+            yy += 36;
 
             doPnl.groupTextBox = doPnl.add('edittext', [xx, yy, xx + 250, yy + 20]);
             xx += 255;
@@ -867,6 +886,11 @@ class LabelPlusInput extends GenericUI {
         this.inputPnl = pnl.add('panel', [xx, yy, xx + 355, yy + 430]);
         ret = this.uiInputPanel(this.inputPnl);
         this.addToPickerList(ret.getOption);
+
+        // cancel hint
+        let hintY = yy + 430 + 5;
+        pnl.add('statictext', [xx + 10, hintY, xx + 345, hintY + 20], "提示：导入过程中按 ESC 可中途停止");
+
         xx += 365;
 
         xOfs = xx;
@@ -880,13 +904,13 @@ class LabelPlusInput extends GenericUI {
         yy += 150;
 
         // style
-        this.stylePnl = pnl.add('panel', [xx, yy, xx + 480, yy + 210]);
+        this.stylePnl = pnl.add('panel', [xx, yy, xx + 480, yy + 190]);
         ret = this.uiStylePanel(this.stylePnl);
         this.addToPickerList(ret.getOption);
-        yy += 215;
+        yy += 200;
 
         // automation
-        this.automationPnl = pnl.add('panel', [xx, yy, xx + 480, yy + 170]);
+        this.automationPnl = pnl.add('panel', [xx, yy, xx + 480, yy + 190]);
         ret = this.uiAutomationPanel(this.automationPnl);
         this.addToPickerList(ret.getOption);
         yy += 180;
@@ -955,6 +979,8 @@ class LabelPlusInput extends GenericUI {
     process(opts: CustomOptions, doc: any)
     {
         let result = false;
+
+        progressWindow = this.win; // for progress display
 
         try {
             writeIni(DEFAULT_INI_PATH, opts); // auto save ini
