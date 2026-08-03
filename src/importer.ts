@@ -378,6 +378,10 @@ export function importFiles(custom_opts: CustomOptions): boolean
 
     /// @ts-ignore
     app.refresh(false); // speed up batch processing
+    /// @ts-ignore
+    var oldDialogs = app.displayDialogs;
+    /// @ts-ignore
+    app.displayDialogs = DialogModes.NO;
 
     log("Start import process!!!");
     log("Properties start ------------------");
@@ -389,6 +393,9 @@ export function importFiles(custom_opts: CustomOptions): boolean
     if (lpFile == null) {
         log_err("error: " + I18n.ERROR_PARSER_LPTEXT_FAIL);
         /// @ts-ignore
+        /// @ts-ignore
+        app.displayDialogs = oldDialogs;
+        /// @ts-ignore
         app.refresh(true);
         return false;
     }
@@ -399,6 +406,8 @@ export function importFiles(custom_opts: CustomOptions): boolean
         let tmp = textReplaceReader(opts.textReplace);
         if (tmp === null) {
             log_err("error: " + I18n.ERROR_TEXT_REPLACE_EXPRESSION);
+            /// @ts-ignore
+            app.displayDialogs = oldDialogs;
             /// @ts-ignore
             app.refresh(true);
             return false;
@@ -414,6 +423,8 @@ export function importFiles(custom_opts: CustomOptions): boolean
         template_path = opts.docTemplateCustomPath;
         if (!FileIsExists(template_path)) {
             log_err("error: " + I18n.ERROR_NOT_FOUND_TEMPLATE + " " + template_path);
+            /// @ts-ignore
+            app.displayDialogs = oldDialogs;
             /// @ts-ignore
             app.refresh(true);
             return false;
@@ -445,6 +456,8 @@ export function importFiles(custom_opts: CustomOptions): boolean
         }
         if (template_path === "") {
             log_err("error: " + I18n.ERROR_PRESET_TEMPLATE_NOT_FOUND);
+            /// @ts-ignore
+            app.displayDialogs = oldDialogs;
             /// @ts-ignore
             app.refresh(true);
             return false;
@@ -513,6 +526,8 @@ export function importFiles(custom_opts: CustomOptions): boolean
     log("All Done!");
     /// @ts-ignore
     if (progressWin) progressWin.close();
+    /// @ts-ignore
+    app.displayDialogs = oldDialogs;
     /// @ts-ignore
     app.refresh(true);
     return true;

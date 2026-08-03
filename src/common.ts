@@ -77,7 +77,6 @@ export function getFileSuffix(filename: string) {
 
 export function doAction(action: string, actionSet: string): boolean
 {
-    // try direct call first — Stdlib.hasAction may fail in newer PS
     try {
         app.doAction(action, actionSet);
         return true;
