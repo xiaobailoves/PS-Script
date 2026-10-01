@@ -605,7 +605,7 @@ class LabelPlusInput extends GenericUI {
         let aaItems = ["犀利", "锐利", "浑厚", "平滑", "无"];
         pnl.antiAliasList = pnl.add('dropdownlist', [xx, yy - 1, xx + 80, yy + 21], aaItems);
         pnl.antiAliasList.enabled = false;
-        pnl.antiAliasList.selection = pnl.antiAliasList.items[0];
+        pnl.antiAliasList.selection = pnl.antiAliasList.items[3]; // 默认“平滑”
         // text color on the right
         pnl.setTextColorCheckBox = pnl.add('checkbox', [colR, yy, colR + 100, yy + 20], I18n.CHECKBOX_SET_TEXT_COLOR);
         pnl.setTextColorCheckBox.onClick = () => {
