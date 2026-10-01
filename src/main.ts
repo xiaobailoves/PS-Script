@@ -854,7 +854,7 @@ class LabelPlusInput extends GenericUI {
     // 帮助 / 关于 对话框：点击链接用浏览器打开
     private showHelpDialog = () => {
         /// @ts-ignore
-        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 500, 300]);
+        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 500, 270]);
         /// @ts-ignore
         dlg.center();
 
@@ -876,35 +876,48 @@ class LabelPlusInput extends GenericUI {
         addLink(I18n.HELP_LINK_VIDEO + "：" + VIDEO_URL + I18n.HELP_CLICK, VIDEO_URL);
         addLink(I18n.HELP_LINK_PROJECT + "：" + PROJECT_URL + I18n.HELP_CLICK, PROJECT_URL);
 
-        // 版本号（居中显示）
-        /// @ts-ignore
-        let verText = dlg.add('statictext', [180, yy, 320, yy + 20], I18n.APP_NAME + " " + VERSION);
-        try { verText.justify = "center"; } catch (e) { }
-        yy += 24;
-
-        // 版本更新检测：打开对话框时自动检查；有新版本时点击可跳转下载，否则点击重新检查
+        // 版本号 + 更新检测（合并为一行，整体居中）；有新版本时点击可跳转下载，否则点击重新检查
         let hasNewVersion = false;
+        let versionPrefix = I18n.APP_NAME + " " + VERSION + "  ";
+        let statusY = yy;
         /// @ts-ignore
-        let statusText = dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_VERSION_CHECKING);
+        let statusText = dlg.add('statictext', [20, statusY, 480, statusY + 20], versionPrefix + I18n.HELP_VERSION_CHECKING);
+        let centerStatus = () => {
+            // 粗略估算文本宽度（中文/全角按 13px，其余 7px），据此让整行居中
+            try {
+                let w = 0;
+                for (let i = 0; i < statusText.text.length; i++) {
+                    w += (statusText.text.charCodeAt(i) > 255) ? 13 : 7;
+                }
+                if (w > 460) {
+                    w = 460;
+                }
+                statusText.bounds = [250 - w / 2, statusY, 250 + w / 2, statusY + 20];
+            } catch (e) { }
+            try { statusText.justify = "center"; } catch (e) { }
+        };
         let runCheck = () => {
-            statusText.text = I18n.HELP_VERSION_CHECKING;
+            statusText.text = versionPrefix + I18n.HELP_VERSION_CHECKING;
+            centerStatus();
             /// @ts-ignore
             dlg.update();
             let latest = fetchLatestReleaseTag();
             if (latest === null) {
                 hasNewVersion = false;
-                statusText.text = I18n.HELP_VERSION_FAILED;
+                statusText.text = versionPrefix + I18n.HELP_VERSION_FAILED;
             } else if (isVersionNewer(latest, VERSION)) {
                 hasNewVersion = true;
-                statusText.text = I18n.HELP_VERSION_NEW + " V" + latest + I18n.HELP_VERSION_CLICK;
+                statusText.text = versionPrefix + I18n.HELP_VERSION_NEW + " V" + latest + I18n.HELP_VERSION_CLICK;
             } else {
                 hasNewVersion = false;
-                statusText.text = I18n.HELP_VERSION_LATEST;
+                statusText.text = versionPrefix + I18n.HELP_VERSION_LATEST;
             }
+            centerStatus();
             /// @ts-ignore
             dlg.update();
         };
         statusText.onClick = () => { if (hasNewVersion) { openUrl(RELEASE_URL); } else { runCheck(); } };
+        centerStatus();
         yy += 24;
 
         /// @ts-ignore
