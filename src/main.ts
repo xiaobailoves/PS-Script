@@ -30,7 +30,6 @@ class LabelPlusInput extends GenericUI {
     private outputPnl: any;
     private stylePnl: any;
     private automationPnl: any;
-    private HelpPnl: any;
 
     constructor() {
         super();
@@ -66,7 +65,7 @@ class LabelPlusInput extends GenericUI {
             if (matchImgByOrder) {
                 arr.push({
                     file: filename,
-                    matched_file: (fileList.length > i) ? fileList[fileindex] : "",
+                    matched_file: (fileList.length > fileindex) ? fileList[fileindex] : "",
                     index: fileindex
                 });
             }
@@ -143,6 +142,9 @@ class LabelPlusInput extends GenericUI {
             // fill ui elements
             inputPnl.chooseImageListBox.removeAll();
             inputPnl.chooseGroupListBox.removeAll();
+            // reset dialog-overlay group dropdown for the new file (keep the empty item)
+            automationPnl.overlayPnl.addGroupList.removeAll();
+            automationPnl.overlayPnl.addGroupList.add('item', "");
             for (let key in lpFile.images) {
                 let item = inputPnl.chooseImageListBox.add('item', key);
                 item.selected = true;
@@ -736,7 +738,7 @@ class LabelPlusInput extends GenericUI {
         xx += 260;
         pnl.textReplaceTextBox = pnl.add('edittext', [xx, yy, xx + 120, yy + 20]);
         xx += 125;
-        pnl.textReplacePresetBtn = pnl.add('button', [xx, yy - 2, xx + 50, yy + 20], '标点');
+        pnl.textReplacePresetBtn = pnl.add('button', [xx, yy - 2, xx + 80, yy + 20], I18n.BUTTON_TEXT_REPLACE_PRESET);
         pnl.textReplacePresetBtn.onClick = () => {
             pnl.textReplaceTextBox.text = "?->？|!->！|!!->！！|～->~|!?->！？";
         }
@@ -763,11 +765,7 @@ class LabelPlusInput extends GenericUI {
         pnl.runActionGroupList.enabled = false;
         let helpBtn = pnl.add('button', [xx + 145, yy - 2, xx + 175, yy + 20], "?");
         helpBtn.onClick = () => {
-            alert("动作组内需包含以下动作名：\n\n" +
-                "  _start — 每张图片处理前执行\n" +
-                "  [分组名] — 每个标签创建后执行（如：框内、框外）\n" +
-                "  _end — 每张图片处理后执行\n\n" +
-                "可在 PS 动作面板中创建/重命名，动作名需完全一致。");
+            alert(I18n.HELP_RUN_ACTION);
         };
 
         xx = xOfs;
@@ -844,16 +842,13 @@ class LabelPlusInput extends GenericUI {
             }
             opts.dialogOverlayLabelGroups = (pnl.dialogOverlayCheckBox.value)? pnl.overlayPnl.groupTextBox.text : "";
             if (pnl.overlayPnl.toleranceTextBox.text !== "") {
-                opts.dialogOverlayTolerance = pnl.overlayPnl.toleranceTextBox.text;
+                let tol = Number(pnl.overlayPnl.toleranceTextBox.text);
+                opts.dialogOverlayTolerance = isNaN(tol) ? 16 : tol;
             }
             return opts;
         }
 
         return {getOption: getOption};
-    }
-
-    private uiHelpPanel(pnl: any): PanelDesc {
-        return {};
     }
 
     private allPanelEnable = (enable: boolean) => {
@@ -889,7 +884,7 @@ class LabelPlusInput extends GenericUI {
 
         // cancel hint
         let hintY = yy + 430 + 5;
-        pnl.add('statictext', [xx + 10, hintY, xx + 345, hintY + 20], "提示：导入过程中按 ESC 可中途停止");
+        pnl.add('statictext', [xx + 10, hintY, xx + 345, hintY + 20], I18n.HINT_ESC_STOP);
 
         xx += 365;
 
@@ -915,17 +910,11 @@ class LabelPlusInput extends GenericUI {
         this.addToPickerList(ret.getOption);
         yy += 180;
 
-        // help bar
-        xx = this.winRect.w - 220;
-        yy = 5;
-        this.HelpPnl = pnl.add('panel', [xx, yy, xx + 200, yy + 25]);
-        ret = this.uiHelpPanel(this.HelpPnl);
-
         this.allPanelEnable(this.lpFile != null);
         return pnl;
     }
 
-    private geCustomOptions = (toFile: boolean): CustomOptions | null => {
+    private getCustomOptions = (toFile: boolean): CustomOptions | null => {
         let new_opts = new CustomOptions();
         for (let i = 0; i < this.optPickers.length; i++) {
             let ret = this.optPickers[i](new_opts, toFile);
@@ -947,7 +936,7 @@ class LabelPlusInput extends GenericUI {
     // validate user panel, generate CustomOptions
     // tofile: if it is saving config to file
     validatePanel(pnl: any, ini: any, tofile: boolean) :CustomOptions | boolean {
-        let opts = this.geCustomOptions(tofile);
+        let opts = this.getCustomOptions(tofile);
         if (opts === null) {
             return true; // continue, will not close the indow
         }
@@ -979,8 +968,6 @@ class LabelPlusInput extends GenericUI {
     process(opts: CustomOptions, doc: any)
     {
         let result = false;
-
-        progressWindow = this.win; // for progress display
 
         try {
             writeIni(DEFAULT_INI_PATH, opts); // auto save ini

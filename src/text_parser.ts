@@ -28,20 +28,20 @@ export function lpTextParser(path: string): LpFile | null
         return null;
     }
 
-    // 打开
-    f.open("r");
-    f.encoding = 'UTF-8';
-
     // json格式读取
-    if (path.substring(path.lastIndexOf("."), path.length) == '.json') {
+    if (path.substring(path.lastIndexOf("."), path.length).toLowerCase() == '.json') {
         f.open("r", "TEXT", "????");
         f.lineFeed = "unix";
         f.encoding = 'UTF-8';
         var json = f.read();
-        var data = (new Function('return ' + json))();
         f.close();
-        return data;
+        json = json.replace(/^\uFEFF/, ""); // 兼容 UTF-8 with BOM
+        return jamJSON.parse(json);
     }
+
+    // 打开
+    f.open("r");
+    f.encoding = 'UTF-8';
 
     // 分行读取
     var state = 'start'; //'start','filehead','context'

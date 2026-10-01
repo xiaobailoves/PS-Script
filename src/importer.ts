@@ -10,6 +10,12 @@ namespace LabelPlus {
 let opts: CustomOptions | null = null;
 let textReplace: TextReplaceInfo = [];
 
+// 中止请求：ESC 键或进度窗口的停止按钮
+let cancelRequested = false;
+function shouldAbort(): boolean {
+    return cancelRequested || ScriptUI.environment.keyboardState['escape'];
+}
+
 interface Group {
     layerSet?: LayerSet;
     template?: ArtLayer;
@@ -35,7 +41,7 @@ interface ImageWorkspace {
     groups: GroupDict;
 };
 
-interface ImageInfo {
+interface ImageDocInfo {
     ws: ImageWorkspace;
     name: string;
     name_pair: string;
@@ -43,7 +49,12 @@ interface ImageInfo {
     textColor?: SolidColor; // pre-computed text color
 };
 
-function importLabel(img: ImageInfo, label: LabelInfo): boolean
+interface ImportResult {
+    ok: boolean;
+    aborted: boolean; // 用户中止，调用方应丢弃当前图片（不保存）
+};
+
+function importLabel(img: ImageDocInfo, label: LabelInfo): boolean
 {
     assert(opts !== null);
 
@@ -59,11 +70,10 @@ function importLabel(img: ImageInfo, label: LabelInfo): boolean
         newTextLayer(img.ws.doc, String(label.index), label.x, label.y, o);
     }
 
-    // 替换文本
+    // 替换文本（split/join 语义，避免替换目标包含原文时死循环）
     if (opts.textReplace) {
         for (let k = 0; k < textReplace.length; k++) {
-            while (label.contents.indexOf(textReplace[k].from) != -1)
-                label.contents = label.contents.replace(textReplace[k].from, textReplace[k].to);
+            label.contents = label.contents.split(textReplace[k].from).join(textReplace[k].to);
         }
     }
 
@@ -105,7 +115,7 @@ function importLabel(img: ImageInfo, label: LabelInfo): boolean
     return true;
 }
 
-function importImage(img: ImageInfo): boolean
+function importImage(img: ImageDocInfo): ImportResult
 {
     assert(opts !== null);
 
@@ -130,7 +140,10 @@ function importImage(img: ImageInfo): boolean
         let contract = UnitValue(2, 'pt');
         let tolerance = opts.dialogOverlayTolerance;
         log("dialogClear() ,contract_px=" + contract + ",tolerance=" + tolerance);
-        dialogClear(img.ws.doc, img.ws.bgLayer, img.ws.dialogOverlayLayer, points, tolerance, contract);
+        if (!dialogClear(img.ws.doc, img.ws.bgLayer, img.ws.dialogOverlayLayer, points, tolerance, contract, shouldAbort)) {
+            log("User cancelled during dialog overlay");
+            return { ok: true, aborted: true }; // 中止：交由调用方丢弃当前图片
+        }
         delArrayElement<ArtLayer>(img.ws.pendingDelLayerList, img.ws.dialogOverlayLayer); // do not delete dialog-overlay-layer
     }
 
@@ -141,9 +154,9 @@ function importImage(img: ImageInfo): boolean
 
     // 遍历LabelData
     for (let j = 0; j < img.labels.length; j++) {
-        if (ScriptUI.environment.keyboardState['escape']) {
+        if (shouldAbort()) {
             log("User cancelled during label import");
-            break;
+            return { ok: true, aborted: true }; // 中止：交由调用方丢弃当前图片
         }
         let l = img.labels[j];
         if (opts.groupSelected.indexOf(l.group) == -1) // the group did not select by user, return directly
@@ -185,7 +198,7 @@ function importImage(img: ImageInfo): boolean
         let result = doAction("_end", opts.actionGroup);
         log("run action _end[" + opts.actionGroup + "]..." + (result ? "done" : "not found or failed"));
     }
-    return true;
+    return { ok: true, aborted: false };
 }
 
 function openImageWorkspace(img_filename: string, template_path: string): ImageWorkspace | null
@@ -333,7 +346,7 @@ function openImageWorkspace(img_filename: string, template_path: string): ImageW
     return ws;
 }
 
-function closeImage(img: ImageInfo, saveType: OptionOutputType = OptionOutputType.PSD): boolean
+function closeImage(img: ImageDocInfo, saveType: OptionOutputType = OptionOutputType.PSD): boolean
 {
     assert(opts !== null);
 
@@ -375,6 +388,7 @@ function closeImage(img: ImageInfo, saveType: OptionOutputType = OptionOutputTyp
 export function importFiles(custom_opts: CustomOptions): boolean
 {
     opts = custom_opts;
+    cancelRequested = false;
 
     /// @ts-ignore
     app.refresh(false); // speed up batch processing
@@ -383,154 +397,160 @@ export function importFiles(custom_opts: CustomOptions): boolean
     /// @ts-ignore
     app.displayDialogs = DialogModes.NO;
 
-    log("Start import process!!!");
-    log("Properties start ------------------");
-    log(Stdlib.listProps(opts));
-    log("Properties end   ------------------");
+    /// @ts-ignore
+    var progressWin: any = null;
+    let aborted = false;
 
-    //解析LabelPlus文本
-    let lpFile = lpTextParser(opts.lpTextFilePath);
-    if (lpFile == null) {
-        log_err("error: " + I18n.ERROR_PARSER_LPTEXT_FAIL);
+    try {
+        log("Start import process!!!");
+        log("Properties start ------------------");
+        log(Stdlib.listProps(opts));
+        log("Properties end   ------------------");
+
+        //解析LabelPlus文本
+        let lpFile = lpTextParser(opts.lpTextFilePath);
+        if (lpFile == null) {
+            log_err("error: " + I18n.ERROR_PARSER_LPTEXT_FAIL);
+            return false;
+        }
+        log("parse lptext done...");
+
+        // 替换文本解析
+        if (opts.textReplace) {
+            let tmp = textReplaceReader(opts.textReplace);
+            if (tmp === null) {
+                log_err("error: " + I18n.ERROR_TEXT_REPLACE_EXPRESSION);
+                return false;
+            }
+            textReplace = tmp;
+        }
+        log("parse textreplace done...");
+
+        // 确定doc模板文件
+        let template_path: string = "";
+        switch (opts.docTemplate) {
+        case OptionDocTemplate.Custom:
+            template_path = opts.docTemplateCustomPath;
+            if (!FileIsExists(template_path)) {
+                log_err("error: " + I18n.ERROR_NOT_FOUND_TEMPLATE + " " + template_path);
+                return false;
+            }
+            break;
+        case OptionDocTemplate.Auto:
+            let tempdir = GetScriptFolder() + dirSeparator + "ps_script_res" + dirSeparator;
+            let lang = app.locale.split("_")[0].toLocaleLowerCase();
+
+            let try_list: string[] = [];
+            if (opts.verticalRoman) {
+                try_list = [
+                    tempdir + lang + "_roman.psd",
+                    tempdir + "en_roman.psd",
+                    tempdir + lang + ".psd",
+                    tempdir + "en.psd"
+                ];
+            } else {
+                try_list = [
+                    tempdir + lang + ".psd",
+                    tempdir + "en.psd"
+                ];
+            }
+            for (let i = 0; i < try_list.length; i++) {
+                if (FileIsExists(try_list[i])) {
+                    template_path = try_list[i];
+                    break;
+                }
+            }
+            if (template_path === "") {
+                log_err("error: " + I18n.ERROR_PRESET_TEMPLATE_NOT_FOUND);
+                return false;
+            }
+            log("auto match template: " + template_path);
+            break;
+        case OptionDocTemplate.No:
+        default:
+            log("template not used");
+            break;
+        }
+
+        // progress palette
         /// @ts-ignore
+        progressWin = new Window('palette', I18n.APP_NAME + " " + VERSION, [200, 200, 500, 335]);
+        /// @ts-ignore
+        var progressLabel = progressWin.add('statictext', [30, 20, 470, 45], I18n.PROGRESS_PREPARING);
+        /// @ts-ignore
+        progressWin.add('statictext', [30, 50, 470, 75], I18n.HINT_ESC_STOP);
+        /// @ts-ignore
+        var stopButton = progressWin.add('button', [30, 85, 150, 110], I18n.BUTTON_STOP);
+        /// @ts-ignore
+        stopButton.onClick = () => { cancelRequested = true; };
+        /// @ts-ignore
+        progressWin.center();
+        /// @ts-ignore
+        progressWin.show();
+
+        // 遍历所选图片
+        for (let i = 0; i < opts.imageSelected.length; i++) {
+            /// @ts-ignore
+            progressLabel.text = I18n.PROGRESS_PROCESSING + (i + 1) + "/" + opts.imageSelected.length + " — " + opts.imageSelected[i].file;
+            /// @ts-ignore
+            progressWin.update();
+            if (shouldAbort()) {
+                aborted = true;
+                log("User cancelled, stop processing remaining images");
+                break;
+            }
+            let orgin_name :string = opts.imageSelected[i].file; // 翻译文件中的图片文件名
+            let matched_name: string = opts.imageSelected[i].matched_file;
+            let name_pair = LabelPlus.str_filename_pair(orgin_name, matched_name);
+
+            log(name_pair + 'in processing...' );
+            if (opts.ignoreNoLabelImg && lpFile?.images[orgin_name].length == 0) { // ignore img with no label
+                log('no label, ignored...');
+                continue;
+            }
+            let ws = openImageWorkspace(matched_name, template_path);
+            if (ws == null) {
+                log_err(name_pair + ": " + I18n.ERROR_FILE_OPEN_FAIL);
+                continue;
+            }
+
+            let img_info: ImageDocInfo = {
+                ws: ws,
+                name: matched_name,
+                name_pair: name_pair,
+                labels: lpFile.images[orgin_name],
+            };
+            let import_result = importImage(img_info);
+            if (import_result.aborted) {
+                aborted = true;
+                log(name_pair + ": aborted, discard current image");
+                // 不保存半成品：未勾选“导入后不关闭文档”时直接丢弃关闭
+                if (!opts.notClose)
+                    img_info.ws.doc.close(SaveOptions.DONOTSAVECHANGES);
+                log("User cancelled, stop processing remaining images");
+                break;
+            }
+            if (!import_result.ok) {
+                log_err(name_pair + ": import label failed");
+            }
+            if (!closeImage(img_info, opts.outputType)) {
+                log_err(name_pair + ": " + I18n.ERROR_FILE_SAVE_FAIL);
+            }
+            log(name_pair + ": done");
+        }
+        log(aborted ? "Aborted by user!" : "All Done!");
+        return true;
+    }
+    finally {
+        // 无论正常结束、提前返回还是异常，都恢复运行环境
+        if (progressWin) {
+            try { progressWin.close(); } catch (e) { }
+        }
         /// @ts-ignore
         app.displayDialogs = oldDialogs;
         /// @ts-ignore
         app.refresh(true);
-        return false;
     }
-    log("parse lptext done...");
-
-    // 替换文本解析
-    if (opts.textReplace) {
-        let tmp = textReplaceReader(opts.textReplace);
-        if (tmp === null) {
-            log_err("error: " + I18n.ERROR_TEXT_REPLACE_EXPRESSION);
-            /// @ts-ignore
-            app.displayDialogs = oldDialogs;
-            /// @ts-ignore
-            app.refresh(true);
-            return false;
-        }
-        textReplace = tmp;
-    }
-    log("parse textreplace done...");
-
-    // 确定doc模板文件
-    let template_path: string = "";
-    switch (opts.docTemplate) {
-    case OptionDocTemplate.Custom:
-        template_path = opts.docTemplateCustomPath;
-        if (!FileIsExists(template_path)) {
-            log_err("error: " + I18n.ERROR_NOT_FOUND_TEMPLATE + " " + template_path);
-            /// @ts-ignore
-            app.displayDialogs = oldDialogs;
-            /// @ts-ignore
-            app.refresh(true);
-            return false;
-        }
-        break;
-    case OptionDocTemplate.Auto:
-        let tempdir = GetScriptFolder() + dirSeparator + "ps_script_res" + dirSeparator;
-        let lang = app.locale.split("_")[0].toLocaleLowerCase();
-
-        let try_list: string[] = [];
-        if (opts.verticalRoman) {
-            try_list = [
-                tempdir + lang + "_roman.psd",
-                tempdir + "en_roman.psd",
-                tempdir + lang + ".psd",
-                tempdir + "en.psd"
-            ];
-        } else {
-            try_list = [
-                tempdir + lang + ".psd",
-                tempdir + "en.psd"
-            ];
-        }
-        for (let i = 0; i < try_list.length; i++) {
-            if (FileIsExists(try_list[i])) {
-                template_path = try_list[i];
-                break;
-            }
-        }
-        if (template_path === "") {
-            log_err("error: " + I18n.ERROR_PRESET_TEMPLATE_NOT_FOUND);
-            /// @ts-ignore
-            app.displayDialogs = oldDialogs;
-            /// @ts-ignore
-            app.refresh(true);
-            return false;
-        }
-        log("auto match template: " + template_path);
-        break;
-    case OptionDocTemplate.No:
-    default:
-        log("template not used");
-        break;
-    }
-
-    // progress palette
-    /// @ts-ignore
-    var progressWin = new Window('palette', I18n.APP_NAME + " " + VERSION, [200, 200, 500, 300]);
-    /// @ts-ignore
-    var progressLabel = progressWin.add('statictext', [30, 20, 470, 45], "准备中...");
-    /// @ts-ignore
-    progressWin.add('statictext', [30, 50, 470, 75], "导入过程中按 ESC 可中途停止");
-    /// @ts-ignore
-    progressWin.center();
-    /// @ts-ignore
-    progressWin.show();
-
-    // 遍历所选图片
-    for (let i = 0; i < opts.imageSelected.length; i++) {
-        /// @ts-ignore
-        progressLabel.text = "正在处理: " + (i + 1) + "/" + opts.imageSelected.length + " — " + opts.imageSelected[i].file;
-        /// @ts-ignore
-        progressWin.update();
-        /// @ts-ignore
-        if (ScriptUI.environment.keyboardState['escape']) {
-            progressWin.close();
-            log("User cancelled, stop processing remaining images");
-            break;
-        }
-        let orgin_name :string = opts.imageSelected[i].file; // 翻译文件中的图片文件名
-        let matched_name: string = opts.imageSelected[i].matched_file;
-        let name_pair = LabelPlus.str_filename_pair(orgin_name, matched_name);
-
-        log(name_pair + 'in processing...' );
-        if (opts.ignoreNoLabelImg && lpFile?.images[orgin_name].length == 0) { // ignore img with no label
-            log('no label, ignored...');
-            continue;
-        }
-        let ws = openImageWorkspace(matched_name, template_path);
-        if (ws == null) {
-            log_err(name_pair + ": " + I18n.ERROR_FILE_OPEN_FAIL);
-            continue;
-        }
-
-        let img_info: ImageInfo = {
-            ws: ws,
-            name: matched_name,
-            name_pair: name_pair,
-            labels: lpFile.images[orgin_name],
-        };
-        if (!importImage(img_info)) {
-            log_err(name_pair + ": import label failed");
-        }
-        if (!closeImage(img_info, opts.outputType)) {
-            log_err(name_pair + ": " + I18n.ERROR_FILE_SAVE_FAIL);
-        }
-        log(name_pair + ": done");
-    }
-    log("All Done!");
-    /// @ts-ignore
-    if (progressWin) progressWin.close();
-    /// @ts-ignore
-    app.displayDialogs = oldDialogs;
-    /// @ts-ignore
-    app.refresh(true);
-    return true;
 };
 
 // 文本导入选项，参数为undefined时表示不设置该项

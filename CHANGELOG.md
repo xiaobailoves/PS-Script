@@ -2,10 +2,22 @@
 
 ## [Unreleased]
 ### Added
+- 导入进度窗口新增“停止”按钮，与 ESC 一样可中止导入
 ### Changed
+- ESC 中止导入时不再保存当前图片的半成品文档（勾选“导入后不关闭文档”时保留文档打开，且不保存）
+- 涂白过程支持中止（ESC / 停止按钮）
+- 界面文案补全国际化（文本替换预设按钮、动作组帮助弹窗、进度与 ESC 提示）
+- JSON 格式的翻译文本改用 jamJSON 解析并兼容 UTF-8 with BOM，扩展名判断不再区分大小写
+- 发布脚本 do_release.sh 改用 zip 打包（与 GitHub Release 资产结构一致），不再依赖 7z
 ### Fixed
 - 修复导入过程中 `app.displayDialogs` 在错误退出时未恢复的问题，导致 PS 不再弹任何对话框
+- 修复导入异常中断时 displayDialogs、界面刷新、进度窗口未恢复的问题，统一改为 try/finally 清理
+- 修复文本替换规则在替换目标包含原文时（如 `…->……`、`!->!!`）导致的死循环
+- 修复“按顺序匹配图片文件”时图源数量不足导致的越界报错
+- 修复二次加载翻译文本时涂白分组下拉列表出现重复项的问题
+- 修复 dialogOverlayTolerance 以字符串存储的类型问题，非法输入回落为 16
 ### Removed
+- 移除无效的帮助面板占位与死代码（progressWindow、getFileSuffix），修正 geCustomOptions 拼写
 
 
 ## [1.7.7] - 2026-08-03

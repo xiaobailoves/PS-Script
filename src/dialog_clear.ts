@@ -86,9 +86,12 @@ function isSelectionValid()
 //      labels: label (x,y) coordinate
 //      tolerance: magicwand's tolerance
 //      contract: contract selected area, for protect the edge of dialog box
+//      shouldAbort: optional callback, return true to abort
+// returns false when the user aborts
 export function dialogClear(doc: Document, bgLayer: ArtLayer, overLayer: ArtLayer,
                             labels: Array<{ x: number, y: number }>,
-                            tolerance: number, contract: UnitValue): boolean
+                            tolerance: number, contract: UnitValue,
+                            shouldAbort?: () => boolean): boolean
 {
     let width = doc.width.as("px");
     let height = doc.height.as("px");
@@ -99,6 +102,10 @@ export function dialogClear(doc: Document, bgLayer: ArtLayer, overLayer: ArtLaye
     tmp_color.rgb.blue = 255;
 
     for (let i = 0; i < labels.length; i++) {
+        if (shouldAbort && shouldAbort()) {
+            log("User cancelled during dialog overlay");
+            return false; // 中止
+        }
         let x = labels[i].x * width;
         let y = labels[i].y * height;
 

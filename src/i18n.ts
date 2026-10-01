@@ -45,6 +45,17 @@ namespace I18n {
     export var LIST_TEXT_DIT_ITEMS: string[] = [ "默认", "横向", "纵向" ];
     export var CHECKBOX_NO_LAYER_GROUP: string = "不对图层进行分组";
 
+    export var BUTTON_TEXT_REPLACE_PRESET: string = "标点";
+    export var BUTTON_STOP: string = "停止";
+    export var HINT_ESC_STOP: string = "导入过程中按 ESC 可中途停止";
+    export var HELP_RUN_ACTION: string = "动作组内需包含以下动作名：\n\n" +
+        "  _start — 每张图片处理前执行\n" +
+        "  [分组名] — 每个标签创建后执行（如：框内、框外）\n" +
+        "  _end — 每张图片处理后执行\n\n" +
+        "可在 PS 动作面板中创建/重命名，动作名需完全一致。";
+    export var PROGRESS_PREPARING: string = "准备中...";
+    export var PROGRESS_PROCESSING: string = "正在处理: ";
+
     export var CHECKBOX_DIALOG_OVERLAY: string = "启用对话框自动涂白";
     export var LABEL_DIALOG_OVERLAY_GROUP: string = "指定需要涂白的分组(例如: 框内,心理)：";
     export var LABEL_DIALOG_OVERLAY_TOLERANCE: string = "容差：";
@@ -110,6 +121,16 @@ namespace I18n {
         LABEL_TEXT_DIRECTION = "Text Direction:";
         LIST_TEXT_DIT_ITEMS = [ "Default", "Horizontal", "Vertical" ];
         CHECKBOX_NO_LAYER_GROUP = "Layer Not Grouping";
+        BUTTON_TEXT_REPLACE_PRESET = "Punctuation";
+        BUTTON_STOP = "Stop";
+        HINT_ESC_STOP = "Press ESC during import to abort";
+        HELP_RUN_ACTION = "The action set must contain actions with these exact names:\n\n" +
+            "  _start — before each image\n" +
+            "  [group name] — after each label (e.g. group1, group2)\n" +
+            "  _end — after each image\n\n" +
+            "Create/rename them in the PS Actions panel.";
+        PROGRESS_PREPARING = "Preparing...";
+        PROGRESS_PROCESSING = "Processing: ";
         CHECKBOX_DIALOG_OVERLAY = "Execute \"Dialog Overlay\"";
         LABEL_DIALOG_OVERLAY_GROUP = "Specified Groups(like: group1,group2)：";
         LABEL_DIALOG_OVERLAY_TOLERANCE = "Tolerance:";

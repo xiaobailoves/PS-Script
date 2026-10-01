@@ -24,7 +24,7 @@ if [ $# -lt 1 ]; then
 fi
 
 version=$1
-program_exists git 7z python
+program_exists git python
 [ $? -ne 0 ] && exit 1
 
 cd "${0%%/*}"
@@ -43,43 +43,29 @@ read -p "* Is CHANGELOG.md ready to release? [y/N] " -n1 try;
 printf "\nstart...\n"
 
 # update version
-sed -i "s/\".*\"/\"${version}\"/" ./src/version.ts
+sed -i "s/\"[0-9][0-9.]*\"/\"${version}\"/" ./src/version.ts
 
-# FIXME make sure dependencies in node_modules are installed
 # build
 ./build.sh
 
-# prepare to pack
-PACK_DIR=./build/pack
-
-# pack directories into ${PACK_DIR}
-pack() {
-    for dir in $*; do
-        cp -vr $dir ${PACK_DIR}/
-    done
-}
-
-mkdir -p ${PACK_DIR}
-rm -rf ./${PACK_DIR}/*
-
-# update changelog
-cp -v CHANGELOG.md ${PACK_DIR}/
+# update changelog: date the [Unreleased] section
 date=$(date +%Y-%m-%d)
-sed -i "s/\[Unreleased\]/\[${version}\] - ${date}/" $PACK_DIR/CHANGELOG.md
+sed -i "s/^## \[Unreleased\]/## \[${version}\] - ${date}/" CHANGELOG.md
 
-pack build/LabelPlus_Ps_Script.jsx \
-    build/ps_script_res \
-    LICENSE.txt \
-    README.md
+# pack release zip (same layout as published assets:
+# LabelPlus_Ps_Script.jsx + ps_script_res)
+python ./pack_zip.py build/LabelPlus_PS-Script_${version}.zip \
+    build/LabelPlus_Ps_Script.jsx \
+    build/ps_script_res
 
-7z a -t7z build/LabelPlus_PS-Script_${version}.7z ${PACK_DIR}/* -m0=BCJ -m1=LZMA:d=21 -ms -mmt
+# insert a fresh [Unreleased] section
+TMP_HEADER=build/.changelog_header.tmp
+printf '## [Unreleased]\n### Added\n### Changed\n### Fixed\n### Removed\n\n' > ${TMP_HEADER}
+sed -i "1r ${TMP_HEADER}" CHANGELOG.md
+rm -f ${TMP_HEADER}
 
 # git commit, add tag
-cp ${PACK_DIR}/CHANGELOG.md ./
-TEXT="\n## [Unreleased]\n### Added\n### Changed\n### Fixed\n### Removed\n"
-sed "1a\\${TEXT}" CHANGELOG.md -i
-
-git commit -am "release ${version}"
+git commit -am "v${version}"
 git tag ${version}
 
 cat <<END
@@ -89,4 +75,7 @@ complete!
 please check and push new commit & tag, command:
 git push
 git push origin ${version}
+
+then create a GitHub release (title like "V${version} (魔改版本)")
+and upload build/LabelPlus_PS-Script_${version}.zip
 END

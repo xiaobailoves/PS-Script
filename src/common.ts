@@ -71,10 +71,6 @@ export function getImageFilesListOfPath(path: string): string[] {
     return fileNameList.sort();
 }
 
-export function getFileSuffix(filename: string) {
-	return filename.substring(filename.lastIndexOf("."), filename.length)
-}
-
 export function doAction(action: string, actionSet: string): boolean
 {
     try {
@@ -110,7 +106,6 @@ export const DEFAULT_INI_PATH: string = APP_DATA_FOLDER + dirSeparator + "lp_ps_
 export const DEFAULT_DUMP_PATH: string = APP_DATA_FOLDER + dirSeparator + "lp_ps_script.dump";
 export let alllog: string = "";
 export let errlog: string = "";
-export let progressWindow: any = null;
 
 Stdlib.log.setFile(DEFAULT_LOG_PATH);
 export function log(msg: any) { Stdlib.log(msg); alllog += msg + '\n'; }
