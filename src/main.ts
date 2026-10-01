@@ -854,7 +854,7 @@ class LabelPlusInput extends GenericUI {
     // 帮助 / 关于 对话框：点击链接用浏览器打开
     private showHelpDialog = () => {
         /// @ts-ignore
-        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 500, 270]);
+        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 500, 290]);
         /// @ts-ignore
         dlg.center();
 
@@ -875,6 +875,7 @@ class LabelPlusInput extends GenericUI {
         addLink(I18n.HELP_LINK_DOCS + "：" + DOCS_URL + I18n.HELP_CLICK, DOCS_URL);
         addLink(I18n.HELP_LINK_VIDEO + "：" + VIDEO_URL + I18n.HELP_CLICK, VIDEO_URL);
         addLink(I18n.HELP_LINK_PROJECT + "：" + PROJECT_URL + I18n.HELP_CLICK, PROJECT_URL);
+        yy += 24; // 空一行，与下方版本行拉开距离
 
         // 版本号 + 更新检测（合并为一行，整体居中）；有新版本时点击可跳转下载，否则点击重新检查
         let hasNewVersion = false;
