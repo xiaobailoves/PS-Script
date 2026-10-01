@@ -1,6 +1,12 @@
 # Changelog
-
 ## [Unreleased]
+### Added
+### Changed
+### Fixed
+### Removed
+
+
+## [1.7.8] - 2026-10-01
 ### Added
 - 导入进度窗口新增“停止”按钮，与 ESC 一样可中止导入
 ### Changed
