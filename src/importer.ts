@@ -61,6 +61,10 @@ interface ImageWorkspace {
 
     pendingDelLayerList: ArtLayer[];
     groups: GroupDict;
+
+    wPx: number;             // 画布像素宽（缓存，避免逐标签查询文档尺寸）
+    hPx: number;             // 画布像素高
+    layerPrototypes: { [key: string]: ArtLayer }; // 每个分组已完成样式的首个文字图层，后续标签直接复制
 };
 
 interface ImageDocInfo {
@@ -103,7 +107,7 @@ function importLabel(img: ImageDocInfo, label: LabelInfo): boolean
             size: (opts.fontSize !== 0) ? UnitValue(opts.fontSize, "pt") : undefined,
             lgroup: img.ws.groups["_Label"].layerSet,
         };
-        newTextLayer(img.ws.doc, String(label.index), label.x, label.y, o);
+        createStyledTextLayer(img, "_Label", String(label.index), label.x * img.ws.wPx, label.y * img.ws.hPx, o);
     }
 
     // 确定文字方向
@@ -133,7 +137,7 @@ function importLabel(img: ImageDocInfo, label: LabelInfo): boolean
     } else {
         o.size = (opts.fontSize !== 0) ? UnitValue(opts.fontSize, "pt") : undefined;
     }
-    textLayer = newTextLayer(img.ws.doc, label.contents, label.x, label.y, o);
+    textLayer = createStyledTextLayer(img, label.group, label.contents, label.x * img.ws.wPx, label.y * img.ws.hPx, o);
 
     // 执行动作,名称为分组名
     if (opts.actionGroup && actionExists(label.group)) {
@@ -374,6 +378,9 @@ function openImageWorkspace(img_filename: string, template_path: string, templat
         dialogOverlayLayer: dialogOverlayLayer,
         pendingDelLayerList: pendingDelLayerList,
         groups: groups,
+        wPx: wsDoc.width.as("px"),
+        hPx: wsDoc.height.as("px"),
+        layerPrototypes: {},
     };
     return ws;
 }
@@ -652,8 +659,8 @@ function hexToColor(hex: string): SolidColor {
     return color;
 }
 
-// 创建文本图层
-function newTextLayer(doc: Document, text: string, x: number, y: number, topts: TextInputOptions = {}): ArtLayer
+// 创建文本图层（xPx/yPx 为画布像素坐标）
+function newTextLayer(doc: Document, text: string, xPx: number, yPx: number, topts: TextInputOptions = {}): ArtLayer
 {
     let artLayerRef: ArtLayer;
     let textItemRef: TextItem;
@@ -679,7 +686,7 @@ function newTextLayer(doc: Document, text: string, x: number, y: number, topts: 
     if (topts.direction)
         textItemRef.direction = topts.direction;
 
-    textItemRef.position = Array(UnitValue(doc.width.as("px") * x, "px"), UnitValue(doc.height.as("px") * y, "px"));
+    textItemRef.position = Array(UnitValue(xPx, "px"), UnitValue(yPx, "px"));
 
     if (topts.lgroup)
         artLayerRef.move(topts.lgroup, ElementPlacement.PLACEATBEGINNING);
@@ -704,6 +711,33 @@ function newTextLayer(doc: Document, text: string, x: number, y: number, topts: 
     textItemRef.contents = text;
 
     return artLayerRef;
+}
+
+// 创建带样式的文本图层（性能优化）：
+// 同一分组的首个标签走完整创建（逐项设置文字属性），后续标签直接复制首个图层，
+// 只更新位置/名称/内容——把每标签约 14 次 PS 属性设置往返降到 4 次
+function createStyledTextLayer(img: ImageDocInfo, group: string, contents: string,
+                               xPx: number, yPx: number, o: TextInputOptions): ArtLayer
+{
+    let proto = img.ws.layerPrototypes[group];
+    if (proto !== undefined) {
+        let lgroup = img.ws.groups[group].layerSet;
+        let layer: ArtLayer;
+        if (lgroup !== undefined) {
+            /// @ts-ignore ts声明文件有误，duplicate()返回ArtLayer对象，而不是void
+            layer = <ArtLayer> proto.duplicate(lgroup, ElementPlacement.PLACEATBEGINNING);
+        } else {
+            /// @ts-ignore ts声明文件有误，duplicate()返回ArtLayer对象，而不是void
+            layer = <ArtLayer> proto.duplicate();
+        }
+        layer.textItem.position = Array(UnitValue(xPx, "px"), UnitValue(yPx, "px"));
+        layer.name = contents;
+        layer.textItem.contents = contents;
+        return layer;
+    }
+    let layer = newTextLayer(img.ws.doc, contents, xPx, yPx, o);
+    img.ws.layerPrototypes[group] = layer;
+    return layer;
 }
 
 type TextReplaceInfo = { from: string; to: string; }[];
