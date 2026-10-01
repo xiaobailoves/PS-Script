@@ -854,34 +854,32 @@ class LabelPlusInput extends GenericUI {
     // 帮助 / 关于 对话框：点击链接用浏览器打开
     private showHelpDialog = () => {
         /// @ts-ignore
-        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 430, 300]);
+        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 500, 300]);
         /// @ts-ignore
         dlg.center();
 
         let yy = 18;
         /// @ts-ignore
-        dlg.add('statictext', [20, yy, 410, yy + 20], I18n.HELP_NOTE);
+        dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_NOTE);
         yy += 28;
         /// @ts-ignore
-        dlg.add('statictext', [20, yy, 410, yy + 20], I18n.HELP_HINT);
+        dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_HINT);
         yy += 28;
 
         let addLink = (label: string, url: string) => {
             /// @ts-ignore
-            let t = dlg.add('statictext', [20, yy, 410, yy + 20], label);
+            let t = dlg.add('statictext', [20, yy, 480, yy + 20], label);
             t.onClick = () => { openUrl(url); };
             yy += 24;
         };
-        addLink(I18n.HELP_LINK_DOCS, DOCS_URL);
-        addLink(I18n.HELP_LINK_VIDEO, VIDEO_URL);
-        addLink(I18n.HELP_LINK_PROJECT + ": " + PROJECT_URL, PROJECT_URL);
-        addLink(I18n.HELP_LINK_RELEASE + ": " + RELEASE_URL, RELEASE_URL);
-        addLink(I18n.HELP_LINK_ISSUES + ": " + ISSUES_URL, ISSUES_URL);
+        addLink(I18n.HELP_LINK_DOCS + "：" + DOCS_URL + I18n.HELP_CLICK, DOCS_URL);
+        addLink(I18n.HELP_LINK_VIDEO + "：" + VIDEO_URL + I18n.HELP_CLICK, VIDEO_URL);
+        addLink(I18n.HELP_LINK_PROJECT + "：" + PROJECT_URL + I18n.HELP_CLICK, PROJECT_URL);
 
         // 版本更新检测：打开对话框时自动检查；有新版本时点击可跳转下载，否则点击重新检查
         let hasNewVersion = false;
         /// @ts-ignore
-        let statusText = dlg.add('statictext', [20, yy, 410, yy + 20], I18n.HELP_VERSION_CHECKING);
+        let statusText = dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_VERSION_CHECKING);
         let runCheck = () => {
             statusText.text = I18n.HELP_VERSION_CHECKING;
             /// @ts-ignore
@@ -904,9 +902,9 @@ class LabelPlusInput extends GenericUI {
         yy += 24;
 
         /// @ts-ignore
-        dlg.add('statictext', [20, yy, 410, yy + 20], I18n.APP_NAME + " " + VERSION);
+        dlg.add('statictext', [20, yy, 480, yy + 20], I18n.APP_NAME + " " + VERSION);
         /// @ts-ignore
-        dlg.add('button', [165, yy + 30, 265, yy + 55], I18n.BUTTON_CLOSE).onClick = () => { dlg.close(); };
+        dlg.add('button', [200, yy + 30, 300, yy + 55], I18n.BUTTON_CLOSE).onClick = () => { dlg.close(); };
 
         // 打开对话框时自动检测一次更新
         /// @ts-ignore
