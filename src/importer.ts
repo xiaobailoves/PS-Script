@@ -16,6 +16,9 @@ function shouldAbort(): boolean {
     return cancelRequested || ScriptUI.environment.keyboardState['escape'];
 }
 
+// 空文本标签计数（内容为空时跳过，不创建文本图层）
+let skippedEmptyLabels = 0;
+
 interface Group {
     layerSet?: LayerSet;
     template?: ArtLayer;
@@ -58,6 +61,20 @@ function importLabel(img: ImageDocInfo, label: LabelInfo): boolean
 {
     assert(opts !== null);
 
+    // 替换文本（split/join 语义，避免替换目标包含原文时死循环）
+    if (opts.textReplace) {
+        for (let k = 0; k < textReplace.length; k++) {
+            label.contents = label.contents.split(textReplace[k].from).join(textReplace[k].to);
+        }
+    }
+
+    // 跳过空文本标签：空字符串赋给图层名/文本内容会让 PS 报错（对象"图层"当前不可用）
+    if (label.contents.trim() === "") {
+        log("label " + label.index + " is empty, skipped");
+        skippedEmptyLabels++;
+        return true;
+    }
+
     // import the index of the Label
     if (opts.outputLabelIndex) {
         let o: TextInputOptions = {
@@ -68,13 +85,6 @@ function importLabel(img: ImageDocInfo, label: LabelInfo): boolean
             lgroup: img.ws.groups["_Label"].layerSet,
         };
         newTextLayer(img.ws.doc, String(label.index), label.x, label.y, o);
-    }
-
-    // 替换文本（split/join 语义，避免替换目标包含原文时死循环）
-    if (opts.textReplace) {
-        for (let k = 0; k < textReplace.length; k++) {
-            label.contents = label.contents.split(textReplace[k].from).join(textReplace[k].to);
-        }
     }
 
     // 确定文字方向
@@ -201,7 +211,7 @@ function importImage(img: ImageDocInfo): ImportResult
     return { ok: true, aborted: false };
 }
 
-function openImageWorkspace(img_filename: string, template_path: string): ImageWorkspace | null
+function openImageWorkspace(img_filename: string, template_path: string, templateDoc: Document | null = null): ImageWorkspace | null
 {
     assert(opts !== null);
 
@@ -228,14 +238,16 @@ function openImageWorkspace(img_filename: string, template_path: string): ImageW
         wsDoc = app.documents.add(bgDoc.width, bgDoc.height, bgDoc.resolution, bgDoc.name, NewDocumentMode.RGB, DocumentFill.TRANSPARENT);
         wsDoc.activeLayer.name = TEMPLATE_LAYER.IMAGE;
     } else {
-        let docFile = new File(template_path);
         try {
-            wsDoc = app.open(docFile);
-        } catch {
-            log_err("template file not found: " + template_path);
+            // 优先从已打开的模板文档复制；无缓存时回退为从磁盘打开
+            /// @ts-ignore ts声明文件可能有误，duplicate()返回Document对象
+            wsDoc = (templateDoc !== null) ? <Document> templateDoc.duplicate() : app.open(new File(template_path));
+        } catch (e) {
+            log_err("template file open failed: " + template_path);
             bgDoc.close(SaveOptions.DONOTSAVECHANGES);
             return null;
         }
+        app.activeDocument = wsDoc;
         wsDoc.resizeImage(undefined, undefined, bgDoc.resolution);
         wsDoc.resizeCanvas(bgDoc.width, bgDoc.height);
     }
@@ -299,6 +311,7 @@ function openImageWorkspace(img_filename: string, template_path: string): ImageW
     }
 
     bgDoc.close(SaveOptions.DONOTSAVECHANGES);
+    app.activeDocument = wsDoc; // 确保工作文档为活动文档（模板文档缓存时可能处于活动状态）
 
     // 若文档类型为索引色模式 更改为RGB模式
     if (wsDoc.mode == DocumentMode.INDEXEDCOLOR) {
@@ -389,6 +402,7 @@ export function importFiles(custom_opts: CustomOptions): boolean
 {
     opts = custom_opts;
     cancelRequested = false;
+    skippedEmptyLabels = 0;
 
     /// @ts-ignore
     app.refresh(false); // speed up batch processing
@@ -399,6 +413,7 @@ export function importFiles(custom_opts: CustomOptions): boolean
 
     /// @ts-ignore
     var progressWin: any = null;
+    let templateDoc: Document | null = null;
     let aborted = false;
 
     try {
@@ -472,6 +487,17 @@ export function importFiles(custom_opts: CustomOptions): boolean
             break;
         }
 
+        // 模板文档整个批次只打开一次，之后每张图直接复制，避免逐张从磁盘打开
+        if (template_path !== "") {
+            try {
+                templateDoc = app.open(new File(template_path));
+                log("open template once: " + template_path);
+            } catch (e) {
+                log_err("error: " + I18n.ERROR_FILE_OPEN_FAIL + " " + template_path);
+                return false;
+            }
+        }
+
         // progress palette
         /// @ts-ignore
         progressWin = new Window('palette', I18n.APP_NAME + " " + VERSION, [200, 200, 500, 335]);
@@ -508,7 +534,7 @@ export function importFiles(custom_opts: CustomOptions): boolean
                 log('no label, ignored...');
                 continue;
             }
-            let ws = openImageWorkspace(matched_name, template_path);
+            let ws = openImageWorkspace(matched_name, template_path, templateDoc);
             if (ws == null) {
                 log_err(name_pair + ": " + I18n.ERROR_FILE_OPEN_FAIL);
                 continue;
@@ -538,6 +564,9 @@ export function importFiles(custom_opts: CustomOptions): boolean
             }
             log(name_pair + ": done");
         }
+        if (skippedEmptyLabels > 0) {
+            log(skippedEmptyLabels + " empty label(s) skipped");
+        }
         log(aborted ? "Aborted by user!" : "All Done!");
         return true;
     }
@@ -545,6 +574,9 @@ export function importFiles(custom_opts: CustomOptions): boolean
         // 无论正常结束、提前返回还是异常，都恢复运行环境
         if (progressWin) {
             try { progressWin.close(); } catch (e) { }
+        }
+        if (templateDoc) {
+            try { templateDoc.close(SaveOptions.DONOTSAVECHANGES); } catch (e) { }
         }
         /// @ts-ignore
         app.displayDialogs = oldDialogs;
