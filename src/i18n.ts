@@ -47,7 +47,7 @@ namespace I18n {
 
     export var BUTTON_TEXT_REPLACE_PRESET: string = "标点";
     export var HINT_ESC_STOP: string = "导入过程中按 ESC 可中途停止";
-    export var HELP_RUN_ACTION: string = "动作组内需包含以下动作名：\n\n" +
+    export var HELP_RUN_ACTION: string = "动作组内可包含以下动作名（不存在的会被自动跳过）：\n\n" +
         "  _start — 每张图片处理前执行\n" +
         "  [分组名] — 每个标签创建后执行（如：框内、框外）\n" +
         "  _end — 每张图片处理后执行\n\n" +
@@ -122,7 +122,7 @@ namespace I18n {
         CHECKBOX_NO_LAYER_GROUP = "Layer Not Grouping";
         BUTTON_TEXT_REPLACE_PRESET = "Punctuation";
         HINT_ESC_STOP = "Press ESC during import to abort";
-        HELP_RUN_ACTION = "The action set must contain actions with these exact names:\n\n" +
+        HELP_RUN_ACTION = "The action set may contain these actions (missing ones are skipped):\n\n" +
             "  _start — before each image\n" +
             "  [group name] — after each label (e.g. group1, group2)\n" +
             "  _end — after each image\n\n" +

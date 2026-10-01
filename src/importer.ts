@@ -20,6 +20,24 @@ function shouldAbort(): boolean {
 // 空文本标签计数（内容为空时跳过，不创建文本图层）
 let skippedEmptyLabels = 0;
 
+// 动作组中实际存在的动作名缓存（导入前枚举一次）
+// 注：对不存在的动作调用 doAction 播放失败一次约耗时 1~2 秒，必须提前过滤
+let availableActions: { [key: string]: boolean } | null = null;
+let unavailableActionWarned: { [key: string]: boolean } = {};
+
+// 动作是否存在于当前动作组；不存在时每次导入只提示一次
+function actionExists(action: string): boolean {
+    if (availableActions === null) // 未能枚举时按“存在”处理，退回直接调用
+        return true;
+    if (availableActions[action] === true)
+        return true;
+    if (unavailableActionWarned[action] !== true) {
+        log("action \"" + action + "\" not found in action group, skipped");
+        unavailableActionWarned[action] = true;
+    }
+    return false;
+}
+
 interface Group {
     layerSet?: LayerSet;
     template?: ArtLayer;
@@ -118,7 +136,7 @@ function importLabel(img: ImageDocInfo, label: LabelInfo): boolean
     textLayer = newTextLayer(img.ws.doc, label.contents, label.x, label.y, o);
 
     // 执行动作,名称为分组名
-    if (opts.actionGroup) {
+    if (opts.actionGroup && actionExists(label.group)) {
         img.ws.doc.activeLayer = textLayer;
         let result = doAction(label.group, opts.actionGroup);
         log("run action " + label.group + "[" + opts.actionGroup + "]..." + (result ? "done" : "not found or failed"));
@@ -131,7 +149,7 @@ function importImage(img: ImageDocInfo): ImportResult
     assert(opts !== null);
 
     // run action _start
-    if (opts.actionGroup) {
+    if (opts.actionGroup && actionExists("_start")) {
         img.ws.doc.activeLayer = img.ws.doc.layers[img.ws.doc.layers.length - 1];
         let result = doAction("_start", opts.actionGroup);
         log("run action _start[" + opts.actionGroup + "]..." + (result ? "done" : "not found or failed"));
@@ -204,7 +222,7 @@ function importImage(img: ImageDocInfo): ImportResult
     }
 
     // run action _end
-    if (opts.actionGroup) {
+    if (opts.actionGroup && actionExists("_end")) {
         img.ws.doc.activeLayer = img.ws.doc.layers[img.ws.doc.layers.length - 1];
         let result = doAction("_end", opts.actionGroup);
         log("run action _end[" + opts.actionGroup + "]..." + (result ? "done" : "not found or failed"));
@@ -403,6 +421,8 @@ export function importFiles(custom_opts: CustomOptions): boolean
 {
     opts = custom_opts;
     skippedEmptyLabels = 0;
+    availableActions = null;
+    unavailableActionWarned = {};
 
     /// @ts-ignore
     app.refresh(false); // speed up batch processing
@@ -440,6 +460,29 @@ export function importFiles(custom_opts: CustomOptions): boolean
             textReplace = tmp;
         }
         log("parse textreplace done...");
+
+        // 枚举动作组内实际存在的动作名（不存在的动作直接跳过）
+        // 注：doAction 对不存在的动作播放失败一次约耗时 1~2 秒
+        if (opts.actionGroup) {
+            try {
+                let sets = Stdlib.getActionSets();
+                let names: { [key: string]: boolean } = {};
+                for (let i = 0; i < sets.length; i++) {
+                    if (sets[i].name === opts.actionGroup) {
+                        for (let j = 0; j < sets[i].actions.length; j++) {
+                            names[sets[i].actions[j]] = true;
+                        }
+                        break;
+                    }
+                }
+                availableActions = names;
+                let action_names: string[] = [];
+                for (let k in names) action_names.push(k);
+                log("action group \"" + opts.actionGroup + "\" cached: [" + action_names.join(", ") + "]");
+            } catch (e) {
+                log("enumerate action group failed, fallback to direct call: " + e);
+            }
+        }
 
         // 确定doc模板文件
         let template_path: string = "";
