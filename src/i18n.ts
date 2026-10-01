@@ -46,7 +46,6 @@ namespace I18n {
     export var CHECKBOX_NO_LAYER_GROUP: string = "不对图层进行分组";
 
     export var BUTTON_TEXT_REPLACE_PRESET: string = "标点";
-    export var BUTTON_STOP: string = "停止";
     export var HINT_ESC_STOP: string = "导入过程中按 ESC 可中途停止";
     export var HELP_RUN_ACTION: string = "动作组内需包含以下动作名：\n\n" +
         "  _start — 每张图片处理前执行\n" +
@@ -122,7 +121,6 @@ namespace I18n {
         LIST_TEXT_DIT_ITEMS = [ "Default", "Horizontal", "Vertical" ];
         CHECKBOX_NO_LAYER_GROUP = "Layer Not Grouping";
         BUTTON_TEXT_REPLACE_PRESET = "Punctuation";
-        BUTTON_STOP = "Stop";
         HINT_ESC_STOP = "Press ESC during import to abort";
         HELP_RUN_ACTION = "The action set must contain actions with these exact names:\n\n" +
             "  _start — before each image\n" +

@@ -10,10 +10,11 @@ namespace LabelPlus {
 let opts: CustomOptions | null = null;
 let textReplace: TextReplaceInfo = [];
 
-// 中止请求：ESC 键或进度窗口的停止按钮
-let cancelRequested = false;
+// 中止请求：ESC 键
+// 注：进度窗口上的按钮在脚本运行期间收不到点击事件（PS 不派发 ScriptUI 事件），
+// 因此中止统一由 ESC 键轮询实现（keyboardState 直接读键盘状态，不依赖事件派发）
 function shouldAbort(): boolean {
-    return cancelRequested || ScriptUI.environment.keyboardState['escape'];
+    return ScriptUI.environment.keyboardState['escape'];
 }
 
 // 空文本标签计数（内容为空时跳过，不创建文本图层）
@@ -401,7 +402,6 @@ function closeImage(img: ImageDocInfo, saveType: OptionOutputType = OptionOutput
 export function importFiles(custom_opts: CustomOptions): boolean
 {
     opts = custom_opts;
-    cancelRequested = false;
     skippedEmptyLabels = 0;
 
     /// @ts-ignore
@@ -500,15 +500,11 @@ export function importFiles(custom_opts: CustomOptions): boolean
 
         // progress palette
         /// @ts-ignore
-        progressWin = new Window('palette', I18n.APP_NAME + " " + VERSION, [200, 200, 500, 335]);
+        progressWin = new Window('palette', I18n.APP_NAME + " " + VERSION, [200, 200, 500, 300]);
         /// @ts-ignore
         var progressLabel = progressWin.add('statictext', [30, 20, 470, 45], I18n.PROGRESS_PREPARING);
         /// @ts-ignore
         progressWin.add('statictext', [30, 50, 470, 75], I18n.HINT_ESC_STOP);
-        /// @ts-ignore
-        var stopButton = progressWin.add('button', [30, 85, 150, 110], I18n.BUTTON_STOP);
-        /// @ts-ignore
-        stopButton.onClick = () => { cancelRequested = true; };
         /// @ts-ignore
         progressWin.center();
         /// @ts-ignore
