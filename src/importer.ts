@@ -558,6 +558,9 @@ export function importFiles(custom_opts: CustomOptions): boolean
             if (!closeImage(img_info, opts.outputType)) {
                 log_err(name_pair + ": " + I18n.ERROR_FILE_SAVE_FAIL);
             }
+            // 释放 Photoshop 缓存（撤销历史、剪贴板等），避免批量导入时内存持续增长
+            /// @ts-ignore
+            app.purge(PurgeTarget.ALLCACHES);
             log(name_pair + ": done");
         }
         if (skippedEmptyLabels > 0) {
