@@ -60,7 +60,7 @@ python ./pack_zip.py build/LabelPlus_PS-Script_${version}.zip \
 
 # insert a fresh [Unreleased] section
 TMP_HEADER=build/.changelog_header.tmp
-printf '## [Unreleased]\n### Added\n### Changed\n### Fixed\n### Removed\n\n' > ${TMP_HEADER}
+printf '\n## [Unreleased]\n### Added\n### Changed\n### Fixed\n### Removed\n\n' > ${TMP_HEADER}
 sed -i "1r ${TMP_HEADER}" CHANGELOG.md
 rm -f ${TMP_HEADER}
 
