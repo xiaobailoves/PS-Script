@@ -31,33 +31,29 @@ export function openUrl(url: string) {
             return;
         }
     } catch (e) { }
-    try {
-        app.system('start "" "' + url + '"');
-    } catch (e) { }
+    execCommandHidden('cmd /c start "" "' + url + '"');
 }
 
-// 执行系统命令（app.system 不可用时回退为临时 .bat 脚本）
-function execCommand(cmd: string): boolean {
+// 隐藏窗口执行系统命令
+// 注：app.system / File.execute 执行命令行程序会弹出 cmd 黑窗，
+// 这里通过 wscript + VBScript 以隐藏窗口方式运行（wscript 自身无控制台）
+function execCommandHidden(cmd: string): boolean {
     try {
-        /// @ts-ignore
-        if (app.system !== undefined) {
-            /// @ts-ignore
-            app.system(cmd);
-            return true;
+        let vbsPath = Folder.temp.fsName + dirSeparator + "lp_ps_script_exec.vbs";
+        let vbs = new File(vbsPath);
+        if (vbs.open("w")) {
+            vbs.lineFeed = "windows";
+            vbs.write('On Error Resume Next\r\n');
+            vbs.write('Set ws = CreateObject("WScript.Shell")\r\n');
+            vbs.write('ws.Run "' + cmd.replace(/"/g, '""') + '", 0, True\r\n');
+            vbs.write('CreateObject("Scripting.FileSystemObject").DeleteFile "' + vbsPath + '"\r\n');
+            vbs.close();
+            if ((new File(vbsPath)).execute()) {
+                return true; // 异步执行，结果由调用方轮询
+            }
         }
     } catch (e) {
-        log("app.system failed: " + e);
-    }
-    try {
-        let bat = new File(Folder.temp.fsName + dirSeparator + "lp_ps_script_cmd.bat");
-        if (bat.open("w")) {
-            bat.lineFeed = "windows";
-            bat.write("@echo off\r\n" + cmd + "\r\n");
-            bat.close();
-            return bat.execute();
-        }
-    } catch (e) {
-        log("exec bat failed: " + e);
+        log("hidden exec failed: " + e);
     }
     return false;
 }
@@ -71,7 +67,7 @@ export function fetchLatestReleaseTag(): string | null {
             out.remove();
         }
         let url = "https://api.github.com/repos/xiaobailoves/PS-Script/releases/latest";
-        execCommand('curl -s -L --max-time 4 -o "' + outPath + '" "' + url + '"');
+        execCommandHidden('curl -s -L --max-time 4 -o "' + outPath + '" "' + url + '"');
         // File.execute 是异步的；轮询等待文件生成（最多 5 秒）
         for (let i = 0; i < 25; i++) {
             if (out.exists) {
