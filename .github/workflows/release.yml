@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install locked dependencies
+        run: |
+          node scripts/prepare_ci_lock.cjs
+          npm ci --ignore-scripts
+      - name: Build release archive and notes
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          # build.sh uses "python"; make it available on the runner
+          sudo ln -sf "$(command -v python3)" /usr/local/bin/python
+          python3 scripts/package_release.py "$RELEASE_TAG"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" build/LabelPlus_PS-Script_*.zip \
+            --verify-tag --title "V${RELEASE_TAG#v} (魔改版本)" --notes-file build/release-notes.md
