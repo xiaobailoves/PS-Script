@@ -212,24 +212,28 @@ function importImage(img: ImageDocInfo): ImportResult
         img.ws.dialogOverlayLayer.move(img.ws.bgLayer, ElementPlacement.PLACEBEFORE);
     }
 
-    // remove unnecessary Layer/LayerSet
+    // remove unnecessary temp layers
     log('remove unnecessary Layer/LayerSet...');
     for (let i = img.ws.pendingDelLayerList.length - 1; i >= 0; i--) { // Layer
         img.ws.pendingDelLayerList[i].remove();
     }
+
+    // run action _end
+    // 注意：空分组文件夹在 _end 之后再清理——动作可能按名字引用与分组同名的文件夹，
+    // 若先清理，引用了"空分组"的动作会报错（对象"图层"xxx当前不可用）
+    if (opts.actionGroup && actionExists("_end")) {
+        img.ws.doc.activeLayer = img.ws.doc.layers[img.ws.doc.layers.length - 1];
+        let result = doAction("_end", opts.actionGroup);
+        log("run action _end[" + opts.actionGroup + "]..." + (result ? "done" : "not found or failed"));
+    }
+
+    // remove empty group LayerSets
     for (let k in img.ws.groups) { // LayerSet
         if (img.ws.groups[k].layerSet !== undefined) {
             if (img.ws.groups[k].layerSet?.artLayers.length === 0) {
                 img.ws.groups[k].layerSet?.remove();
             }
         }
-    }
-
-    // run action _end
-    if (opts.actionGroup && actionExists("_end")) {
-        img.ws.doc.activeLayer = img.ws.doc.layers[img.ws.doc.layers.length - 1];
-        let result = doAction("_end", opts.actionGroup);
-        log("run action _end[" + opts.actionGroup + "]..." + (result ? "done" : "not found or failed"));
     }
     return { ok: true, aborted: false };
 }
