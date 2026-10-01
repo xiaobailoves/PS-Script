@@ -851,6 +851,67 @@ class LabelPlusInput extends GenericUI {
         return {getOption: getOption};
     }
 
+    // 帮助 / 关于 对话框：点击链接用浏览器打开
+    private showHelpDialog = () => {
+        /// @ts-ignore
+        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 430, 250]);
+        /// @ts-ignore
+        dlg.center();
+
+        let yy = 18;
+        /// @ts-ignore
+        dlg.add('statictext', [20, yy, 410, yy + 20], I18n.HELP_HINT);
+        yy += 28;
+
+        let addLink = (label: string, url: string) => {
+            /// @ts-ignore
+            let t = dlg.add('statictext', [20, yy, 410, yy + 20], label);
+            t.onClick = () => { openUrl(url); };
+            yy += 24;
+        };
+        addLink(I18n.HELP_LINK_VIDEO, VIDEO_URL);
+        addLink(I18n.HELP_LINK_PROJECT + ": " + PROJECT_URL, PROJECT_URL);
+        addLink(I18n.HELP_LINK_RELEASE + ": " + RELEASE_URL, RELEASE_URL);
+        addLink(I18n.HELP_LINK_ISSUES + ": " + ISSUES_URL, ISSUES_URL);
+
+        // 版本更新检测：打开对话框时自动检查；有新版本时点击可跳转下载，否则点击重新检查
+        let hasNewVersion = false;
+        /// @ts-ignore
+        let statusText = dlg.add('statictext', [20, yy, 410, yy + 20], I18n.HELP_VERSION_CHECKING);
+        let runCheck = () => {
+            statusText.text = I18n.HELP_VERSION_CHECKING;
+            /// @ts-ignore
+            dlg.update();
+            let latest = fetchLatestReleaseTag();
+            if (latest === null) {
+                hasNewVersion = false;
+                statusText.text = I18n.HELP_VERSION_FAILED;
+            } else if (isVersionNewer(latest, VERSION)) {
+                hasNewVersion = true;
+                statusText.text = I18n.HELP_VERSION_NEW + " V" + latest + I18n.HELP_VERSION_CLICK;
+            } else {
+                hasNewVersion = false;
+                statusText.text = I18n.HELP_VERSION_LATEST;
+            }
+            /// @ts-ignore
+            dlg.update();
+        };
+        statusText.onClick = () => { if (hasNewVersion) { openUrl(RELEASE_URL); } else { runCheck(); } };
+        yy += 24;
+
+        /// @ts-ignore
+        dlg.add('statictext', [20, yy, 410, yy + 20], I18n.APP_NAME + " " + VERSION);
+        /// @ts-ignore
+        dlg.add('button', [165, yy + 30, 265, yy + 55], I18n.BUTTON_CLOSE).onClick = () => { dlg.close(); };
+
+        // 打开对话框时自动检测一次更新
+        /// @ts-ignore
+        dlg.onShow = runCheck;
+
+        /// @ts-ignore
+        dlg.show();
+    }
+
     private allPanelEnable = (enable: boolean) => {
         this.inputPnl.enabled = enable;
         this.outputPnl.enabled = enable;
@@ -909,6 +970,10 @@ class LabelPlusInput extends GenericUI {
         ret = this.uiAutomationPanel(this.automationPnl);
         this.addToPickerList(ret.getOption);
         yy += 180;
+
+        // help / about
+        let helpBtn = pnl.add('button', [this.winRect.w - 100, 5, this.winRect.w - 20, 30], I18n.BUTTON_HELP);
+        helpBtn.onClick = () => { this.showHelpDialog(); };
 
         this.allPanelEnable(this.lpFile != null);
         return pnl;

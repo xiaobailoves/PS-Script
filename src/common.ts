@@ -18,6 +18,96 @@ export const TEMPLATE_LAYER = {
     DIALOG_OVERLAY: "dialog-overlay",
 };
 
+// 帮助页链接
+export const PROJECT_URL = "https://github.com/xiaobailoves/PS-Script";
+export const RELEASE_URL = PROJECT_URL + "/releases";
+export const ISSUES_URL  = PROJECT_URL + "/issues";
+export const VIDEO_URL   = "https://www.bilibili.com/video/BV1tTg46UESb/";
+
+// 用系统默认浏览器打开链接
+export function openUrl(url: string) {
+    try {
+        if ((new File(url)).execute()) {
+            return;
+        }
+    } catch (e) { }
+    try {
+        app.system('start "" "' + url + '"');
+    } catch (e) { }
+}
+
+// 执行系统命令（app.system 不可用时回退为临时 .bat 脚本）
+function execCommand(cmd: string): boolean {
+    try {
+        /// @ts-ignore
+        if (app.system !== undefined) {
+            /// @ts-ignore
+            app.system(cmd);
+            return true;
+        }
+    } catch (e) {
+        log("app.system failed: " + e);
+    }
+    try {
+        let bat = new File(Folder.temp.fsName + dirSeparator + "lp_ps_script_cmd.bat");
+        if (bat.open("w")) {
+            bat.lineFeed = "windows";
+            bat.write("@echo off\r\n" + cmd + "\r\n");
+            bat.close();
+            return bat.execute();
+        }
+    } catch (e) {
+        log("exec bat failed: " + e);
+    }
+    return false;
+}
+
+// 读取 GitHub 最新 Release 的版本号；失败返回 null
+export function fetchLatestReleaseTag(): string | null {
+    try {
+        let outPath = APP_DATA_FOLDER + dirSeparator + "lp_ps_script_update.json";
+        let out = new File(outPath);
+        if (out.exists) {
+            out.remove();
+        }
+        let url = "https://api.github.com/repos/xiaobailoves/PS-Script/releases/latest";
+        execCommand('curl -s -L --max-time 4 -o "' + outPath + '" "' + url + '"');
+        // File.execute 是异步的；轮询等待文件生成（最多 5 秒）
+        for (let i = 0; i < 25; i++) {
+            if (out.exists) {
+                break;
+            }
+            $.sleep(200);
+        }
+        if (!out.exists) {
+            return null;
+        }
+        out.open("r");
+        out.encoding = "UTF-8";
+        let text = out.read();
+        out.close();
+        let data = jamJSON.parse(text);
+        return (data && data.tag_name) ? String(data.tag_name) : null;
+    } catch (e) {
+        log("fetchLatestReleaseTag failed: " + e);
+        return null;
+    }
+}
+
+// 版本号比较：remote 是否比 local 新（如 1.7.9 > 1.7.8）
+export function isVersionNewer(remote: string, local: string): boolean {
+    let a = remote.replace(/^v/, "").split(".");
+    let b = local.replace(/^v/, "").split(".");
+    let n = Math.max(a.length, b.length);
+    for (let i = 0; i < n; i++) {
+        let x = parseInt(a[i]) || 0;
+        let y = parseInt(b[i]) || 0;
+        if (x > y) return true;
+        if (x < y) return false;
+    }
+    return false;
+}
+
 export const image_suffix_list = [".psd", ".png", ".jpg", ".jpeg", ".tif", ".tiff"];
 
 export function GetScriptPath(): string {

@@ -46,6 +46,19 @@ namespace I18n {
     export var CHECKBOX_NO_LAYER_GROUP: string = "不对图层进行分组";
 
     export var BUTTON_TEXT_REPLACE_PRESET: string = "标点";
+    export var BUTTON_HELP: string = "帮助";
+    export var BUTTON_CLOSE: string = "关闭";
+    export var HELP_TITLE: string = "帮助 / 关于";
+    export var HELP_HINT: string = "点击下列任意一行，用浏览器打开：";
+    export var HELP_LINK_VIDEO: string = "B站视频教程（点击打开）";
+    export var HELP_LINK_PROJECT: string = "项目地址";
+    export var HELP_LINK_RELEASE: string = "发布下载页";
+    export var HELP_LINK_ISSUES: string = "问题反馈";
+    export var HELP_VERSION_CHECKING: string = "正在检测更新…";
+    export var HELP_VERSION_FAILED: string = "更新检测失败（无法访问 GitHub，可手动打开发布页）";
+    export var HELP_VERSION_LATEST: string = "已是最新版本";
+    export var HELP_VERSION_NEW: string = "发现新版本";
+    export var HELP_VERSION_CLICK: string = "（点击此行下载）";
     export var HINT_ESC_STOP: string = "导入过程中按 ESC 可中途停止";
     export var HELP_RUN_ACTION: string = "动作组内可包含以下动作名（不存在的会被自动跳过）：\n\n" +
         "  _start — 每张图片处理前执行\n" +
@@ -121,6 +134,19 @@ namespace I18n {
         LIST_TEXT_DIT_ITEMS = [ "Default", "Horizontal", "Vertical" ];
         CHECKBOX_NO_LAYER_GROUP = "Layer Not Grouping";
         BUTTON_TEXT_REPLACE_PRESET = "Punctuation";
+        BUTTON_HELP = "Help";
+        BUTTON_CLOSE = "Close";
+        HELP_TITLE = "Help / About";
+        HELP_HINT = "Click any line below to open it in your browser:";
+        HELP_LINK_VIDEO = "Bilibili Video Tutorial (click to open)";
+        HELP_LINK_PROJECT = "Project";
+        HELP_LINK_RELEASE = "Releases / Downloads";
+        HELP_LINK_ISSUES = "Feedback / Issues";
+        HELP_VERSION_CHECKING = "Checking for updates...";
+        HELP_VERSION_FAILED = "Update check failed (GitHub unreachable)";
+        HELP_VERSION_LATEST = "You are up to date";
+        HELP_VERSION_NEW = "New version available";
+        HELP_VERSION_CLICK = " (click to download)";
         HINT_ESC_STOP = "Press ESC during import to abort";
         HELP_RUN_ACTION = "The action set may contain these actions (missing ones are skipped):\n\n" +
             "  _start — before each image\n" +
