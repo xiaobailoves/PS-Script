@@ -854,11 +854,14 @@ class LabelPlusInput extends GenericUI {
     // 帮助 / 关于 对话框：点击链接用浏览器打开
     private showHelpDialog = () => {
         /// @ts-ignore
-        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 430, 250]);
+        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 430, 300]);
         /// @ts-ignore
         dlg.center();
 
         let yy = 18;
+        /// @ts-ignore
+        dlg.add('statictext', [20, yy, 410, yy + 20], I18n.HELP_NOTE);
+        yy += 28;
         /// @ts-ignore
         dlg.add('statictext', [20, yy, 410, yy + 20], I18n.HELP_HINT);
         yy += 28;
@@ -869,6 +872,7 @@ class LabelPlusInput extends GenericUI {
             t.onClick = () => { openUrl(url); };
             yy += 24;
         };
+        addLink(I18n.HELP_LINK_DOCS, DOCS_URL);
         addLink(I18n.HELP_LINK_VIDEO, VIDEO_URL);
         addLink(I18n.HELP_LINK_PROJECT + ": " + PROJECT_URL, PROJECT_URL);
         addLink(I18n.HELP_LINK_RELEASE + ": " + RELEASE_URL, RELEASE_URL);

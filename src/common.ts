@@ -23,6 +23,7 @@ export const PROJECT_URL = "https://github.com/xiaobailoves/PS-Script";
 export const RELEASE_URL = PROJECT_URL + "/releases";
 export const ISSUES_URL  = PROJECT_URL + "/issues";
 export const VIDEO_URL   = "https://www.bilibili.com/video/BV1tTg46UESb/";
+export const DOCS_URL    = "https://www.yurucamp.cn/archives/9/";
 
 // 用系统默认浏览器打开链接
 export function openUrl(url: string) {

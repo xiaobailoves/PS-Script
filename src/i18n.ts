@@ -49,7 +49,9 @@ namespace I18n {
     export var BUTTON_HELP: string = "帮助";
     export var BUTTON_CLOSE: string = "关闭";
     export var HELP_TITLE: string = "帮助 / 关于";
+    export var HELP_NOTE: string = "该版本为玖玖组特供魔改版，也欢迎大家使用。";
     export var HELP_HINT: string = "点击下列任意一行，用浏览器打开：";
+    export var HELP_LINK_DOCS: string = "使用教程网页（点击打开）";
     export var HELP_LINK_VIDEO: string = "B站视频教程（点击打开）";
     export var HELP_LINK_PROJECT: string = "项目地址";
     export var HELP_LINK_RELEASE: string = "发布下载页";
@@ -137,7 +139,9 @@ namespace I18n {
         BUTTON_HELP = "Help";
         BUTTON_CLOSE = "Close";
         HELP_TITLE = "Help / About";
+        HELP_NOTE = "A modded build made for the JiuJiu Group; everyone is welcome to use it.";
         HELP_HINT = "Click any line below to open it in your browser:";
+        HELP_LINK_DOCS = "Usage Guide (web, click to open)";
         HELP_LINK_VIDEO = "Bilibili Video Tutorial (click to open)";
         HELP_LINK_PROJECT = "Project";
         HELP_LINK_RELEASE = "Releases / Downloads";
