@@ -876,6 +876,12 @@ class LabelPlusInput extends GenericUI {
         addLink(I18n.HELP_LINK_VIDEO + "：" + VIDEO_URL + I18n.HELP_CLICK, VIDEO_URL);
         addLink(I18n.HELP_LINK_PROJECT + "：" + PROJECT_URL + I18n.HELP_CLICK, PROJECT_URL);
 
+        // 版本号（居中显示）
+        /// @ts-ignore
+        let verText = dlg.add('statictext', [180, yy, 320, yy + 20], I18n.APP_NAME + " " + VERSION);
+        try { verText.justify = "center"; } catch (e) { }
+        yy += 24;
+
         // 版本更新检测：打开对话框时自动检查；有新版本时点击可跳转下载，否则点击重新检查
         let hasNewVersion = false;
         /// @ts-ignore
@@ -901,8 +907,6 @@ class LabelPlusInput extends GenericUI {
         statusText.onClick = () => { if (hasNewVersion) { openUrl(RELEASE_URL); } else { runCheck(); } };
         yy += 24;
 
-        /// @ts-ignore
-        dlg.add('statictext', [20, yy, 480, yy + 20], I18n.APP_NAME + " " + VERSION);
         /// @ts-ignore
         dlg.add('button', [200, yy + 30, 300, yy + 55], I18n.BUTTON_CLOSE).onClick = () => { dlg.close(); };
 
