@@ -238,7 +238,8 @@ function importImage(img: ImageDocInfo): ImportResult
     return { ok: true, aborted: false };
 }
 
-function openImageWorkspace(img_filename: string, template_path: string, templateDoc: Document | null = null): ImageWorkspace | null
+function openImageWorkspace(img_filename: string, template_path: string, templateDoc: Document | null = null,
+                            extraGroups: string[] = []): ImageWorkspace | null
 {
     assert(opts !== null);
 
@@ -368,6 +369,18 @@ function openImageWorkspace(img_filename: string, template_path: string, templat
         }
         groups[name] = tmp; // add
     }
+
+    // 为动作预建其余分组的同名文件夹（未勾选导入的分组；空文件夹将在收尾时被清理）
+    for (let i = 0; i < extraGroups.length; i++) {
+        let name = extraGroups[i];
+        if (name.trim() === "" || groups[name] !== undefined)
+            continue;
+        let tmp: Group = {};
+        tmp.layerSet = wsDoc.layerSets.add();
+        tmp.layerSet.name = name;
+        tmp.layerSet.blendMode = BlendMode.NORMAL;
+        groups[name] = tmp;
+    }
     if (opts.outputLabelIndex) {
         let tmp: Group = {};
         tmp.layerSet = wsDoc.layerSets.add();
@@ -495,6 +508,14 @@ export function importFiles(custom_opts: CustomOptions): boolean
             }
         }
 
+        // 动作兼容：预建 LP 文本中所有分组的同名文件夹（含未勾选导入的分组），
+        // 避免动作按名字引用“框内”“框外”等文件夹时报“对象‘图层’xxx当前不可用”
+        let actionCompatGroups: string[] = [];
+        if (opts.actionGroup && !opts.noLayerGroup) {
+            actionCompatGroups = lpFile.groups;
+            log("pre-create group folders for actions: " + actionCompatGroups.join(", "));
+        }
+
         // 确定doc模板文件
         let template_path: string = "";
         switch (opts.docTemplate) {
@@ -584,7 +605,7 @@ export function importFiles(custom_opts: CustomOptions): boolean
                 log('no label, ignored...');
                 continue;
             }
-            let ws = openImageWorkspace(matched_name, template_path, templateDoc);
+            let ws = openImageWorkspace(matched_name, template_path, templateDoc, actionCompatGroups);
             if (ws == null) {
                 log_err(name_pair + ": " + I18n.ERROR_FILE_OPEN_FAIL);
                 continue;
