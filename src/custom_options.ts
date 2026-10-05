@@ -43,6 +43,7 @@ export class CustomOptions {
     tateChuYokoPatterns: string = ""; // 直排内横排：自动匹配的文本片段（| 分隔），空 = 关闭
     tsumeChars: string = "";          // 比例间距：套用挤压的字符（如 「」），空 = 关闭
     tsumePercent: number = 0;         // 比例间距百分比 10~90，0 = 关闭
+    verticalRomanChars: string = "";  // 直立字符（直排）：对这些字符套用标准直立（标准垂直罗马对齐），空 = 关闭
     ppi: number = 0; // override output PPI, 0 means disabled
 
     actionGroup: string = ""; // action group name

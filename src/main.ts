@@ -620,6 +620,17 @@ class LabelPlusInput extends GenericUI {
         xx = xOfs;
         yy += 36;
 
+        // upright chars in vertical text (per-char standard vertical roman alignment)
+        pnl.verticalRomanCharsCheckBox = pnl.add('checkbox', [xx, yy, xx + 130, yy + 20], I18n.CHECKBOX_VERTICAL_ROMAN_CHARS);
+        pnl.verticalRomanCharsCheckBox.onClick = () => {
+            pnl.verticalRomanCharsTextBox.enabled = pnl.verticalRomanCharsCheckBox.value;
+        };
+        pnl.verticalRomanCharsTextBox = pnl.add('edittext', [xx + 140, yy, xx + 380, yy + 20]);
+        pnl.verticalRomanCharsTextBox.enabled = false;
+        pnl.verticalRomanCharsTextBox.text = "?!";
+        xx = xOfs;
+        yy += 36;
+
         let opts = this.opts;
         if (opts.docTemplate !== undefined) {
             pnl.docTemplatePnl.autoTemplateRb.value = false;
@@ -687,6 +698,11 @@ class LabelPlusInput extends GenericUI {
             }
             Emit(pnl.tsumeCheckBox.onClick);
         }
+        if (opts.verticalRomanChars !== undefined && opts.verticalRomanChars !== "") {
+            pnl.verticalRomanCharsCheckBox.value = true;
+            pnl.verticalRomanCharsTextBox.text = opts.verticalRomanChars;
+            Emit(pnl.verticalRomanCharsCheckBox.onClick);
+        }
         if (opts.textLeading !== undefined) {
             if (opts.textLeading === 0) {
                 pnl.setTextLeadingCheckBox.value = false;
@@ -726,6 +742,7 @@ class LabelPlusInput extends GenericUI {
             } else {
                 opts.tsumePercent = 0;
             }
+            opts.verticalRomanChars = (pnl.verticalRomanCharsCheckBox.value) ? pnl.verticalRomanCharsTextBox.text : "";
             opts.textDirection = <OptionTextDirection> I18n.LIST_TEXT_DIT_ITEMS.indexOf(pnl.textDirList.selection.text);
             return opts;
         }

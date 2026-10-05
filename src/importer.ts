@@ -1127,6 +1127,15 @@ function applyLabelTypography(doc: Document, layer: ArtLayer, contents: string):
                 }
             });
         }
+        if (opts.verticalRomanChars !== "" && layer.textItem.direction === Direction.VERTICAL) {
+            charRules.push({
+                chars: opts.verticalRomanChars,
+                mutate: (style) => {
+                    let id = app.stringIDToTypeID("baselineDirection");
+                    style.putEnumerated(id, id, app.stringIDToTypeID("withStream"));
+                }
+            });
+        }
         if (opts.tsumeChars !== "" && opts.tsumePercent > 0) {
             let tsumeValue = opts.tsumePercent / 100;
             charRules.push({
