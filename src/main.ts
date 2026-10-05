@@ -35,7 +35,7 @@ class LabelPlusInput extends GenericUI {
         this.saveIni = false;
         this.hasBorder = false;
         this.settingsPanel = false;
-        this.winRect = { x: 200, y: 200, w: 970, h: 690 };
+        this.winRect = { x: 200, y: 200, w: 880, h: 660 };
         this.center = true;
         this.title = I18n.APP_NAME + " " + VERSION;
         this.notesSize = 0;
@@ -96,9 +96,9 @@ class LabelPlusInput extends GenericUI {
         let xx: number = 14, yy: number = 10;
         pnl.lpTextFileLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_TEXT_FILE);
         xx += 120;
-        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 350, yy + 20], '');
+        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 240, yy + 20], '');
         pnl.lpTextFileTextBox.enabled = false;
-        xx += 355;
+        xx += 245;
         pnl.lpTextFileBrowseButton = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         xx += 30;
         yy += 20;
@@ -196,8 +196,8 @@ class LabelPlusInput extends GenericUI {
         // image source folder select
         pnl.sourceLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_SOURCE);
         xx += 90;
-        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 754, yy + 20], '');
-        xx += 764;
+        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 660, yy + 20], '');
+        xx += 670;
         pnl.sourceBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.sourceBrowse.onClick = () => {
             try {
@@ -271,8 +271,8 @@ class LabelPlusInput extends GenericUI {
         // overlay manual folder (涂白文件夹，可选)
         pnl.overlayManualLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_OVERLAY_MANUAL);
         xx += 90;
-        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 754, yy + 20], '');
-        xx += 764;
+        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 660, yy + 20], '');
+        xx += 670;
         pnl.overlayManualBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.overlayManualBrowse.onClick = () => {
             try {
@@ -293,16 +293,16 @@ class LabelPlusInput extends GenericUI {
         yOfs = yy;
         pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_IMG);
         yy += 25;
-        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 436, yy + 310], [], { multiselect: true });
+        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 270], [], { multiselect: true });
 
         // select label group
         yy = yOfs;
-        xx = xOfs + 466;
+        xx = xOfs + 396;
         pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_GROUP);
         yy += 25;
-        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 436, yy + 310], [], { multiselect: true });
+        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 270], [], { multiselect: true });
         xx = xOfs;
-        yy += 318;
+        yy += 278;
 
         // tip for multiple selection
         let tipText = pnl.add('statictext', [xx, yy, xx + 624, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
@@ -362,8 +362,8 @@ class LabelPlusInput extends GenericUI {
         // output folder
         pnl.targetLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_TARGET);
         xx += 120;
-        pnl.targetTextBox = pnl.add('edittext', [xx, yy, xx + 630, yy + 20], '');
-        xx += 635;
+        pnl.targetTextBox = pnl.add('edittext', [xx, yy, xx + 610, yy + 20], '');
+        xx += 615;
         pnl.targetBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.targetBrowse.onClick = () => {
             try {
@@ -493,7 +493,7 @@ class LabelPlusInput extends GenericUI {
         pnl.text = I18n.PANEL_STYLE;
 
         // template settings
-        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 890, yy + 100], I18n.PANEL_TEMPLATE_SETTING);
+        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 806, yy + 100], I18n.PANEL_TEMPLATE_SETTING);
         stylePanelTint(pnl.docTemplatePnl);
 
         let pnll: any = pnl.docTemplatePnl;
@@ -506,7 +506,7 @@ class LabelPlusInput extends GenericUI {
         xxx = xxxOfs;
         yyy += 30;
         pnll.customTemplateRb = pnll.add('radiobutton', [xxx, yyy, xxx + 130, yyy + 20], I18n.RB_TEMPLATE_CUSTOM); xxx += 140;
-        pnll.customTemplateTextbox = pnll.add('edittext', [xxx, yyy, xxx + 430, yyy + 20]); xxx += 440;
+        pnll.customTemplateTextbox = pnll.add('edittext', [xxx, yyy, xxx + 330, yyy + 20]); xxx += 340;
         pnll.customTemplateTextButton = pnll.add('button', [xxx, yyy - 2, xxx + 30, yyy + 20]); xxx += 30;
         let rbclick = () => {
             let custom_enable: boolean = pnll.customTemplateRb.value;
@@ -556,7 +556,7 @@ class LabelPlusInput extends GenericUI {
                 pnl.font.fontSize.enabled = value;
             }
             xx += 110;
-            pnl.font = pnl.add('group', [xx, yy + 2, xx + 600, yy + 25]);
+            pnl.font = pnl.add('group', [xx, yy + 2, xx + 580, yy + 25]);
             this.createFontPanel(pnl.font, undefined, "", 0);
             pnl.font.family.enabled = false;
             pnl.font.style.enabled = false;
@@ -796,7 +796,7 @@ class LabelPlusInput extends GenericUI {
         // pnl
         xx = xOfs;
         yy += 30;
-        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 890, yy + 100]);
+        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 790, yy + 100]);
         stylePanelTint(pnl.overlayPnl);
 
         {
@@ -812,12 +812,12 @@ class LabelPlusInput extends GenericUI {
 
             xx = xOfs + 6;
             yy += 28;
-            pnl.overlayPnl.overlayGroupLabel = doPnl.add('statictext', [xx, yy, xx + 600, yy + 22], I18n.LABEL_DIALOG_OVERLAY_GROUP, { multiline: true });
+            pnl.overlayPnl.overlayGroupLabel = doPnl.add('statictext', [xx, yy, xx + 480, yy + 22], I18n.LABEL_DIALOG_OVERLAY_GROUP, { multiline: true });
             styleDim(pnl.overlayPnl.overlayGroupLabel);
             yy += 28;
 
-            doPnl.groupTextBox = doPnl.add('edittext', [xx, yy, xx + 480, yy + 20]);
-            xx += 485;
+            doPnl.groupTextBox = doPnl.add('edittext', [xx, yy, xx + 440, yy + 20]);
+            xx += 445;
             let arr = [""];
             doPnl.addGroupList = doPnl.add('dropdownlist', [xx, yy - 1, xx + 120, yy + 21], arr);
             let func = () => {
@@ -978,7 +978,7 @@ class LabelPlusInput extends GenericUI {
             let win = GenericUI.getWindow(pnl);
             let fileMask = "INI Files: *.ini, All Files: *.*";
             let defFile = DEFAULT_INI_PATH;
-            let bx = this.winRect.w - 410;
+            let bx = this.winRect.w - 430;
             let bw = 90;
             let gap = 8;
             let loadBtn = pnl.add('button', [bx, 5, bx + bw, 30], I18n.BUTTON_LOAD);
@@ -1017,11 +1017,11 @@ class LabelPlusInput extends GenericUI {
         }
 
         // panes as tabs
-        let tabs = pnl.add('tabbedpanel', [14, 44, 944, 596]);
-        let tabInput = tabs.add('tab', [6, 26, 924, 546], I18n.PANEL_INPUT);
-        let tabOutput = tabs.add('tab', [6, 26, 924, 546], I18n.PANEL_OUTPUT);
-        let tabStyle = tabs.add('tab', [6, 26, 924, 546], I18n.PANEL_STYLE);
-        let tabAutomation = tabs.add('tab', [6, 26, 924, 546], I18n.PANEL_AUTOMATION);
+        let tabs = pnl.add('tabbedpanel', [14, 44, 846, 562]);
+        let tabInput = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_INPUT);
+        let tabOutput = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_OUTPUT);
+        let tabStyle = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_STYLE);
+        let tabAutomation = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_AUTOMATION);
 
         stylePanelTint(tabInput);
         stylePanelTint(tabOutput);
@@ -1045,7 +1045,7 @@ class LabelPlusInput extends GenericUI {
         this.addToPickerList(ret.getOption);
 
         // cancel hint
-        let escHint = pnl.add('statictext', [xOfs + 14, 600, xOfs + 406, 618], I18n.HINT_ESC_STOP);
+        let escHint = pnl.add('statictext', [xOfs + 14, 566, xOfs + 406, 584], I18n.HINT_ESC_STOP);
         styleDim(escHint);
 
         // help / about
