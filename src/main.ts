@@ -35,7 +35,7 @@ class LabelPlusInput extends GenericUI {
         this.saveIni = false;
         this.hasBorder = false;
         this.settingsPanel = false;
-        this.winRect = { x: 200, y: 200, w: 760, h: 500 };
+        this.winRect = { x: 200, y: 200, w: 760, h: 550 };
         this.center = true;
         this.title = I18n.APP_NAME + " " + VERSION;
         this.notesSize = 0;
@@ -293,16 +293,16 @@ class LabelPlusInput extends GenericUI {
         yOfs = yy;
         pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_IMG);
         yy += 25;
-        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 320, yy + 135], [], { multiselect: true });
+        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 320, yy + 185], [], { multiselect: true });
 
         // select label group
         yy = yOfs;
         xx = xOfs + 342;
         pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_GROUP);
         yy += 25;
-        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 320, yy + 135], [], { multiselect: true });
+        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 320, yy + 185], [], { multiselect: true });
         xx = xOfs;
-        yy += 143;
+        yy += 193;
 
         // tip for multiple selection
         let tipText = pnl.add('statictext', [xx, yy, xx + 640, yy + 24], I18n.LABEL_SELECT_TIP, { multiline: true });
@@ -354,7 +354,7 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiOutputPanel = (pnl: any): PanelDesc => {
-        let xOfs = 84, yOfs = 89;
+        let xOfs = 84, yOfs = 104;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_OUTPUT;
@@ -482,14 +482,13 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiStylePanel = (pnl: any): PanelDesc => {
-        let xOfs = 16, yOfs = 26;
+        let xOfs = 16, yOfs = 41;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_STYLE;
 
         // template settings
         pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 662, yy + 106], I18n.PANEL_TEMPLATE_SETTING);
-        stylePanelTint(pnl.docTemplatePnl);
 
         let pnll: any = pnl.docTemplatePnl;
         let xxxOfs: number = 16;
@@ -735,7 +734,7 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiAutomationPanel = (pnl: any): PanelDesc => {
-        let xOfs = 16, yOfs = 70;
+        let xOfs = 16, yOfs = 85;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_AUTOMATION;
@@ -792,7 +791,6 @@ class LabelPlusInput extends GenericUI {
         xx = xOfs;
         yy += 30;
         pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 662, yy + 100]);
-        stylePanelTint(pnl.overlayPnl);
 
         {
             let xx = xOfs + 6;
@@ -1013,16 +1011,11 @@ class LabelPlusInput extends GenericUI {
         }
 
         // panes as tabs
-        let tabs = pnl.add('tabbedpanel', [14, 44, 726, 402]);
-        let tabInput = tabs.add('tab', [6, 26, 706, 348], I18n.PANEL_INPUT);
-        let tabOutput = tabs.add('tab', [6, 26, 706, 348], I18n.PANEL_OUTPUT);
-        let tabStyle = tabs.add('tab', [6, 26, 706, 348], I18n.PANEL_STYLE);
-        let tabAutomation = tabs.add('tab', [6, 26, 706, 348], I18n.PANEL_AUTOMATION);
-
-        stylePanelTint(tabInput);
-        stylePanelTint(tabOutput);
-        stylePanelTint(tabStyle);
-        stylePanelTint(tabAutomation);
+        let tabs = pnl.add('tabbedpanel', [14, 44, 726, 452]);
+        let tabInput = tabs.add('tab', [6, 26, 706, 398], I18n.PANEL_INPUT);
+        let tabOutput = tabs.add('tab', [6, 26, 706, 398], I18n.PANEL_OUTPUT);
+        let tabStyle = tabs.add('tab', [6, 26, 706, 398], I18n.PANEL_STYLE);
+        let tabAutomation = tabs.add('tab', [6, 26, 706, 398], I18n.PANEL_AUTOMATION);
 
         this.inputPnl = tabInput;
         ret = this.uiInputPanel(this.inputPnl);
@@ -1041,7 +1034,7 @@ class LabelPlusInput extends GenericUI {
         this.addToPickerList(ret.getOption);
 
         // cancel hint (centered by tight bounds + justify fallback)
-        let escHint = pnl.add('statictext', [297, 406, 463, 424], I18n.HINT_ESC_STOP);
+        let escHint = pnl.add('statictext', [297, 456, 463, 474], I18n.HINT_ESC_STOP);
         styleDim(escHint);
         try { escHint.justify = "center"; } catch (e) { }
 

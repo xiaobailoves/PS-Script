@@ -52,14 +52,6 @@ export function styleLink(t: any) {
     } catch (e) { }
 }
 
-// 面板/容器浅色底（Windows 若不支持则无效果）
-export function stylePanelTint(pnl: any) {
-    try {
-        /// @ts-ignore
-        pnl.graphics.backgroundColor = pnl.graphics.newBrush(pnl.graphics.BrushType.SOLID_COLOR, [0.955, 0.965, 0.98, 1]);
-    } catch (e) { }
-}
-
 // 用系统默认浏览器打开链接
 export function openUrl(url: string) {
     try {
