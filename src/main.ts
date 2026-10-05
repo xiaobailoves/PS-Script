@@ -482,7 +482,7 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiStylePanel = (pnl: any): PanelDesc => {
-        let xOfs = 16, yOfs = 41;
+        let xOfs = 16, yOfs = 28;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_STYLE;
@@ -538,7 +538,7 @@ class LabelPlusInput extends GenericUI {
         pnl.textDirList = pnl.add('dropdownlist', [xx, yy, xx + 100, yy + 20], I18n.LIST_TEXT_DIT_ITEMS);
         pnl.textDirList.selection = pnl.textDirList.find(I18n.LIST_TEXT_DIT_ITEMS[0]);
         xx = xOfs;
-        yy += 36;
+        yy += 34;
 
         // set font
         {
@@ -557,7 +557,7 @@ class LabelPlusInput extends GenericUI {
             pnl.font.fontSize.enabled = false;
             pnl.font.family.selection = pnl.font.family.find("SimSun");
             xx = xOfs;
-            yy += 36;
+            yy += 34;
         }
 
         // anti-alias (left) | text color (right)
@@ -580,7 +580,7 @@ class LabelPlusInput extends GenericUI {
         pnl.textColorTextBox.enabled = false;
         pnl.textColorTextBox.text = "#000000";
         xx = xOfs;
-        yy += 36;
+        yy += 34;
 
         // vertical roman (left) | leading (right)
         pnl.verticalRomanCheckBox = pnl.add('checkbox', [xx, yy, xx + 230, yy + 20], I18n.CHECKBOX_VERTICAL_ROMAN);
@@ -595,14 +595,14 @@ class LabelPlusInput extends GenericUI {
         pnl.textLeadingTextBox.text = "120";
         pnl.add('statictext', [lx + 65, yy, lx + 105, yy + 20], "%");
         xx = xOfs;
-        yy += 36;
+        yy += 34;
 
         // tate-chu-yoko (left) | tsume (right)
-        pnl.tateChuYokoCheckBox = pnl.add('checkbox', [xx, yy, xx + 90, yy + 20], I18n.CHECKBOX_TATE_CHU_YOKO);
+        pnl.tateChuYokoCheckBox = pnl.add('checkbox', [xx, yy, xx + 130, yy + 20], I18n.CHECKBOX_TATE_CHU_YOKO);
         pnl.tateChuYokoCheckBox.onClick = () => {
             pnl.tateChuYokoTextBox.enabled = pnl.tateChuYokoCheckBox.value;
         };
-        pnl.tateChuYokoTextBox = pnl.add('edittext', [xx + 100, yy, xx + 320, yy + 20]);
+        pnl.tateChuYokoTextBox = pnl.add('edittext', [xx + 140, yy, xx + 320, yy + 20]);
         pnl.tateChuYokoTextBox.enabled = false;
         // tsume on the right
         pnl.tsumeCheckBox = pnl.add('checkbox', [colR, yy, colR + 90, yy + 20], I18n.CHECKBOX_TSUME);
@@ -618,20 +618,20 @@ class LabelPlusInput extends GenericUI {
         pnl.tsumePercentTextBox.text = "80";
         pnl.add('statictext', [colR + 245, yy, colR + 265, yy + 20], "%");
         xx = xOfs;
-        yy += 36;
+        yy += 34;
 
         // upright chars in vertical text (per-char standard vertical roman alignment)
         pnl.verticalRomanCharsCheckBox = pnl.add('checkbox', [xx, yy, xx + 130, yy + 20], I18n.CHECKBOX_VERTICAL_ROMAN_CHARS);
         pnl.verticalRomanCharsCheckBox.onClick = () => {
             pnl.verticalRomanCharsTextBox.enabled = pnl.verticalRomanCharsCheckBox.value;
         };
-        pnl.verticalRomanCharsTextBox = pnl.add('edittext', [xx + 140, yy, xx + 380, yy + 20]);
+        pnl.verticalRomanCharsTextBox = pnl.add('edittext', [xx + 140, yy, xx + 320, yy + 20]);
         pnl.verticalRomanCharsTextBox.enabled = false;
         pnl.verticalRomanCharsTextBox.text = "?!";
-        // kerning = metrics (on the same row, right side)
-        pnl.kerningMetricsCheckBox = pnl.add('checkbox', [396, yy, 596, yy + 20], I18n.CHECKBOX_KERNING_METRICS);
+        // kerning = metrics (on the same row, aligned to the right column)
+        pnl.kerningMetricsCheckBox = pnl.add('checkbox', [colR, yy, colR + 120, yy + 20], I18n.CHECKBOX_KERNING_METRICS);
         xx = xOfs;
-        yy += 36;
+        yy += 34;
 
         let opts = this.opts;
         if (opts.docTemplate !== undefined) {
