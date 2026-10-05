@@ -332,6 +332,27 @@ class LabelPlusInput extends GenericUI {
         xx = xOfs;
         yy += 23;
 
+        // overlay manual folder (涂白文件夹，可选)
+        pnl.overlayManualLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_OVERLAY_MANUAL);
+        xx += 90;
+        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 205, yy + 20], '');
+        xx += 210;
+        pnl.overlayManualBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
+        pnl.overlayManualBrowse.onClick = () => {
+            try {
+                let def: string = (pnl.overlayManualTextBox.text ?
+                    pnl.overlayManualTextBox.text : (pnl.sourceTextBox.text ? pnl.sourceTextBox.text : Folder.desktop));
+                let f = Stdlib.selectFolder(I18n.LABEL_OVERLAY_MANUAL, def);
+                if (f) {
+                    pnl.overlayManualTextBox.text = f.fsName;
+                }
+            } catch (e) {
+                alert(Stdlib.exceptionMessage(e));
+            }
+        };
+        xx = xOfs;
+        yy += 25;
+
         // selct img
         yOfs = yy;
         pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 150, yy + 20], I18n.LABEL_SELECT_IMG);
@@ -359,6 +380,18 @@ class LabelPlusInput extends GenericUI {
                     return null;
                 }
                 opts.source = f.fsName;
+
+                // overlay manual folder (optional)
+                if (pnl.overlayManualTextBox.text !== "") {
+                    let ov = new Folder(pnl.overlayManualTextBox.text);
+                    if (!ov.exists) {
+                        alert(I18n.ERROR_NOT_FOUND_OVERLAY);
+                        return null;
+                    }
+                    opts.overlayManualSource = ov.fsName;
+                } else {
+                    opts.overlayManualSource = "";
+                }
 
                 // images select
                 if (!pnl.chooseImageListBox.selection || pnl.chooseImageListBox.selection.length == 0) {
@@ -632,6 +665,29 @@ class LabelPlusInput extends GenericUI {
         xx = xOfs;
         yy += 23;
 
+        // tate-chu-yoko (left) | tsume (right)
+        pnl.tateChuYokoCheckBox = pnl.add('checkbox', [xx, yy, xx + 90, yy + 20], I18n.CHECKBOX_TATE_CHU_YOKO);
+        pnl.tateChuYokoCheckBox.onClick = () => {
+            pnl.tateChuYokoTextBox.enabled = pnl.tateChuYokoCheckBox.value;
+        };
+        pnl.tateChuYokoTextBox = pnl.add('edittext', [xx + 95, yy, xx + 245, yy + 20]);
+        pnl.tateChuYokoTextBox.enabled = false;
+        // tsume on the right
+        pnl.tsumeCheckBox = pnl.add('checkbox', [colR, yy, colR + 80, yy + 20], I18n.CHECKBOX_TSUME);
+        pnl.tsumeCheckBox.onClick = () => {
+            let en = pnl.tsumeCheckBox.value;
+            pnl.tsumeCharsTextBox.enabled = en;
+            pnl.tsumePercentTextBox.enabled = en;
+        };
+        pnl.tsumeCharsTextBox = pnl.add('edittext', [colR + 85, yy, colR + 135, yy + 20]);
+        pnl.tsumeCharsTextBox.enabled = false;
+        pnl.tsumePercentTextBox = pnl.add('edittext', [colR + 140, yy, colR + 175, yy + 20]);
+        pnl.tsumePercentTextBox.enabled = false;
+        pnl.tsumePercentTextBox.text = "80";
+        pnl.add('statictext', [colR + 178, yy, colR + 198, yy + 20], "%");
+        xx = xOfs;
+        yy += 23;
+
         let opts = this.opts;
         if (opts.docTemplate !== undefined) {
             pnl.docTemplatePnl.autoTemplateRb.value = false;
@@ -686,6 +742,19 @@ class LabelPlusInput extends GenericUI {
         if (opts.verticalRoman !== undefined && opts.verticalRoman) {
             pnl.verticalRomanCheckBox.value = true;
         }
+        if (opts.tateChuYokoPatterns !== undefined && opts.tateChuYokoPatterns !== "") {
+            pnl.tateChuYokoCheckBox.value = true;
+            pnl.tateChuYokoTextBox.text = opts.tateChuYokoPatterns;
+            Emit(pnl.tateChuYokoCheckBox.onClick);
+        }
+        if (opts.tsumeChars !== undefined && opts.tsumeChars !== "") {
+            pnl.tsumeCheckBox.value = true;
+            pnl.tsumeCharsTextBox.text = opts.tsumeChars;
+            if (opts.tsumePercent !== undefined && opts.tsumePercent !== 0) {
+                pnl.tsumePercentTextBox.text = opts.tsumePercent.toString();
+            }
+            Emit(pnl.tsumeCheckBox.onClick);
+        }
         if (opts.textLeading !== undefined) {
             if (opts.textLeading === 0) {
                 pnl.setTextLeadingCheckBox.value = false;
@@ -717,6 +786,14 @@ class LabelPlusInput extends GenericUI {
             opts.textColor = (pnl.setTextColorCheckBox.value) ? pnl.textColorTextBox.text : "";
             opts.verticalRoman = pnl.verticalRomanCheckBox.value;
             opts.textLeading = (pnl.setTextLeadingCheckBox.value) ? pnl.textLeadingTextBox.text : 0;
+            opts.tateChuYokoPatterns = (pnl.tateChuYokoCheckBox.value) ? pnl.tateChuYokoTextBox.text : "";
+            opts.tsumeChars = (pnl.tsumeCheckBox.value) ? pnl.tsumeCharsTextBox.text : "";
+            if (pnl.tsumeCheckBox.value && pnl.tsumePercentTextBox.text !== "") {
+                let tp = Number(pnl.tsumePercentTextBox.text);
+                opts.tsumePercent = isNaN(tp) ? 80 : tp;
+            } else {
+                opts.tsumePercent = 0;
+            }
             opts.textDirection = <OptionTextDirection> I18n.LIST_TEXT_DIT_ITEMS.indexOf(pnl.textDirList.selection.text);
             return opts;
         }
@@ -959,12 +1036,12 @@ class LabelPlusInput extends GenericUI {
         yy += 60;
 
         // input options
-        this.inputPnl = pnl.add('panel', [xx, yy, xx + 355, yy + 430]);
+        this.inputPnl = pnl.add('panel', [xx, yy, xx + 355, yy + 455]);
         ret = this.uiInputPanel(this.inputPnl);
         this.addToPickerList(ret.getOption);
 
         // cancel hint
-        let hintY = yy + 430 + 5;
+        let hintY = yy + 455 + 5;
         pnl.add('statictext', [xx + 10, hintY, xx + 345, hintY + 20], I18n.HINT_ESC_STOP);
 
         xx += 365;
@@ -980,10 +1057,10 @@ class LabelPlusInput extends GenericUI {
         yy += 150;
 
         // style
-        this.stylePnl = pnl.add('panel', [xx, yy, xx + 480, yy + 190]);
+        this.stylePnl = pnl.add('panel', [xx, yy, xx + 480, yy + 215]);
         ret = this.uiStylePanel(this.stylePnl);
         this.addToPickerList(ret.getOption);
-        yy += 200;
+        yy += 225;
 
         // automation
         this.automationPnl = pnl.add('panel', [xx, yy, xx + 480, yy + 190]);

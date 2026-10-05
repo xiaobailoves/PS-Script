@@ -58,6 +58,7 @@ interface ImageWorkspace {
     bgLayer: ArtLayer;
     textTemplateLayer: ArtLayer;
     dialogOverlayLayer: ArtLayer;
+    overlayManualLayer: ArtLayer | null; // 涂白文件夹载入的图层（未启用时为 null）
 
     pendingDelLayerList: ArtLayer[];
     groups: GroupDict;
@@ -207,9 +208,17 @@ function importImage(img: ImageDocInfo): ImportResult
     }
 
     // adjust layer order
-    if (img.ws.bgLayer && (opts.dialogOverlayLabelGroups !== "")) {
-        log('move "dialog-overlay" before "bg"');
-        img.ws.dialogOverlayLayer.move(img.ws.bgLayer, ElementPlacement.PLACEBEFORE);
+    if (img.ws.bgLayer) {
+        if (img.ws.overlayManualLayer !== null) {
+            log('move "overlay-manual" before "bg"');
+            img.ws.overlayManualLayer.move(img.ws.bgLayer, ElementPlacement.PLACEBEFORE);
+        }
+        if (opts.dialogOverlayLabelGroups !== "") {
+            log('move "dialog-overlay" before "bg"');
+            img.ws.dialogOverlayLayer.move(
+                (img.ws.overlayManualLayer !== null) ? img.ws.overlayManualLayer : img.ws.bgLayer,
+                ElementPlacement.PLACEBEFORE);
+        }
     }
 
     // remove unnecessary temp layers
@@ -236,6 +245,27 @@ function importImage(img: ImageDocInfo): ImportResult
         }
     }
     return { ok: true, aborted: false };
+}
+
+// 在涂白文件夹中查找与页面匹配的图片文件（支持不同后缀名匹配）
+function findOverlayManualFile(overlayManualSource: string, originalFilename: string): File | null
+{
+    let exactMatchFile = new File(overlayManualSource + dirSeparator + originalFilename);
+    if (exactMatchFile.exists) {
+        return exactMatchFile;
+    }
+    let nameWithoutExt = originalFilename.substring(0, originalFilename.lastIndexOf("."));
+    if (nameWithoutExt === "") {
+        nameWithoutExt = originalFilename;
+    }
+    for (let i = 0; i < image_suffix_list.length; i++) {
+        let candidate = new File(overlayManualSource + dirSeparator + nameWithoutExt + image_suffix_list[i]);
+        if (candidate.exists) {
+            log("overlay-manual matched (different extension): " + candidate.fsName);
+            return candidate;
+        }
+    }
+    return null;
 }
 
 function openImageWorkspace(img_filename: string, template_path: string, templateDoc: Document | null = null,
@@ -284,6 +314,7 @@ function openImageWorkspace(img_filename: string, template_path: string, templat
     let bgLayer: ArtLayer;
     let textTemplateLayer: ArtLayer;
     let dialogOverlayLayer: ArtLayer;
+    let overlayManualLayer: ArtLayer | null = null;
     let pendingDelLayerList: ArtLayer[] = new Array();
     {
         // add all artlayers to the pending delete list
@@ -341,6 +372,36 @@ function openImageWorkspace(img_filename: string, template_path: string, templat
     bgDoc.close(SaveOptions.DONOTSAVECHANGES);
     app.activeDocument = wsDoc; // 确保工作文档为活动文档（模板文档缓存时可能处于活动状态）
 
+    // 涂白文件夹（overlay-manual）：载入预处理的涂白图片；未匹配到文件时跳过
+    if (opts.overlayManualSource !== "") {
+        let overlayFile = findOverlayManualFile(opts.overlayManualSource, img_filename);
+        if (overlayFile !== null) {
+            try {
+                let overlayDoc = app.open(overlayFile);
+                app.activeDocument = overlayDoc;
+                overlayDoc.selection.selectAll();
+                overlayDoc.selection.copy();
+                overlayDoc.close(SaveOptions.DONOTSAVECHANGES);
+
+                try {
+                    overlayManualLayer = wsDoc.artLayers.getByName(TEMPLATE_LAYER.OVERLAY_MANUAL);
+                } catch {
+                    overlayManualLayer = wsDoc.artLayers.add();
+                    overlayManualLayer.name = TEMPLATE_LAYER.OVERLAY_MANUAL;
+                }
+                app.activeDocument = wsDoc;
+                wsDoc.activeLayer = overlayManualLayer;
+                wsDoc.paste();
+                log("overlay-manual loaded: " + overlayFile.fsName);
+            } catch (e) {
+                log_err("overlay-manual failed: " + e);
+                overlayManualLayer = null;
+            }
+        } else {
+            log("overlay-manual: no matched file, skipped (" + img_filename + ")");
+        }
+    }
+
     // 若文档类型为索引色模式 更改为RGB模式
     if (wsDoc.mode == DocumentMode.INDEXEDCOLOR) {
         log("wsDoc.mode is INDEXEDCOLOR, set RGB");
@@ -393,6 +454,7 @@ function openImageWorkspace(img_filename: string, template_path: string, templat
         bgLayer: bgLayer,
         textTemplateLayer: textTemplateLayer,
         dialogOverlayLayer: dialogOverlayLayer,
+        overlayManualLayer: overlayManualLayer,
         pendingDelLayerList: pendingDelLayerList,
         groups: groups,
         wPx: wsDoc.width.as("px"),
@@ -758,11 +820,320 @@ function createStyledTextLayer(img: ImageDocInfo, group: string, contents: strin
         layer.textItem.position = Array(UnitValue(xPx, "px"), UnitValue(yPx, "px"));
         layer.name = contents;
         layer.textItem.contents = contents;
+        // 直排内横排 / 比例间距（逐标签，按文本内容计算命中区间）
+        applyLabelTypography(img.ws.doc, layer, contents);
         return layer;
     }
     let layer = newTextLayer(img.ws.doc, contents, xPx, yPx, o);
     img.ws.layerPrototypes[group] = layer;
+    // 标准垂直罗马对齐：脚本端直接设置（原型层设置一次，克隆层自动继承）
+    if (opts !== null && opts.verticalRoman) {
+        applyVerticalRomanAlignment(img.ws.doc, layer);
+    }
+    // 直排内横排 / 比例间距（逐标签，按文本内容计算命中区间）
+    applyLabelTypography(img.ws.doc, layer, contents);
     return layer;
+}
+
+// ==================== 文字样式覆写引擎 ====================
+// 移植自 ZsIsMe/PS-Script (by zhongsheng，感谢原作者)：
+// 通过 ActionManager 读取图层的 textKey 描述符，重建 textStyleRange 后写回，
+// 用于脚本端设置“标准垂直罗马对齐”(baselineDirection=withStream)、
+// “直排内横排”(baselineDirection=Crs)、“比例间距”(mojiZume) 等字符级属性。
+
+interface StyleOverrideRange {
+    from: number;
+    to: number;
+    mutators: Array<(s: ActionDescriptor) => void>;
+}
+
+// 深拷贝 ActionDescriptor（优先 stream 克隆；旧版 PS 不支持时回退为逐项复制）
+function cloneActionDescriptor(src: ActionDescriptor): ActionDescriptor {
+    try {
+        /// @ts-ignore ActionDescriptor 的 stream 接口未在类型声明中
+        let stream = src.toStream();
+        let cloned = new ActionDescriptor();
+        /// @ts-ignore
+        cloned.fromStream(stream);
+        return cloned;
+    } catch (e) {
+        // 回退：逐项复制
+    }
+    let dst = new ActionDescriptor();
+    for (let i = 0; i < src.count; i++) {
+        let key = src.getKey(i);
+        let type = src.getType(key);
+        switch (type) {
+        case DescValueType.BOOLEANTYPE:
+            dst.putBoolean(key, src.getBoolean(key)); break;
+        case DescValueType.STRINGTYPE:
+            dst.putString(key, src.getString(key)); break;
+        case DescValueType.INTEGERTYPE:
+            dst.putInteger(key, src.getInteger(key)); break;
+        case DescValueType.DOUBLETYPE:
+            dst.putDouble(key, src.getDouble(key)); break;
+        case DescValueType.UNITDOUBLE:
+            dst.putUnitDouble(key, src.getUnitDoubleType(key), src.getUnitDoubleValue(key)); break;
+        case DescValueType.ENUMERATEDTYPE:
+            dst.putEnumerated(key, src.getEnumerationType(key), src.getEnumerationValue(key)); break;
+        case DescValueType.OBJECTTYPE:
+            dst.putObject(key, src.getObjectType(key), cloneActionDescriptor(src.getObjectValue(key))); break;
+        case DescValueType.LISTTYPE:
+            dst.putList(key, cloneActionList(src.getList(key))); break;
+        case DescValueType.REFERENCETYPE:
+            dst.putReference(key, src.getReference(key)); break;
+        case DescValueType.CLASSTYPE:
+            dst.putClass(key, src.getClass(key)); break;
+        case DescValueType.RAWTYPE:
+            dst.putData(key, src.getData(key)); break;
+        case DescValueType.ALIASTYPE:
+            dst.putPath(key, src.getPath(key)); break;
+        }
+    }
+    return dst;
+}
+
+function cloneActionList(src: ActionList): ActionList {
+    let dst = new ActionList();
+    for (let i = 0; i < src.count; i++) {
+        if (src.getType(i) === DescValueType.OBJECTTYPE) {
+            /// @ts-ignore 运行时 ActionList.putObject 支持 (classID, value)
+            dst.putObject(src.getObjectType(i), cloneActionDescriptor(src.getObjectValue(i)));
+        }
+    }
+    return dst;
+}
+
+function splitStylePatterns(patterns: string): string[] {
+    let arr: string[] = [];
+    if (!patterns) return arr;
+    let parts = patterns.split("|");
+    for (let i = 0; i < parts.length; i++) {
+        if (parts[i] !== "") arr.push(parts[i]);
+    }
+    arr.sort((a, b) => b.length - a.length); // 长片段优先匹配
+    return arr;
+}
+
+function isRangeCovered(covered: boolean[], from: number, to: number): boolean {
+    for (let i = from; i < to; i++) {
+        if (covered[i]) return true;
+    }
+    return false;
+}
+
+function markRangeCovered(covered: boolean[], from: number, to: number): void {
+    for (let i = from; i < to; i++) covered[i] = true;
+}
+
+// 收集命中区间：片段规则优先（保留完整区间），再收集未被覆盖的字符规则
+function collectStyleRanges(text: string,
+        patternRules: Array<{ patterns: string; mutate: (s: ActionDescriptor) => void }>,
+        charRules: Array<{ chars: string; mutate: (s: ActionDescriptor) => void }>): StyleOverrideRange[] {
+    let ranges: StyleOverrideRange[] = [];
+    let covered: boolean[] = [];
+    for (let i = 0; i < text.length; i++) covered[i] = false;
+
+    for (let r = 0; r < patternRules.length; r++) {
+        let patterns = splitStylePatterns(patternRules[r].patterns);
+        let i = 0;
+        while (i < text.length) {
+            let matched = "";
+            for (let p = 0; p < patterns.length; p++) {
+                let pattern = patterns[p];
+                if (pattern.length > 0 && text.substr(i, pattern.length) === pattern &&
+                        !isRangeCovered(covered, i, i + pattern.length)) {
+                    matched = pattern;
+                    break;
+                }
+            }
+            if (matched !== "") {
+                ranges.push({ from: i, to: i + matched.length, mutators: [patternRules[r].mutate] });
+                markRangeCovered(covered, i, i + matched.length);
+                i += matched.length;
+            } else {
+                i++;
+            }
+        }
+    }
+
+    for (let i = 0; i < text.length; i++) {
+        if (covered[i]) continue;
+        let ch = text.charAt(i);
+        let muts: Array<(s: ActionDescriptor) => void> = [];
+        for (let r = 0; r < charRules.length; r++) {
+            if (charRules[r].chars.indexOf(ch) !== -1) {
+                muts.push(charRules[r].mutate);
+            }
+        }
+        if (muts.length > 0) {
+            ranges.push({ from: i, to: i + 1, mutators: muts });
+        }
+    }
+    ranges.sort((a, b) => a.from - b.from);
+    return ranges;
+}
+
+// 读取当前活动图层的 textKey 描述符
+function readActiveLayerTextKey(): ActionDescriptor | null {
+    let getRef = new ActionReference();
+    getRef.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("textKey"));
+    getRef.putEnumerated(app.charIDToTypeID("Lyr "), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Trgt"));
+    let layerDesc = app.executeActionGet(getRef);
+    if (!layerDesc.getObjectValue) return null;
+    return layerDesc.getObjectValue(app.stringIDToTypeID("textKey"));
+}
+
+// 把修改后的 textKey 写回当前活动图层（textLayer 的 class ID 为 'TxLr'）
+function writeActiveLayerTextKey(textKey: ActionDescriptor): void {
+    let setRef = new ActionReference();
+    setRef.putEnumerated(app.charIDToTypeID("Lyr "), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Trgt"));
+    let setDesc = new ActionDescriptor();
+    setDesc.putReference(app.charIDToTypeID("null"), setRef);
+    setDesc.putObject(app.charIDToTypeID("T   "), app.charIDToTypeID("TxLr"), textKey);
+    app.executeAction(app.charIDToTypeID("setd"), setDesc, DialogModes.NO);
+}
+
+// 对整段文字应用样式修改（所有 textStyleRange 的样式统一 mutate）
+function applyWholeTextStyleMutation(doc: Document, layer: ArtLayer, mutate: (s: ActionDescriptor) => void): void {
+    try {
+        doc.activeLayer = layer;
+        let textKey = readActiveLayerTextKey();
+        if (textKey === null) return;
+        let oldRanges = textKey.getList(app.stringIDToTypeID("textStyleRange"));
+        if (oldRanges.count === 0) return;
+
+        let newRanges = new ActionList();
+        for (let i = 0; i < oldRanges.count; i++) {
+            let oldRange = oldRanges.getObjectValue(i);
+            let style = cloneActionDescriptor(oldRange.getObjectValue(app.stringIDToTypeID("textStyle")));
+            mutate(style);
+            let r = new ActionDescriptor();
+            r.putInteger(app.stringIDToTypeID("from"), oldRange.getInteger(app.stringIDToTypeID("from")));
+            r.putInteger(app.stringIDToTypeID("to"), oldRange.getInteger(app.stringIDToTypeID("to")));
+            r.putObject(app.stringIDToTypeID("textStyle"), app.stringIDToTypeID("textStyle"), style);
+            /// @ts-ignore 运行时 ActionList.putObject 支持 (classID, value)
+            newRanges.putObject(app.stringIDToTypeID("textStyleRange"), r);
+        }
+        textKey.putList(app.stringIDToTypeID("textStyleRange"), newRanges);
+        writeActiveLayerTextKey(textKey);
+    } catch (e) {
+        log_err("applyWholeTextStyleMutation failed: " + e);
+    }
+}
+
+// 按命中区间应用字符/片段级样式覆写（重建 textStyleRange 后写回）
+function applyRangeStyleOverrides(doc: Document, layer: ArtLayer, ranges: StyleOverrideRange[]): void {
+    if (ranges.length === 0) return;
+    try {
+        doc.activeLayer = layer;
+        let textKey = readActiveLayerTextKey();
+        if (textKey === null) return;
+        let sTID = (s: string) => app.stringIDToTypeID(s);
+        let oldRanges = textKey.getList(sTID("textStyleRange"));
+        if (oldRanges.count === 0) return;
+
+        let buildRange = (from: number, to: number, baseStyle: ActionDescriptor,
+                          mutators: Array<(s: ActionDescriptor) => void>): ActionDescriptor => {
+            let r = new ActionDescriptor();
+            r.putInteger(sTID("from"), from);
+            r.putInteger(sTID("to"), to);
+            let style = cloneActionDescriptor(baseStyle);
+            for (let i = 0; i < mutators.length; i++) {
+                mutators[i](style);
+            }
+            r.putObject(sTID("textStyle"), sTID("textStyle"), style);
+            return r;
+        };
+
+        let newRanges = new ActionList();
+        for (let oi = 0; oi < oldRanges.count; oi++) {
+            let oldRange = oldRanges.getObjectValue(oi);
+            let from = oldRange.getInteger(sTID("from"));
+            let to = oldRange.getInteger(sTID("to"));
+            let baseStyle = oldRange.getObjectValue(sTID("textStyle"));
+            let cursor = from;
+
+            for (let ri = 0; ri < ranges.length; ri++) {
+                let range = ranges[ri];
+                if (range.to <= from) continue;
+                if (range.from >= to) break;
+
+                let overlapFrom = Math.max(range.from, cursor);
+                let overlapTo = Math.min(range.to, to);
+                if (overlapTo <= overlapFrom) continue;
+
+                if (cursor < overlapFrom) {
+                    /// @ts-ignore 运行时 ActionList.putObject 支持 (classID, value)
+                    newRanges.putObject(sTID("textStyleRange"), buildRange(cursor, overlapFrom, baseStyle, []));
+                }
+                /// @ts-ignore 运行时 ActionList.putObject 支持 (classID, value)
+                newRanges.putObject(sTID("textStyleRange"), buildRange(overlapFrom, overlapTo, baseStyle, range.mutators));
+                cursor = overlapTo;
+            }
+
+            if (cursor < to) {
+                /// @ts-ignore 运行时 ActionList.putObject 支持 (classID, value)
+                newRanges.putObject(sTID("textStyleRange"), buildRange(cursor, to, baseStyle, []));
+            }
+        }
+        textKey.putList(sTID("textStyleRange"), newRanges);
+        writeActiveLayerTextKey(textKey);
+    } catch (e) {
+        log_err("applyRangeStyleOverrides failed: " + e);
+    }
+}
+
+// 脚本端设置“标准垂直罗马对齐”（baselineDirection=withStream），不再依赖 _roman 模板
+function applyVerticalRomanAlignment(doc: Document, layer: ArtLayer): void {
+    try {
+        if (layer.textItem.direction !== Direction.VERTICAL) {
+            return; // 横排无需设置
+        }
+        applyWholeTextStyleMutation(doc, layer, (style) => {
+            let id = app.stringIDToTypeID("baselineDirection");
+            style.putEnumerated(id, id, app.stringIDToTypeID("withStream"));
+        });
+        log("standard vertical roman alignment applied (script-side)");
+    } catch (e) {
+        log_err("applyVerticalRomanAlignment failed: " + e);
+    }
+}
+
+// 直排内横排 + 比例间距：按标签文本计算命中区间并应用
+function applyLabelTypography(doc: Document, layer: ArtLayer, contents: string): void {
+    assert(opts !== null);
+    try {
+        let patternRules: Array<{ patterns: string; mutate: (s: ActionDescriptor) => void }> = [];
+        let charRules: Array<{ chars: string; mutate: (s: ActionDescriptor) => void }> = [];
+
+        if (opts.tateChuYokoPatterns !== "" && layer.textItem.direction === Direction.VERTICAL) {
+            patternRules.push({
+                patterns: opts.tateChuYokoPatterns,
+                mutate: (style) => {
+                    let id = app.stringIDToTypeID("baselineDirection");
+                    style.putEnumerated(id, id, app.charIDToTypeID("Crs "));
+                }
+            });
+        }
+        if (opts.tsumeChars !== "" && opts.tsumePercent > 0) {
+            let tsumeValue = opts.tsumePercent / 100;
+            charRules.push({
+                chars: opts.tsumeChars,
+                mutate: (style) => {
+                    style.putDouble(app.stringIDToTypeID("mojiZume"), tsumeValue);
+                }
+            });
+        }
+        if (patternRules.length === 0 && charRules.length === 0) return;
+
+        let ranges = collectStyleRanges(contents, patternRules, charRules);
+        if (ranges.length > 0) {
+            applyRangeStyleOverrides(doc, layer, ranges);
+        }
+    } catch (e) {
+        log_err("applyLabelTypography failed: " + e);
+    }
 }
 
 type TextReplaceInfo = { from: string; to: string; }[];

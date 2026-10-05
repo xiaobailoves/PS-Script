@@ -16,6 +16,7 @@ export const TEMPLATE_LAYER = {
     TEXT:  "text",
     IMAGE: "bg",
     DIALOG_OVERLAY: "dialog-overlay",
+    OVERLAY_MANUAL: "overlay-manual",
 };
 
 // 帮助页链接

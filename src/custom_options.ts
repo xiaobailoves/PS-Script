@@ -17,6 +17,7 @@ export class CustomOptions {
     // ------------------------------------ not saved options
     source: string = ""; // images source folder
     target: string = ""; // images target folder
+    overlayManualSource: string = ""; // overlay manual images folder (涂白文件夹：预处理涂白图片)
     lpTextFilePath: string = ""; // path of labelplus text file
     imageSelected: ImageInfo[] = []; // selected images
     groupSelected: string[] = [];  // selected label group
@@ -38,7 +39,10 @@ export class CustomOptions {
     textDirection: OptionTextDirection = OptionTextDirection.Keep; // text direction option
     textColor: string = ""; // override text color, hex string, "" = disabled
     antiAlias: number = 0; // override anti-alias, 0=disabled, 1=None, 2=Sharp, 3=Crisp, 4=Strong, 5=Smooth
-    verticalRoman: boolean = true; // use _roman template for standard vertical roman alignment (默认启用)
+    verticalRoman: boolean = true; // standard vertical roman alignment (脚本端设置，默认启用)
+    tateChuYokoPatterns: string = ""; // 直排内横排：自动匹配的文本片段（| 分隔），空 = 关闭
+    tsumeChars: string = "";          // 比例间距：套用挤压的字符（如 「」），空 = 关闭
+    tsumePercent: number = 0;         // 比例间距百分比 10~90，0 = 关闭
     ppi: number = 0; // override output PPI, 0 means disabled
 
     actionGroup: string = ""; // action group name
