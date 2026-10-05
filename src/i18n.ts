@@ -13,6 +13,7 @@ namespace I18n {
     export var PANEL_AUTOMATION: string = "自动化";
 
     export var PANEL_TEMPLATE_SETTING: string = "文档模板设置";
+    export var PANEL_OUTPUT_OPTIONS: string = "输出选项";
     export var RB_TEMPLATE_AUTO: string = "自动";
     export var RB_TEMPLATE_NO: string = "不使用模板（直接新建文件）";
     export var RB_TEMPLATE_CUSTOM: string = "自定义模板";
@@ -112,6 +113,7 @@ namespace I18n {
         PANEL_STYLE = "Style";
         PANEL_AUTOMATION = "Automation";
         PANEL_TEMPLATE_SETTING = "Document Template Setting";
+        PANEL_OUTPUT_OPTIONS = "Output Options";
         RB_TEMPLATE_AUTO = "Auto";
         RB_TEMPLATE_NO = "No Template";
         RB_TEMPLATE_CUSTOM = "Custom Template";

@@ -354,7 +354,7 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiOutputPanel = (pnl: any): PanelDesc => {
-        let xOfs = 84, yOfs = 104;
+        let xOfs = 30, yOfs = 98;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_OUTPUT;
@@ -362,8 +362,8 @@ class LabelPlusInput extends GenericUI {
         // output folder
         pnl.targetLabel = pnl.add('statictext', [xx, yy, xx + 130, yy + 20], I18n.LABEL_TARGET);
         xx += 140;
-        pnl.targetTextBox = pnl.add('edittext', [xx, yy, xx + 360, yy + 20], '');
-        xx += 368;
+        pnl.targetTextBox = pnl.add('edittext', [xx, yy, xx + 450, yy + 20], '');
+        xx += 458;
         pnl.targetBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.targetBrowse.onClick = () => {
             try {
@@ -399,27 +399,28 @@ class LabelPlusInput extends GenericUI {
         xx = xOfs;
         yy += 36;
 
+        // options box
+        let optPnl = pnl.add('panel', [16, 178, 678, 274], I18n.PANEL_OUTPUT_OPTIONS);
+
         // ignore images with no label
-        pnl.ignoreNoLabelImgCheckBox = pnl.add('checkbox', [224, yy, 444, yy + 20], I18n.CHECKBOX_IGNORE_NO_LABEL_IMG);
+        pnl.ignoreNoLabelImgCheckBox = optPnl.add('checkbox', [20, 12, 240, 32], I18n.CHECKBOX_IGNORE_NO_LABEL_IMG);
         pnl.ignoreNoLabelImgCheckBox.value = true;
 
         // do not close image document after importing complete
-        pnl.notCloseCheckBox = pnl.add('checkbox', [474, yy, 694, yy + 20], I18n.CHECKBOX_NOT_CLOSE);
-        yy += 36;
+        pnl.notCloseCheckBox = optPnl.add('checkbox', [355, 12, 575, 32], I18n.CHECKBOX_NOT_CLOSE);
 
         // output label index as text layer
-        pnl.outputLabelIndexCheckBox = pnl.add('checkbox', [224, yy, 444, yy + 20], I18n.CHECKBOX_OUTPUT_LABEL_INDEX);
+        pnl.outputLabelIndexCheckBox = optPnl.add('checkbox', [20, 37, 240, 57], I18n.CHECKBOX_OUTPUT_LABEL_INDEX);
 
         // do not create layer group
-        pnl.noLayerGroupCheckBox = pnl.add('checkbox', [474, yy, 694, yy + 20], I18n.CHECKBOX_NO_LAYER_GROUP);
-        yy += 36;
+        pnl.noLayerGroupCheckBox = optPnl.add('checkbox', [355, 37, 575, 57], I18n.CHECKBOX_NO_LAYER_GROUP);
 
         // ppi
-        pnl.setPPICheckBox = pnl.add('checkbox', [224, yy, 324, yy + 20], I18n.CHECKBOX_SET_PPI);
+        pnl.setPPICheckBox = optPnl.add('checkbox', [20, 62, 120, 82], I18n.CHECKBOX_SET_PPI);
         pnl.setPPICheckBox.onClick = () => {
             pnl.ppiTextBox.enabled = pnl.setPPICheckBox.value;
         }
-        pnl.ppiTextBox = pnl.add('edittext', [329, yy, 379, yy + 20]);
+        pnl.ppiTextBox = optPnl.add('edittext', [125, 62, 175, 82]);
         pnl.ppiTextBox.enabled = false;
         pnl.ppiTextBox.text = "300";
         xx = xOfs;
