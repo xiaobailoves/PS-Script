@@ -354,16 +354,16 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiOutputPanel = (pnl: any): PanelDesc => {
-        let xOfs = 16, yOfs = 16;
+        let xOfs = 95, yOfs = 160;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_OUTPUT;
 
         // output folder
-        pnl.targetLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_TARGET);
-        xx += 120;
-        pnl.targetTextBox = pnl.add('edittext', [xx, yy, xx + 610, yy + 20], '');
-        xx += 615;
+        pnl.targetLabel = pnl.add('statictext', [xx, yy, xx + 130, yy + 20], I18n.LABEL_TARGET);
+        xx += 140;
+        pnl.targetTextBox = pnl.add('edittext', [xx, yy, xx + 446, yy + 20], '');
+        xx += 454;
         pnl.targetBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.targetBrowse.onClick = () => {
             try {
@@ -389,40 +389,37 @@ class LabelPlusInput extends GenericUI {
         yy += 36;
 
         // output file type
-        pnl.outputTypeLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_OUTPUT_FILE_TYPE);
+        pnl.outputTypeLabel = pnl.add('statictext', [xx, yy, xx + 130, yy + 20], I18n.LABEL_OUTPUT_FILE_TYPE);
         let type_arr: string[] = [];
         for (let i = 0; i < OptionOutputType._count; i++) {
             type_arr[i] = OptionOutputType[i];
         }
-        xx += 120;
+        xx += 140;
         pnl.outputTypeList = pnl.add('dropdownlist', [xx, yy - 1, xx + 100, yy + 21], type_arr);
         xx = xOfs;
         yy += 36;
 
         // ignore images with no label
-        pnl.ignoreNoLabelImgCheckBox = pnl.add('checkbox', [62, yy, 332, yy + 20], I18n.CHECKBOX_IGNORE_NO_LABEL_IMG);
+        pnl.ignoreNoLabelImgCheckBox = pnl.add('checkbox', [235, yy, 455, yy + 20], I18n.CHECKBOX_IGNORE_NO_LABEL_IMG);
         pnl.ignoreNoLabelImgCheckBox.value = true;
 
         // do not close image document after importing complete
-        pnl.notCloseCheckBox = pnl.add('checkbox', [482, yy, 752, yy + 20], I18n.CHECKBOX_NOT_CLOSE);
-        xx = xOfs;
+        pnl.notCloseCheckBox = pnl.add('checkbox', [485, yy, 705, yy + 20], I18n.CHECKBOX_NOT_CLOSE);
         yy += 36;
 
         // output label index as text layer
-        pnl.outputLabelIndexCheckBox = pnl.add('checkbox', [62, yy, 332, yy + 20], I18n.CHECKBOX_OUTPUT_LABEL_INDEX);
+        pnl.outputLabelIndexCheckBox = pnl.add('checkbox', [235, yy, 455, yy + 20], I18n.CHECKBOX_OUTPUT_LABEL_INDEX);
 
         // do not create layer group
-        pnl.noLayerGroupCheckBox = pnl.add('checkbox', [482, yy, 752, yy + 20], I18n.CHECKBOX_NO_LAYER_GROUP);
-        xx = xOfs;
+        pnl.noLayerGroupCheckBox = pnl.add('checkbox', [485, yy, 705, yy + 20], I18n.CHECKBOX_NO_LAYER_GROUP);
         yy += 36;
 
         // ppi
-        pnl.setPPICheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_PPI);
+        pnl.setPPICheckBox = pnl.add('checkbox', [235, yy, 335, yy + 20], I18n.CHECKBOX_SET_PPI);
         pnl.setPPICheckBox.onClick = () => {
             pnl.ppiTextBox.enabled = pnl.setPPICheckBox.value;
         }
-        xx += 105;
-        pnl.ppiTextBox = pnl.add('edittext', [xx, yy, xx + 50, yy + 20]);
+        pnl.ppiTextBox = pnl.add('edittext', [340, yy, 390, yy + 20]);
         pnl.ppiTextBox.enabled = false;
         pnl.ppiTextBox.text = "300";
         xx = xOfs;
@@ -485,13 +482,13 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiStylePanel = (pnl: any): PanelDesc => {
-        let xOfs = 16, yOfs = 16;
+        let xOfs = 16, yOfs = 98;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_STYLE;
 
         // template settings
-        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 782, yy + 100], I18n.PANEL_TEMPLATE_SETTING);
+        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 782, yy + 106], I18n.PANEL_TEMPLATE_SETTING);
         stylePanelTint(pnl.docTemplatePnl);
 
         let pnll: any = pnl.docTemplatePnl;
@@ -534,7 +531,7 @@ class LabelPlusInput extends GenericUI {
             }
         };
         xx = xOfs;
-        yy += 120;
+        yy += 126;
 
         // text direction
         pnl.textDirLabel = pnl.add('statictext', [xx, yy, xx + 100, yy + 20], I18n.LABEL_TEXT_DIRECTION);
@@ -565,7 +562,7 @@ class LabelPlusInput extends GenericUI {
         }
 
         // anti-alias (left) | text color (right)
-        let colR = 470; // right column start
+        let colR = 416; // right column start (symmetric with left margin)
         pnl.setAntiAliasCheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_ANTI_ALIAS);
         pnl.setAntiAliasCheckBox.onClick = () => {
             pnl.antiAliasList.enabled = pnl.setAntiAliasCheckBox.value;
@@ -738,7 +735,7 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiAutomationPanel = (pnl: any): PanelDesc => {
-        let xOfs = 16, yOfs = 16;
+        let xOfs = 16, yOfs = 142;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_AUTOMATION;
