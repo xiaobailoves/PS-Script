@@ -36,7 +36,7 @@ class LabelPlusInput extends GenericUI {
         this.saveIni = false;
         this.hasBorder = false;
         this.settingsPanel = false;
-        this.winRect = { x: 200, y: 200, w: 930, h: 690 };
+        this.winRect = { x: 200, y: 200, w: 970, h: 690 };
         this.center = true;
         this.title = I18n.APP_NAME + " " + VERSION;
         this.notesSize = 0;
@@ -97,9 +97,9 @@ class LabelPlusInput extends GenericUI {
         let xx: number = 14, yy: number = 10;
         pnl.lpTextFileLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_TEXT_FILE);
         xx += 120;
-        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 330, yy + 20], '');
+        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 350, yy + 20], '');
         pnl.lpTextFileTextBox.enabled = false;
-        xx += 335;
+        xx += 355;
         pnl.lpTextFileBrowseButton = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         xx += 30;
         yy += 20;
@@ -260,8 +260,8 @@ class LabelPlusInput extends GenericUI {
         // image source folder select
         pnl.sourceLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_SOURCE);
         xx += 90;
-        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 240, yy + 20], '');
-        xx += 245;
+        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 255, yy + 20], '');
+        xx += 260;
         pnl.sourceBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.sourceBrowse.onClick = () => {
             try {
@@ -335,8 +335,8 @@ class LabelPlusInput extends GenericUI {
         // overlay manual folder (涂白文件夹，可选)
         pnl.overlayManualLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_OVERLAY_MANUAL);
         xx += 90;
-        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 240, yy + 20], '');
-        xx += 245;
+        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 255, yy + 20], '');
+        xx += 260;
         pnl.overlayManualBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.overlayManualBrowse.onClick = () => {
             try {
@@ -355,21 +355,21 @@ class LabelPlusInput extends GenericUI {
 
         // selct img
         yOfs = yy;
-        pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 165, yy + 20], I18n.LABEL_SELECT_IMG);
+        pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_IMG);
         yy += 25;
-        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 165, yy + 268], [], { multiselect: true });
+        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 180, yy + 268], [], { multiselect: true });
 
         // select label group
         yy = yOfs;
-        xx = xOfs + 180;
-        pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 165, yy + 20], I18n.LABEL_SELECT_GROUP);
+        xx = xOfs + 196;
+        pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_GROUP);
         yy += 25;
-        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 165, yy + 268], [], { multiselect: true });
+        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 180, yy + 268], [], { multiselect: true });
         xx = xOfs;
         yy += 276;
 
         // tip for multiple selection
-        pnl.add('statictext', [xx, yy, xx + 360, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
+        pnl.add('statictext', [xx, yy, xx + 380, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
 
         let getOption = (opts: CustomOptions, toFile: boolean): CustomOptions | null => {
             if (!toFile) {
@@ -670,7 +670,7 @@ class LabelPlusInput extends GenericUI {
         pnl.tateChuYokoCheckBox.onClick = () => {
             pnl.tateChuYokoTextBox.enabled = pnl.tateChuYokoCheckBox.value;
         };
-        pnl.tateChuYokoTextBox = pnl.add('edittext', [xx + 95, yy, xx + 245, yy + 20]);
+        pnl.tateChuYokoTextBox = pnl.add('edittext', [xx + 95, yy, xx + 228, yy + 20]);
         pnl.tateChuYokoTextBox.enabled = false;
         // tsume on the right
         pnl.tsumeCheckBox = pnl.add('checkbox', [colR, yy, colR + 80, yy + 20], I18n.CHECKBOX_TSUME);
@@ -856,9 +856,9 @@ class LabelPlusInput extends GenericUI {
         }
 
         // pnl
-        xx += 10;
+        xx += 4;
         yy += 25;
-        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 448, yy + 84]);
+        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 444, yy + 84]);
 
         {
             let xx = xOfs;
@@ -872,9 +872,9 @@ class LabelPlusInput extends GenericUI {
 
 
             xx = xOfs;
-            yy += 20;
-            pnl.overlayPnl.overlayGroupLabel = doPnl.add('statictext', [xx, yy, xx + 420, yy + 36], I18n.LABEL_DIALOG_OVERLAY_GROUP, { multiline: true });
-            yy += 36;
+            yy += 24;
+            pnl.overlayPnl.overlayGroupLabel = doPnl.add('statictext', [xx, yy, xx + 420, yy + 22], I18n.LABEL_DIALOG_OVERLAY_GROUP, { multiline: true });
+            yy += 26;
 
             doPnl.groupTextBox = doPnl.add('edittext', [xx, yy, xx + 240, yy + 20]);
             xx += 245;
@@ -1030,21 +1030,21 @@ class LabelPlusInput extends GenericUI {
         yOfs = yy;
 
         // setting save/load
-        this.settingsPnl = pnl.add('panel', [xx, yy, xx + 400, yy + 54]);
+        this.settingsPnl = pnl.add('panel', [xx, yy, xx + 420, yy + 54]);
         ret = this.uiSettingsPanel(this.settingsPnl);
         this.addToPickerList(ret.getOption);
         yy += 62;
 
         // input options
-        this.inputPnl = pnl.add('panel', [xx, yy, xx + 400, yy + 470]);
+        this.inputPnl = pnl.add('panel', [xx, yy, xx + 420, yy + 470]);
         ret = this.uiInputPanel(this.inputPnl);
         this.addToPickerList(ret.getOption);
 
         // cancel hint
         let hintY = yy + 470 + 6;
-        pnl.add('statictext', [xx + 14, hintY, xx + 386, hintY + 20], I18n.HINT_ESC_STOP);
+        pnl.add('statictext', [xx + 14, hintY, xx + 406, hintY + 20], I18n.HINT_ESC_STOP);
 
-        xx += 416;
+        xx += 442;
 
         xOfs = xx;
         xx = xOfs;
