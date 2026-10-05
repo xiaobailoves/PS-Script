@@ -36,7 +36,7 @@ class LabelPlusInput extends GenericUI {
         this.saveIni = false;
         this.hasBorder = false;
         this.settingsPanel = false;
-        this.winRect = { x: 200, y: 200, w: 875, h: 645 };
+        this.winRect = { x: 200, y: 200, w: 930, h: 690 };
         this.center = true;
         this.title = I18n.APP_NAME + " " + VERSION;
         this.notesSize = 0;
@@ -94,12 +94,12 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiLpTextSelect = (pnl: any): PanelDesc => {
-        let xx: number = 10, yy: number = 10;
+        let xx: number = 14, yy: number = 10;
         pnl.lpTextFileLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_TEXT_FILE);
         xx += 120;
-        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 300, yy + 20], '');
+        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 330, yy + 20], '');
         pnl.lpTextFileTextBox.enabled = false;
-        xx += 305;
+        xx += 335;
         pnl.lpTextFileBrowseButton = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         xx += 30;
         yy += 20;
@@ -252,7 +252,7 @@ class LabelPlusInput extends GenericUI {
     };
 
     private uiInputPanel = (pnl: any): PanelDesc => {
-        let xOfs = 10, yOfs = 20;
+        let xOfs = 14, yOfs = 20;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_INPUT;
@@ -260,8 +260,8 @@ class LabelPlusInput extends GenericUI {
         // image source folder select
         pnl.sourceLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_SOURCE);
         xx += 90;
-        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 205, yy + 20], '');
-        xx += 210;
+        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 240, yy + 20], '');
+        xx += 245;
         pnl.sourceBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.sourceBrowse.onClick = () => {
             try {
@@ -330,13 +330,13 @@ class LabelPlusInput extends GenericUI {
         }
         pnl.setSourceFileTypeList.onChange = func;
         xx = xOfs;
-        yy += 23;
+        yy += 25;
 
         // overlay manual folder (涂白文件夹，可选)
         pnl.overlayManualLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_OVERLAY_MANUAL);
         xx += 90;
-        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 205, yy + 20], '');
-        xx += 210;
+        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 240, yy + 20], '');
+        xx += 245;
         pnl.overlayManualBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.overlayManualBrowse.onClick = () => {
             try {
@@ -355,21 +355,21 @@ class LabelPlusInput extends GenericUI {
 
         // selct img
         yOfs = yy;
-        pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 150, yy + 20], I18n.LABEL_SELECT_IMG);
-        yy += 23;
-        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 150, yy + 260], [], { multiselect: true });
+        pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 165, yy + 20], I18n.LABEL_SELECT_IMG);
+        yy += 25;
+        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 165, yy + 268], [], { multiselect: true });
 
         // select label group
         yy = yOfs;
-        xx = xOfs + 175;
-        pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 150, yy + 20], I18n.LABEL_SELECT_GROUP);
-        yy += 23;
-        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 150, yy + 260], [], { multiselect: true });
+        xx = xOfs + 180;
+        pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 165, yy + 20], I18n.LABEL_SELECT_GROUP);
+        yy += 25;
+        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 165, yy + 268], [], { multiselect: true });
         xx = xOfs;
-        yy += 265;
+        yy += 276;
 
         // tip for multiple selection
-        pnl.add('statictext', [xx, yy, xx + 330, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
+        pnl.add('statictext', [xx, yy, xx + 360, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
 
         let getOption = (opts: CustomOptions, toFile: boolean): CustomOptions | null => {
             if (!toFile) {
@@ -417,7 +417,7 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiOutputPanel = (pnl: any): PanelDesc => {
-        let xOfs = 10, yOfs = 20;
+        let xOfs = 14, yOfs = 20;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_OUTPUT;
@@ -449,7 +449,7 @@ class LabelPlusInput extends GenericUI {
             }
         };
         xx = xOfs;
-        yy += 23;
+        yy += 24;
 
         // output file type
         pnl.outputTypeLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_OUTPUT_FILE_TYPE);
@@ -460,7 +460,7 @@ class LabelPlusInput extends GenericUI {
         xx += 120;
         pnl.outputTypeList = pnl.add('dropdownlist', [xx, yy - 1, xx + 100, yy + 21], type_arr);
         xx = xOfs;
-        yy += 23;
+        yy += 24;
 
         // ignore images with no label
         pnl.ignoreNoLabelImgCheckBox = pnl.add('checkbox', [xx, yy, xx + 250, yy + 20], I18n.CHECKBOX_IGNORE_NO_LABEL_IMG);
@@ -470,7 +470,7 @@ class LabelPlusInput extends GenericUI {
         // do not close image document after importing complete
         pnl.notCloseCheckBox = pnl.add('checkbox', [xx, yy, xx + 250, yy + 20], I18n.CHECKBOX_NOT_CLOSE);
         xx = xOfs;
-        yy += 23;
+        yy += 24;
 
         // output label index as text layer
         pnl.outputLabelIndexCheckBox = pnl.add('checkbox', [xx, yy, xx + 250, yy + 20], I18n.CHECKBOX_OUTPUT_LABEL_INDEX);
@@ -479,7 +479,7 @@ class LabelPlusInput extends GenericUI {
         // do not create layer group
         pnl.noLayerGroupCheckBox = pnl.add('checkbox', [xx, yy, xx + 250, yy + 20], I18n.CHECKBOX_NO_LAYER_GROUP);
         xx = xOfs;
-        yy += 23;
+        yy += 24;
 
         // ppi
         pnl.setPPICheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_PPI);
@@ -491,7 +491,7 @@ class LabelPlusInput extends GenericUI {
         pnl.ppiTextBox.enabled = false;
         pnl.ppiTextBox.text = "300";
         xx = xOfs;
-        yy += 23;
+        yy += 24;
 
         let opts = this.opts;
         if (opts.outputLabelIndex !== undefined) {
@@ -550,13 +550,13 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiStylePanel = (pnl: any): PanelDesc => {
-        let xOfs = 10, yOfs = 20;
+        let xOfs = 14, yOfs = 20;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_STYLE;
 
         // template settings
-        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 460, yy + 65], I18n.PANEL_TEMPLATE_SETTING);
+        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 448, yy + 66], I18n.PANEL_TEMPLATE_SETTING);
 
         let pnll: any = pnl.docTemplatePnl;
         let xxxOfs: number = 5;
@@ -598,7 +598,7 @@ class LabelPlusInput extends GenericUI {
             }
         };
         xx = xOfs;
-        yy += 70;
+        yy += 72;
 
         // text direction
         pnl.textDirLabel = pnl.add('statictext', [xx, yy, xx + 100, yy + 20], I18n.LABEL_TEXT_DIRECTION);
@@ -606,7 +606,7 @@ class LabelPlusInput extends GenericUI {
         pnl.textDirList = pnl.add('dropdownlist', [xx, yy, xx + 100, yy + 20], I18n.LIST_TEXT_DIT_ITEMS);
         pnl.textDirList.selection = pnl.textDirList.find(I18n.LIST_TEXT_DIT_ITEMS[0]);
         xx = xOfs;
-        yy += 23;
+        yy += 25;
 
         // set font
         {
@@ -648,7 +648,7 @@ class LabelPlusInput extends GenericUI {
         pnl.textColorTextBox.enabled = false;
         pnl.textColorTextBox.text = "#000000";
         xx = xOfs;
-        yy += 23;
+        yy += 25;
 
         // vertical roman (left) | leading (right)
         pnl.verticalRomanCheckBox = pnl.add('checkbox', [xx, yy, xx + 230, yy + 20], I18n.CHECKBOX_VERTICAL_ROMAN);
@@ -663,7 +663,7 @@ class LabelPlusInput extends GenericUI {
         pnl.textLeadingTextBox.text = "120";
         pnl.add('statictext', [lx + 55, yy, lx + 95, yy + 20], "%");
         xx = xOfs;
-        yy += 23;
+        yy += 25;
 
         // tate-chu-yoko (left) | tsume (right)
         pnl.tateChuYokoCheckBox = pnl.add('checkbox', [xx, yy, xx + 90, yy + 20], I18n.CHECKBOX_TATE_CHU_YOKO);
@@ -686,7 +686,7 @@ class LabelPlusInput extends GenericUI {
         pnl.tsumePercentTextBox.text = "80";
         pnl.add('statictext', [colR + 178, yy, colR + 198, yy + 20], "%");
         xx = xOfs;
-        yy += 23;
+        yy += 25;
 
         let opts = this.opts;
         if (opts.docTemplate !== undefined) {
@@ -802,7 +802,7 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiAutomationPanel = (pnl: any): PanelDesc => {
-        let xOfs = 10, yOfs = 20;
+        let xOfs = 14, yOfs = 20;
         let xx = xOfs,  yy = yOfs;
 
         pnl.text = I18n.PANEL_AUTOMATION;
@@ -813,14 +813,14 @@ class LabelPlusInput extends GenericUI {
             pnl.textReplaceTextBox.enabled = pnl.textReplaceCheckBox.value;
         };
         xx += 260;
-        pnl.textReplaceTextBox = pnl.add('edittext', [xx, yy, xx + 120, yy + 20]);
-        xx += 125;
-        pnl.textReplacePresetBtn = pnl.add('button', [xx, yy - 2, xx + 80, yy + 20], I18n.BUTTON_TEXT_REPLACE_PRESET);
+        pnl.textReplaceTextBox = pnl.add('edittext', [xx, yy, xx + 110, yy + 20]);
+        xx += 115;
+        pnl.textReplacePresetBtn = pnl.add('button', [xx, yy - 2, xx + 75, yy + 20], I18n.BUTTON_TEXT_REPLACE_PRESET);
         pnl.textReplacePresetBtn.onClick = () => {
             pnl.textReplaceTextBox.text = "?->？|!->！|!!->！！|～->~|!?->！？";
         }
         xx = xOfs;
-        yy += 23;
+        yy += 25;
 
         // run action
         pnl.runActionGroupCheckBox = pnl.add('checkbox', [xx, yy, xx + 250, yy + 20],
@@ -846,7 +846,7 @@ class LabelPlusInput extends GenericUI {
         };
 
         xx = xOfs;
-        yy += 23;
+        yy += 25;
 
         // dialog overlay
         pnl.dialogOverlayCheckBox = pnl.add('checkbox', [xx, yy, xx + 300, yy + 20], I18n.CHECKBOX_DIALOG_OVERLAY);
@@ -857,8 +857,8 @@ class LabelPlusInput extends GenericUI {
 
         // pnl
         xx += 10;
-        yy += 23;
-        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 460, yy + 90]);
+        yy += 25;
+        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 448, yy + 84]);
 
         {
             let xx = xOfs;
@@ -873,11 +873,11 @@ class LabelPlusInput extends GenericUI {
 
             xx = xOfs;
             yy += 20;
-            pnl.overlayPnl.overlayGroupLabel = doPnl.add('statictext', [xx, yy, xx + 430, yy + 36], I18n.LABEL_DIALOG_OVERLAY_GROUP, { multiline: true });
+            pnl.overlayPnl.overlayGroupLabel = doPnl.add('statictext', [xx, yy, xx + 420, yy + 36], I18n.LABEL_DIALOG_OVERLAY_GROUP, { multiline: true });
             yy += 36;
 
-            doPnl.groupTextBox = doPnl.add('edittext', [xx, yy, xx + 250, yy + 20]);
-            xx += 255;
+            doPnl.groupTextBox = doPnl.add('edittext', [xx, yy, xx + 240, yy + 20]);
+            xx += 245;
             let arr = [""];
             doPnl.addGroupList = doPnl.add('dropdownlist', [xx, yy - 1, xx + 100, yy + 21], arr);
             let func = () => {
@@ -1017,7 +1017,7 @@ class LabelPlusInput extends GenericUI {
     }
 
     public mainPannel = (pnl: any) => {
-        let xOfs = 10, yOfs = 0;
+        let xOfs = 14, yOfs = 0;
         let xx = xOfs,  yy = yOfs;
         let ret: PanelDesc;
 
@@ -1030,21 +1030,21 @@ class LabelPlusInput extends GenericUI {
         yOfs = yy;
 
         // setting save/load
-        this.settingsPnl = pnl.add('panel', [xx, yy, xx + 355, yy + 50]);
+        this.settingsPnl = pnl.add('panel', [xx, yy, xx + 400, yy + 54]);
         ret = this.uiSettingsPanel(this.settingsPnl);
         this.addToPickerList(ret.getOption);
-        yy += 60;
+        yy += 62;
 
         // input options
-        this.inputPnl = pnl.add('panel', [xx, yy, xx + 355, yy + 455]);
+        this.inputPnl = pnl.add('panel', [xx, yy, xx + 400, yy + 470]);
         ret = this.uiInputPanel(this.inputPnl);
         this.addToPickerList(ret.getOption);
 
         // cancel hint
-        let hintY = yy + 455 + 5;
-        pnl.add('statictext', [xx + 10, hintY, xx + 345, hintY + 20], I18n.HINT_ESC_STOP);
+        let hintY = yy + 470 + 6;
+        pnl.add('statictext', [xx + 14, hintY, xx + 386, hintY + 20], I18n.HINT_ESC_STOP);
 
-        xx += 365;
+        xx += 416;
 
         xOfs = xx;
         xx = xOfs;
@@ -1054,13 +1054,13 @@ class LabelPlusInput extends GenericUI {
         this.outputPnl = pnl.add('panel', [xx, yy, xx + 480, yy + 145]);
         ret = this.uiOutputPanel(this.outputPnl);
         this.addToPickerList(ret.getOption);
-        yy += 150;
+        yy += 155;
 
         // style
-        this.stylePnl = pnl.add('panel', [xx, yy, xx + 480, yy + 215]);
+        this.stylePnl = pnl.add('panel', [xx, yy, xx + 480, yy + 225]);
         ret = this.uiStylePanel(this.stylePnl);
         this.addToPickerList(ret.getOption);
-        yy += 225;
+        yy += 235;
 
         // automation
         this.automationPnl = pnl.add('panel', [xx, yy, xx + 480, yy + 190]);
