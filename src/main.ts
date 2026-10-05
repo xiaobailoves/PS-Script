@@ -196,8 +196,8 @@ class LabelPlusInput extends GenericUI {
         // image source folder select
         pnl.sourceLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_SOURCE);
         xx += 90;
-        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 590, yy + 20], '');
-        xx += 600;
+        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 754, yy + 20], '');
+        xx += 764;
         pnl.sourceBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.sourceBrowse.onClick = () => {
             try {
@@ -253,8 +253,8 @@ class LabelPlusInput extends GenericUI {
             pnl.setSourceFileTypeList.enabled = enable;
         }
         xx += 225;
-        pnl.replaceImgSuffixTextbox = pnl.add('edittext', [xx, yy, xx + 100, yy + 20]);
-        xx += 105;
+        pnl.replaceImgSuffixTextbox = pnl.add('edittext', [xx, yy, xx + 160, yy + 20]);
+        xx += 165;
         let type_list = [""];
         type_list = type_list.concat(image_suffix_list);
         pnl.setSourceFileTypeList = pnl.add('dropdownlist', [xx, yy - 1, xx + 55, yy + 21], type_list);
@@ -271,8 +271,8 @@ class LabelPlusInput extends GenericUI {
         // overlay manual folder (涂白文件夹，可选)
         pnl.overlayManualLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_OVERLAY_MANUAL);
         xx += 90;
-        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 590, yy + 20], '');
-        xx += 600;
+        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 754, yy + 20], '');
+        xx += 764;
         pnl.overlayManualBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.overlayManualBrowse.onClick = () => {
             try {
