@@ -17,6 +17,10 @@ function shouldAbort(): boolean {
     return ScriptUI.environment.keyboardState['escape'];
 }
 
+// 当前使用的模板是否已包含"标准垂直罗马对齐"（_roman 模板已烘焙该属性）
+// 已包含时跳过脚本端写入，保证速度
+let templateHasVerticalRoman = false;
+
 // 空文本标签计数（内容为空时跳过，不创建文本图层）
 let skippedEmptyLabels = 0;
 
@@ -624,6 +628,12 @@ export function importFiles(custom_opts: CustomOptions): boolean
             break;
         }
 
+        // 记录模板是否已自带罗马对齐（_roman 模板）；已带则跳过脚本端写入
+        templateHasVerticalRoman = (template_path !== "") && (template_path.indexOf("_roman") >= 0);
+        if (templateHasVerticalRoman) {
+            log("template already provides vertical roman alignment, skip script-side write");
+        }
+
         // 模板文档整个批次只打开一次，之后每张图直接复制，避免逐张从磁盘打开
         if (template_path !== "") {
             try {
@@ -827,7 +837,8 @@ function createStyledTextLayer(img: ImageDocInfo, group: string, contents: strin
     let layer = newTextLayer(img.ws.doc, contents, xPx, yPx, o);
     img.ws.layerPrototypes[group] = layer;
     // 标准垂直罗马对齐：脚本端直接设置（原型层设置一次，克隆层自动继承）
-    if (opts !== null && opts.verticalRoman) {
+    // 若所用模板已自带该属性（_roman），则跳过，避免多余的底层写入
+    if (opts !== null && opts.verticalRoman && !templateHasVerticalRoman) {
         applyVerticalRomanAlignment(img.ws.doc, layer);
     }
     // 直排内横排 / 比例间距（逐标签，按文本内容计算命中区间）
