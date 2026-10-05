@@ -1040,9 +1040,10 @@ class LabelPlusInput extends GenericUI {
         ret = this.uiAutomationPanel(this.automationPnl);
         this.addToPickerList(ret.getOption);
 
-        // cancel hint (centered)
-        let escHint = pnl.add('statictext', [300, 566, 580, 584], I18n.HINT_ESC_STOP);
+        // cancel hint (centered by tight bounds + justify fallback)
+        let escHint = pnl.add('statictext', [357, 566, 523, 584], I18n.HINT_ESC_STOP);
         styleDim(escHint);
+        try { escHint.justify = "center"; } catch (e) { }
 
         // help / about (in the top toolbar row)
         let helpBtn = pnl.add('button', [744, 8, 834, 38], I18n.BUTTON_HELP);
