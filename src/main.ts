@@ -293,16 +293,16 @@ class LabelPlusInput extends GenericUI {
         yOfs = yy;
         pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_IMG);
         yy += 25;
-        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 270], [], { multiselect: true });
+        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 250], [], { multiselect: true });
 
         // select label group
         yy = yOfs;
         xx = xOfs + 396;
         pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_GROUP);
         yy += 25;
-        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 270], [], { multiselect: true });
+        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 250], [], { multiselect: true });
         xx = xOfs;
-        yy += 278;
+        yy += 258;
 
         // tip for multiple selection
         let tipText = pnl.add('statictext', [xx, yy, xx + 624, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
@@ -973,17 +973,18 @@ class LabelPlusInput extends GenericUI {
         yy += 40;
         yOfs = yy;
 
-        // setting save/load buttons (top right)
+        // setting save/load buttons (below the lp-text row)
         {
             let win = GenericUI.getWindow(pnl);
             let fileMask = "INI Files: *.ini, All Files: *.*";
             let defFile = DEFAULT_INI_PATH;
-            let bx = this.winRect.w - 430;
+            let bx = xOfs;
+            let by = 42;
             let bw = 90;
             let gap = 8;
-            let loadBtn = pnl.add('button', [bx, 5, bx + bw, 30], I18n.BUTTON_LOAD);
-            let saveBtn = pnl.add('button', [bx + bw + gap, 5, bx + bw * 2 + gap, 30], I18n.BUTTON_SAVE);
-            let resetBtn = pnl.add('button', [bx + (bw + gap) * 2, 5, bx + bw * 3 + gap * 2, 30], I18n.BUTTON_RESET);
+            let loadBtn = pnl.add('button', [bx, by, bx + bw, by + 30], I18n.BUTTON_LOAD);
+            let saveBtn = pnl.add('button', [bx + bw + gap, by, bx + bw * 2 + gap, by + 30], I18n.BUTTON_SAVE);
+            let resetBtn = pnl.add('button', [bx + (bw + gap) * 2, by, bx + bw * 3 + gap * 2, by + 30], I18n.BUTTON_RESET);
             loadBtn.onClick = () => {
                 let sel = Stdlib.createFileSelect(fileMask);
                 if (isMac()) {
@@ -1017,11 +1018,11 @@ class LabelPlusInput extends GenericUI {
         }
 
         // panes as tabs
-        let tabs = pnl.add('tabbedpanel', [14, 44, 846, 562]);
-        let tabInput = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_INPUT);
-        let tabOutput = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_OUTPUT);
-        let tabStyle = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_STYLE);
-        let tabAutomation = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_AUTOMATION);
+        let tabs = pnl.add('tabbedpanel', [14, 76, 846, 562]);
+        let tabInput = tabs.add('tab', [6, 26, 826, 484], I18n.PANEL_INPUT);
+        let tabOutput = tabs.add('tab', [6, 26, 826, 484], I18n.PANEL_OUTPUT);
+        let tabStyle = tabs.add('tab', [6, 26, 826, 484], I18n.PANEL_STYLE);
+        let tabAutomation = tabs.add('tab', [6, 26, 826, 484], I18n.PANEL_AUTOMATION);
 
         stylePanelTint(tabInput);
         stylePanelTint(tabOutput);
