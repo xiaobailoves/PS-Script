@@ -26,6 +26,40 @@ export const ISSUES_URL  = PROJECT_URL + "/issues";
 export const VIDEO_URL   = "https://www.bilibili.com/video/BV1tTg46UESb/";
 export const DOCS_URL    = "https://www.yurucamp.cn/archives/9/";
 
+// ---------------- 界面样式助手（ScriptUI 可用的美化手段，不支持时静默跳过） ----------------
+
+// 加粗文字（可选字号）
+export function styleBold(t: any, size?: number) {
+    try {
+        /// @ts-ignore
+        t.graphics.font = ScriptUI.newFont("dialog", "BOLD", size || 12);
+    } catch (e) { }
+}
+
+// 弱化说明文字（灰色）
+export function styleDim(t: any) {
+    try {
+        /// @ts-ignore
+        t.graphics.foregroundColor = t.graphics.newPen(t.graphics.PenType.SOLID_COLOR, [0.45, 0.45, 0.45, 1], 1);
+    } catch (e) { }
+}
+
+// 链接样式（蓝色）
+export function styleLink(t: any) {
+    try {
+        /// @ts-ignore
+        t.graphics.foregroundColor = t.graphics.newPen(t.graphics.PenType.SOLID_COLOR, [0.1, 0.35, 0.75, 1], 1);
+    } catch (e) { }
+}
+
+// 面板/容器浅色底（Windows 若不支持则无效果）
+export function stylePanelTint(pnl: any) {
+    try {
+        /// @ts-ignore
+        pnl.graphics.backgroundColor = pnl.graphics.newBrush(pnl.graphics.BrushType.SOLID_COLOR, [0.955, 0.965, 0.98, 1]);
+    } catch (e) { }
+}
+
 // 用系统默认浏览器打开链接
 export function openUrl(url: string) {
     try {

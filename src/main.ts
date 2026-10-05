@@ -305,7 +305,8 @@ class LabelPlusInput extends GenericUI {
         yy += 318;
 
         // tip for multiple selection
-        pnl.add('statictext', [xx, yy, xx + 624, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
+        let tipText = pnl.add('statictext', [xx, yy, xx + 624, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
+        styleDim(tipText);
 
         let getOption = (opts: CustomOptions, toFile: boolean): CustomOptions | null => {
             if (!toFile) {
@@ -493,6 +494,7 @@ class LabelPlusInput extends GenericUI {
 
         // template settings
         pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 890, yy + 100], I18n.PANEL_TEMPLATE_SETTING);
+        stylePanelTint(pnl.docTemplatePnl);
 
         let pnll: any = pnl.docTemplatePnl;
         let xxxOfs: number = 16;
@@ -795,6 +797,7 @@ class LabelPlusInput extends GenericUI {
         xx = xOfs;
         yy += 30;
         pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 890, yy + 100]);
+        stylePanelTint(pnl.overlayPnl);
 
         {
             let xx = xOfs + 6;
@@ -810,6 +813,7 @@ class LabelPlusInput extends GenericUI {
             xx = xOfs + 6;
             yy += 28;
             pnl.overlayPnl.overlayGroupLabel = doPnl.add('statictext', [xx, yy, xx + 600, yy + 22], I18n.LABEL_DIALOG_OVERLAY_GROUP, { multiline: true });
+            styleDim(pnl.overlayPnl.overlayGroupLabel);
             yy += 28;
 
             doPnl.groupTextBox = doPnl.add('edittext', [xx, yy, xx + 480, yy + 20]);
@@ -873,16 +877,19 @@ class LabelPlusInput extends GenericUI {
 
         let yy = 18;
         /// @ts-ignore
-        dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_NOTE);
+        let noteText = dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_NOTE);
+        styleBold(noteText);
         yy += 28;
         /// @ts-ignore
-        dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_HINT);
+        let hintText = dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_HINT);
+        styleDim(hintText);
         yy += 28;
 
         let addLink = (label: string, url: string) => {
             /// @ts-ignore
             let t = dlg.add('statictext', [20, yy, 480, yy + 20], label);
             t.onClick = () => { openUrl(url); };
+            styleLink(t);
             yy += 24;
         };
         addLink(I18n.HELP_LINK_DOCS + "：" + DOCS_URL + I18n.HELP_CLICK, DOCS_URL);
@@ -896,6 +903,7 @@ class LabelPlusInput extends GenericUI {
         let statusY = yy;
         /// @ts-ignore
         let statusText = dlg.add('statictext', [20, statusY, 480, statusY + 20], versionPrefix + I18n.HELP_VERSION_CHECKING);
+        styleBold(statusText);
         let centerStatus = () => {
             // 粗略估算文本宽度（中文/全角按 13px，其余 7px），据此让整行居中
             try {
@@ -1015,6 +1023,11 @@ class LabelPlusInput extends GenericUI {
         let tabStyle = tabs.add('tab', [6, 26, 924, 546], I18n.PANEL_STYLE);
         let tabAutomation = tabs.add('tab', [6, 26, 924, 546], I18n.PANEL_AUTOMATION);
 
+        stylePanelTint(tabInput);
+        stylePanelTint(tabOutput);
+        stylePanelTint(tabStyle);
+        stylePanelTint(tabAutomation);
+
         this.inputPnl = tabInput;
         ret = this.uiInputPanel(this.inputPnl);
         this.addToPickerList(ret.getOption);
@@ -1032,7 +1045,8 @@ class LabelPlusInput extends GenericUI {
         this.addToPickerList(ret.getOption);
 
         // cancel hint
-        pnl.add('statictext', [xOfs + 14, 600, xOfs + 406, 618], I18n.HINT_ESC_STOP);
+        let escHint = pnl.add('statictext', [xOfs + 14, 600, xOfs + 406, 618], I18n.HINT_ESC_STOP);
+        styleDim(escHint);
 
         // help / about
         let helpBtn = pnl.add('button', [this.winRect.w - 100, 5, this.winRect.w - 20, 30], I18n.BUTTON_HELP);
