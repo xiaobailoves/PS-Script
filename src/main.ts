@@ -500,7 +500,7 @@ class LabelPlusInput extends GenericUI {
         xxx = xxxOfs;
         yyy += 30;
         pnll.customTemplateRb = pnll.add('radiobutton', [xxx, yyy, xxx + 130, yyy + 20], I18n.RB_TEMPLATE_CUSTOM); xxx += 140;
-        pnll.customTemplateTextbox = pnll.add('edittext', [xxx, yyy, xxx + 280, yyy + 20]); xxx += 290;
+        pnll.customTemplateTextbox = pnll.add('edittext', [xxx, yyy, xxx + 440, yyy + 20]); xxx += 450;
         pnll.customTemplateTextButton = pnll.add('button', [xxx, yyy - 2, xxx + 30, yyy + 20]); xxx += 30;
         let rbclick = () => {
             let custom_enable: boolean = pnll.customTemplateRb.value;
@@ -550,7 +550,7 @@ class LabelPlusInput extends GenericUI {
                 pnl.font.fontSize.enabled = value;
             }
             xx += 110;
-            pnl.font = pnl.add('group', [xx, yy + 2, xx + 480, yy + 25]);
+            pnl.font = pnl.add('group', [xx, yy + 2, xx + 558, yy + 25]);
             this.createFontPanel(pnl.font, undefined, "", 0);
             pnl.font.family.enabled = false;
             pnl.font.style.enabled = false;
@@ -561,7 +561,7 @@ class LabelPlusInput extends GenericUI {
         }
 
         // anti-alias (left) | text color (right)
-        let colR = 352; // right column start (symmetric with left margin)
+        let colR = 366; // right column start
         pnl.setAntiAliasCheckBox = pnl.add('checkbox', [xx, yy, xx + 100, yy + 20], I18n.CHECKBOX_SET_ANTI_ALIAS);
         pnl.setAntiAliasCheckBox.onClick = () => {
             pnl.antiAliasList.enabled = pnl.setAntiAliasCheckBox.value;
@@ -576,7 +576,7 @@ class LabelPlusInput extends GenericUI {
         pnl.setTextColorCheckBox.onClick = () => {
             pnl.textColorTextBox.enabled = pnl.setTextColorCheckBox.value;
         }
-        pnl.textColorTextBox = pnl.add('edittext', [colR + 105, yy, colR + 225, yy + 20]);
+        pnl.textColorTextBox = pnl.add('edittext', [colR + 105, yy, colR + 285, yy + 20]);
         pnl.textColorTextBox.enabled = false;
         pnl.textColorTextBox.text = "#000000";
         xx = xOfs;
@@ -602,7 +602,7 @@ class LabelPlusInput extends GenericUI {
         pnl.tateChuYokoCheckBox.onClick = () => {
             pnl.tateChuYokoTextBox.enabled = pnl.tateChuYokoCheckBox.value;
         };
-        pnl.tateChuYokoTextBox = pnl.add('edittext', [xx + 100, yy, xx + 400, yy + 20]);
+        pnl.tateChuYokoTextBox = pnl.add('edittext', [xx + 100, yy, xx + 320, yy + 20]);
         pnl.tateChuYokoTextBox.enabled = false;
         // tsume on the right
         pnl.tsumeCheckBox = pnl.add('checkbox', [colR, yy, colR + 90, yy + 20], I18n.CHECKBOX_TSUME);
