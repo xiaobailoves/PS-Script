@@ -93,12 +93,12 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiLpTextSelect = (pnl: any): PanelDesc => {
-        let xx: number = 190, yy: number = 10;
+        let xx: number = 46, yy: number = 11;
         pnl.lpTextFileLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_TEXT_FILE);
         xx += 120;
-        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 345, yy + 20], '');
+        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 234, yy + 20], '');
         pnl.lpTextFileTextBox.enabled = false;
-        xx += 350;
+        xx += 234;
         pnl.lpTextFileBrowseButton = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         xx += 30;
         yy += 20;
@@ -293,16 +293,16 @@ class LabelPlusInput extends GenericUI {
         yOfs = yy;
         pnl.chooseImageLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_IMG);
         yy += 25;
-        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 250], [], { multiselect: true });
+        pnl.chooseImageListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 270], [], { multiselect: true });
 
         // select label group
         yy = yOfs;
         xx = xOfs + 402;
         pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_GROUP);
         yy += 25;
-        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 250], [], { multiselect: true });
+        pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 270], [], { multiselect: true });
         xx = xOfs;
-        yy += 258;
+        yy += 278;
 
         // tip for multiple selection
         let tipText = pnl.add('statictext', [xx, yy, xx + 624, yy + 44], I18n.LABEL_SELECT_TIP, { multiline: true });
@@ -976,8 +976,8 @@ class LabelPlusInput extends GenericUI {
             let win = GenericUI.getWindow(pnl);
             let fileMask = "INI Files: *.ini, All Files: *.*";
             let defFile = DEFAULT_INI_PATH;
-            let bx = 248;
-            let by = 42;
+            let bx = 450;
+            let by = 8;
             let bw = 90;
             let gap = 8;
             let loadBtn = pnl.add('button', [bx, by, bx + bw, by + 30], I18n.BUTTON_LOAD);
@@ -1016,11 +1016,11 @@ class LabelPlusInput extends GenericUI {
         }
 
         // panes as tabs
-        let tabs = pnl.add('tabbedpanel', [14, 76, 846, 562]);
-        let tabInput = tabs.add('tab', [6, 26, 826, 484], I18n.PANEL_INPUT);
-        let tabOutput = tabs.add('tab', [6, 26, 826, 484], I18n.PANEL_OUTPUT);
-        let tabStyle = tabs.add('tab', [6, 26, 826, 484], I18n.PANEL_STYLE);
-        let tabAutomation = tabs.add('tab', [6, 26, 826, 484], I18n.PANEL_AUTOMATION);
+        let tabs = pnl.add('tabbedpanel', [14, 44, 846, 562]);
+        let tabInput = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_INPUT);
+        let tabOutput = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_OUTPUT);
+        let tabStyle = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_STYLE);
+        let tabAutomation = tabs.add('tab', [6, 26, 826, 512], I18n.PANEL_AUTOMATION);
 
         stylePanelTint(tabInput);
         stylePanelTint(tabOutput);
@@ -1047,8 +1047,8 @@ class LabelPlusInput extends GenericUI {
         let escHint = pnl.add('statictext', [300, 566, 580, 584], I18n.HINT_ESC_STOP);
         styleDim(escHint);
 
-        // help / about (in the centered button row)
-        let helpBtn = pnl.add('button', [542, 42, 632, 72], I18n.BUTTON_HELP);
+        // help / about (in the top toolbar row)
+        let helpBtn = pnl.add('button', [744, 8, 834, 38], I18n.BUTTON_HELP);
         helpBtn.onClick = () => { this.showHelpDialog(); };
 
         this.allPanelEnable(this.lpFile != null);
