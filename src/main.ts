@@ -93,12 +93,12 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiLpTextSelect = (pnl: any): PanelDesc => {
-        let xx: number = 50, yy: number = 11;
-        pnl.lpTextFileLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_TEXT_FILE);
-        xx += 120;
-        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 150, yy + 20], '');
+        let xx: number = 30, yy: number = 11;
+        pnl.lpTextFileLabel = pnl.add('statictext', [xx, yy, xx + 110, yy + 20], I18n.LABEL_TEXT_FILE);
+        xx += 110;
+        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 230, yy + 20], '');
         pnl.lpTextFileTextBox.enabled = false;
-        xx += 150;
+        xx += 230;
         pnl.lpTextFileBrowseButton = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         xx += 30;
         yy += 20;
@@ -995,13 +995,13 @@ class LabelPlusInput extends GenericUI {
             let win = GenericUI.getWindow(pnl);
             let fileMask = "INI Files: *.ini, All Files: *.*";
             let defFile = DEFAULT_INI_PATH;
-            let bx = 366;
-            let by = 8;
-            let bw = 80;
+            let bx = 426;
+            let by = 11;
+            let bw = 70;
             let gap = 8;
-            let loadBtn = pnl.add('button', [bx, by, bx + bw, by + 30], I18n.BUTTON_LOAD);
-            let saveBtn = pnl.add('button', [bx + bw + gap, by, bx + bw * 2 + gap, by + 30], I18n.BUTTON_SAVE);
-            let resetBtn = pnl.add('button', [bx + (bw + gap) * 2, by, bx + bw * 3 + gap * 2, by + 30], I18n.BUTTON_RESET);
+            let loadBtn = pnl.add('button', [bx, by, bx + bw, by + 20], I18n.BUTTON_LOAD);
+            let saveBtn = pnl.add('button', [bx + bw + gap, by, bx + bw * 2 + gap, by + 20], I18n.BUTTON_SAVE);
+            let resetBtn = pnl.add('button', [bx + (bw + gap) * 2, by, bx + bw * 3 + gap * 2, by + 20], I18n.BUTTON_RESET);
             loadBtn.onClick = () => {
                 let sel = Stdlib.createFileSelect(fileMask);
                 if (isMac()) {
@@ -1063,7 +1063,7 @@ class LabelPlusInput extends GenericUI {
         try { escHint.justify = "center"; } catch (e) { }
 
         // help / about (in the top toolbar row)
-        let helpBtn = pnl.add('button', [630, 8, 710, 38], I18n.BUTTON_HELP);
+        let helpBtn = pnl.add('button', [660, 11, 730, 31], I18n.BUTTON_HELP);
         helpBtn.onClick = () => { this.showHelpDialog(); };
 
         this.allPanelEnable(this.lpFile != null);
