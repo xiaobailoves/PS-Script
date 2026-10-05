@@ -44,6 +44,7 @@ namespace I18n {
     export var CHECKBOX_TATE_CHU_YOKO: string = "直排内横排";
     export var CHECKBOX_TSUME: string = "比例间距";
     export var CHECKBOX_VERTICAL_ROMAN_CHARS: string = "直立字符（直排）";
+    export var CHECKBOX_KERNING_METRICS: string = "字偶间距（度量标准）";
     export var CHECKBOX_SET_PPI: string = "设置PPI";
     export var LABEL_TEXT_DIRECTION: string = "文字方向：";
     export var LIST_TEXT_DIT_ITEMS: string[] = [ "默认", "横向", "纵向" ];
@@ -139,6 +140,7 @@ namespace I18n {
         CHECKBOX_TATE_CHU_YOKO = "Tate-Chu-Yoko";
         CHECKBOX_TSUME = "Tsume";
         CHECKBOX_VERTICAL_ROMAN_CHARS = "Upright Chars (vertical)";
+        CHECKBOX_KERNING_METRICS = "Kerning: Metrics";
         CHECKBOX_SET_PPI = "Set PPI";
         LABEL_TEXT_DIRECTION = "Text Direction:";
         LIST_TEXT_DIT_ITEMS = [ "Default", "Horizontal", "Vertical" ];

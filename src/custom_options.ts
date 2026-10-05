@@ -44,6 +44,7 @@ export class CustomOptions {
     tsumeChars: string = "";          // 比例间距：套用挤压的字符（如 「」），空 = 关闭
     tsumePercent: number = 0;         // 比例间距百分比 10~90，0 = 关闭
     verticalRomanChars: string = "";  // 直立字符（直排）：对这些字符套用标准直立（标准垂直罗马对齐），空 = 关闭
+    autoKerningMetrics: boolean = false; // 字偶间距应用"度量标准"(Metrics)：使用字体自带的两字间距微调
     ppi: number = 0; // override output PPI, 0 means disabled
 
     actionGroup: string = ""; // action group name

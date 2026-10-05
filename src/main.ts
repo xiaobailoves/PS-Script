@@ -628,6 +628,8 @@ class LabelPlusInput extends GenericUI {
         pnl.verticalRomanCharsTextBox = pnl.add('edittext', [xx + 140, yy, xx + 380, yy + 20]);
         pnl.verticalRomanCharsTextBox.enabled = false;
         pnl.verticalRomanCharsTextBox.text = "?!";
+        // kerning = metrics (on the same row, right side)
+        pnl.kerningMetricsCheckBox = pnl.add('checkbox', [396, yy, 596, yy + 20], I18n.CHECKBOX_KERNING_METRICS);
         xx = xOfs;
         yy += 36;
 
@@ -703,6 +705,9 @@ class LabelPlusInput extends GenericUI {
             pnl.verticalRomanCharsTextBox.text = opts.verticalRomanChars;
             Emit(pnl.verticalRomanCharsCheckBox.onClick);
         }
+        if (opts.autoKerningMetrics !== undefined && opts.autoKerningMetrics) {
+            pnl.kerningMetricsCheckBox.value = true;
+        }
         if (opts.textLeading !== undefined) {
             if (opts.textLeading === 0) {
                 pnl.setTextLeadingCheckBox.value = false;
@@ -743,6 +748,7 @@ class LabelPlusInput extends GenericUI {
                 opts.tsumePercent = 0;
             }
             opts.verticalRomanChars = (pnl.verticalRomanCharsCheckBox.value) ? pnl.verticalRomanCharsTextBox.text : "";
+            opts.autoKerningMetrics = pnl.kerningMetricsCheckBox.value;
             opts.textDirection = <OptionTextDirection> I18n.LIST_TEXT_DIT_ITEMS.indexOf(pnl.textDirList.selection.text);
             return opts;
         }

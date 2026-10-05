@@ -133,6 +133,7 @@ function importLabel(img: ImageDocInfo, label: LabelInfo): boolean
         lending: opts.textLeading ? opts.textLeading : undefined,
         color: img.textColor,
         antiAlias: (opts.antiAlias > 0) ? opts.antiAlias : undefined,
+        autoKerningMetrics: (opts.autoKerningMetrics) ? true : undefined,
     };
 
     // 使用模板时，用户不设置字体大小，不做更改；不使用模板时，如果用户不设置大小，自动调整到合适的大小
@@ -741,6 +742,7 @@ interface TextInputOptions {
     lending?: number;        // 自动行距
     color?: SolidColor;      // 文本颜色
     antiAlias?: number;      // 消除锯齿 1=None 2=Sharp 3=Crisp 4=Strong 5=Smooth
+    autoKerningMetrics?: boolean; // 字偶间距应用"度量标准"(Metrics)
 };
 
 // hex颜色字符串转SolidColor, 如 "#ff0000" 或 "ff0000"
@@ -802,6 +804,10 @@ function newTextLayer(doc: Document, text: string, xPx: number, yPx: number, top
         let aaMap = [undefined, AntiAlias.NONE, AntiAlias.SHARP, AntiAlias.CRISP, AntiAlias.STRONG, AntiAlias.SMOOTH];
         /// @ts-ignore
         textItemRef.antiAliasMethod = aaMap[topts.antiAlias];
+    }
+
+    if (topts.autoKerningMetrics) {
+        textItemRef.autoKerning = AutoKernType.METRICS;
     }
 
     artLayerRef.name     = text;
