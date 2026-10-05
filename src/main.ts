@@ -93,12 +93,12 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiLpTextSelect = (pnl: any): PanelDesc => {
-        let xx: number = 14, yy: number = 10;
+        let xx: number = 190, yy: number = 10;
         pnl.lpTextFileLabel = pnl.add('statictext', [xx, yy, xx + 120, yy + 20], I18n.LABEL_TEXT_FILE);
         xx += 120;
-        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 240, yy + 20], '');
+        pnl.lpTextFileTextBox = pnl.add('edittext', [xx, yy, xx + 345, yy + 20], '');
         pnl.lpTextFileTextBox.enabled = false;
-        xx += 245;
+        xx += 350;
         pnl.lpTextFileBrowseButton = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         xx += 30;
         yy += 20;
@@ -196,8 +196,8 @@ class LabelPlusInput extends GenericUI {
         // image source folder select
         pnl.sourceLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_SOURCE);
         xx += 90;
-        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 660, yy + 20], '');
-        xx += 670;
+        pnl.sourceTextBox = pnl.add('edittext', [xx, yy, xx + 652, yy + 20], '');
+        xx += 662;
         pnl.sourceBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.sourceBrowse.onClick = () => {
             try {
@@ -271,8 +271,8 @@ class LabelPlusInput extends GenericUI {
         // overlay manual folder (涂白文件夹，可选)
         pnl.overlayManualLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_OVERLAY_MANUAL);
         xx += 90;
-        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 660, yy + 20], '');
-        xx += 670;
+        pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 652, yy + 20], '');
+        xx += 662;
         pnl.overlayManualBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.overlayManualBrowse.onClick = () => {
             try {
@@ -297,7 +297,7 @@ class LabelPlusInput extends GenericUI {
 
         // select label group
         yy = yOfs;
-        xx = xOfs + 396;
+        xx = xOfs + 402;
         pnl.chooseGroupLabel = pnl.add('statictext', [xx, yy, xx + 180, yy + 20], I18n.LABEL_SELECT_GROUP);
         yy += 25;
         pnl.chooseGroupListBox = pnl.add('listbox', [xx, yy, xx + 380, yy + 250], [], { multiselect: true });
@@ -400,21 +400,19 @@ class LabelPlusInput extends GenericUI {
         yy += 36;
 
         // ignore images with no label
-        pnl.ignoreNoLabelImgCheckBox = pnl.add('checkbox', [xx, yy, xx + 270, yy + 20], I18n.CHECKBOX_IGNORE_NO_LABEL_IMG);
+        pnl.ignoreNoLabelImgCheckBox = pnl.add('checkbox', [62, yy, 332, yy + 20], I18n.CHECKBOX_IGNORE_NO_LABEL_IMG);
         pnl.ignoreNoLabelImgCheckBox.value = true;
-        xx += 484;
 
         // do not close image document after importing complete
-        pnl.notCloseCheckBox = pnl.add('checkbox', [xx, yy, xx + 270, yy + 20], I18n.CHECKBOX_NOT_CLOSE);
+        pnl.notCloseCheckBox = pnl.add('checkbox', [482, yy, 752, yy + 20], I18n.CHECKBOX_NOT_CLOSE);
         xx = xOfs;
         yy += 36;
 
         // output label index as text layer
-        pnl.outputLabelIndexCheckBox = pnl.add('checkbox', [xx, yy, xx + 270, yy + 20], I18n.CHECKBOX_OUTPUT_LABEL_INDEX);
-        xx += 484;
+        pnl.outputLabelIndexCheckBox = pnl.add('checkbox', [62, yy, 332, yy + 20], I18n.CHECKBOX_OUTPUT_LABEL_INDEX);
 
         // do not create layer group
-        pnl.noLayerGroupCheckBox = pnl.add('checkbox', [xx, yy, xx + 270, yy + 20], I18n.CHECKBOX_NO_LAYER_GROUP);
+        pnl.noLayerGroupCheckBox = pnl.add('checkbox', [482, yy, 752, yy + 20], I18n.CHECKBOX_NO_LAYER_GROUP);
         xx = xOfs;
         yy += 36;
 
@@ -493,7 +491,7 @@ class LabelPlusInput extends GenericUI {
         pnl.text = I18n.PANEL_STYLE;
 
         // template settings
-        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 806, yy + 100], I18n.PANEL_TEMPLATE_SETTING);
+        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 782, yy + 100], I18n.PANEL_TEMPLATE_SETTING);
         stylePanelTint(pnl.docTemplatePnl);
 
         let pnll: any = pnl.docTemplatePnl;
@@ -796,7 +794,7 @@ class LabelPlusInput extends GenericUI {
         // pnl
         xx = xOfs;
         yy += 30;
-        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 790, yy + 100]);
+        pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 782, yy + 100]);
         stylePanelTint(pnl.overlayPnl);
 
         {
@@ -978,7 +976,7 @@ class LabelPlusInput extends GenericUI {
             let win = GenericUI.getWindow(pnl);
             let fileMask = "INI Files: *.ini, All Files: *.*";
             let defFile = DEFAULT_INI_PATH;
-            let bx = xOfs;
+            let bx = 248;
             let by = 42;
             let bw = 90;
             let gap = 8;
@@ -1045,12 +1043,12 @@ class LabelPlusInput extends GenericUI {
         ret = this.uiAutomationPanel(this.automationPnl);
         this.addToPickerList(ret.getOption);
 
-        // cancel hint
-        let escHint = pnl.add('statictext', [xOfs + 14, 566, xOfs + 406, 584], I18n.HINT_ESC_STOP);
+        // cancel hint (centered)
+        let escHint = pnl.add('statictext', [300, 566, 580, 584], I18n.HINT_ESC_STOP);
         styleDim(escHint);
 
-        // help / about
-        let helpBtn = pnl.add('button', [this.winRect.w - 100, 5, this.winRect.w - 20, 30], I18n.BUTTON_HELP);
+        // help / about (in the centered button row)
+        let helpBtn = pnl.add('button', [542, 42, 632, 72], I18n.BUTTON_HELP);
         helpBtn.onClick = () => { this.showHelpDialog(); };
 
         this.allPanelEnable(this.lpFile != null);
