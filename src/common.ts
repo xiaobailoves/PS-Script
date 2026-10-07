@@ -36,11 +36,17 @@ export function styleBold(t: any, size?: number) {
     } catch (e) { }
 }
 
+// 语义色（0-1 浮点 RGBA）：链接蓝调亮，兼顾 PS 深色/浅色主题下均可读
+export const UI_COLOR = {
+    dim:  [0.45, 0.45, 0.45, 1],
+    link: [0.30, 0.52, 0.92, 1],
+};
+
 // 弱化说明文字（灰色）
 export function styleDim(t: any) {
     try {
         /// @ts-ignore
-        t.graphics.foregroundColor = t.graphics.newPen(t.graphics.PenType.SOLID_COLOR, [0.45, 0.45, 0.45, 1], 1);
+        t.graphics.foregroundColor = t.graphics.newPen(t.graphics.PenType.SOLID_COLOR, UI_COLOR.dim, 1);
     } catch (e) { }
 }
 
@@ -48,8 +54,18 @@ export function styleDim(t: any) {
 export function styleLink(t: any) {
     try {
         /// @ts-ignore
-        t.graphics.foregroundColor = t.graphics.newPen(t.graphics.PenType.SOLID_COLOR, [0.1, 0.35, 0.75, 1], 1);
+        t.graphics.foregroundColor = t.graphics.newPen(t.graphics.PenType.SOLID_COLOR, UI_COLOR.link, 1);
     } catch (e) { }
+}
+
+// 从 URL 提取显示用短域名（https://www.yurucamp.cn/archives/9/ -> yurucamp.cn）
+export function shortHost(url: string): string {
+    let s = url.replace(/^https?:\/\//i, "");
+    let i = s.indexOf("/");
+    if (i >= 0) {
+        s = s.substr(0, i);
+    }
+    return s.replace(/^www\./i, "");
 }
 
 // 用系统默认浏览器打开链接

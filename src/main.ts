@@ -216,6 +216,7 @@ class LabelPlusInput extends GenericUI {
 
         // match image file by order
         pnl.matchImgByOrderCheckBox = pnl.add('checkbox', [xx, yy, xx + 220, yy + 20], I18n.CHECKBOX_MATCH_IMG_BY_ORDER);
+        pnl.matchImgByOrderCheckBox.helpTip = I18n.TIP_MATCH_BY_ORDER;
         pnl.matchImgByOrderCheckBox.onClick = () => {
             if (pnl.matchImgByOrderCheckBox.value) {
                 pnl.replaceImgSuffixCheckBox.value = false; // incompatible to "replace image suffix"
@@ -224,6 +225,7 @@ class LabelPlusInput extends GenericUI {
         }
         xx += 225;
         pnl.checkSourceMatchButton = pnl.add('button', [xx, yy - 2, xx + 140, yy + 20], I18n.BUTTON_SOURCE_CHECK_MATCH);
+        pnl.checkSourceMatchButton.helpTip = I18n.TIP_CHECK_MATCH;
         pnl.checkSourceMatchButton.onClick = () => { // preview button
             let matchList = this.getMatchedFileList();
             var logwin = new LogWindow(I18n.BUTTON_SOURCE_CHECK_MATCH);
@@ -243,6 +245,7 @@ class LabelPlusInput extends GenericUI {
 
         // replace image suffix
         pnl.replaceImgSuffixCheckBox = pnl.add('checkbox', [xx, yy, xx + 220, yy + 20], I18n.CHECKBOX_REPLACE_IMG_SUFFIX);
+        pnl.replaceImgSuffixCheckBox.helpTip = I18n.TIP_REPLACE_SUFFIX;
         pnl.replaceImgSuffixCheckBox.onClick = () => {
             if (pnl.replaceImgSuffixCheckBox.value) {
                 pnl.matchImgByOrderCheckBox.value = false; // incompatible to "match image file by order"
@@ -254,6 +257,7 @@ class LabelPlusInput extends GenericUI {
         }
         xx += 225;
         pnl.replaceImgSuffixTextbox = pnl.add('edittext', [xx, yy, xx + 160, yy + 20]);
+        pnl.replaceImgSuffixTextbox.helpTip = I18n.TIP_REPLACE_SUFFIX;
         xx += 165;
         let type_list = [""];
         type_list = type_list.concat(image_suffix_list);
@@ -272,6 +276,7 @@ class LabelPlusInput extends GenericUI {
         pnl.overlayManualLabel = pnl.add('statictext', [xx, yy, xx + 80, yy + 20], I18n.LABEL_OVERLAY_MANUAL);
         xx += 90;
         pnl.overlayManualTextBox = pnl.add('edittext', [xx, yy, xx + 530, yy + 20], '');
+        pnl.overlayManualTextBox.helpTip = I18n.TIP_OVERLAY_MANUAL;
         xx += 540;
         pnl.overlayManualBrowse = pnl.add('button', [xx, yy - 2, xx + 30, yy + 20], '...');
         pnl.overlayManualBrowse.onClick = () => {
@@ -411,16 +416,20 @@ class LabelPlusInput extends GenericUI {
 
         // output label index as text layer
         pnl.outputLabelIndexCheckBox = optPnl.add('checkbox', [20, 37, 240, 57], I18n.CHECKBOX_OUTPUT_LABEL_INDEX);
+        pnl.outputLabelIndexCheckBox.helpTip = I18n.TIP_OUTPUT_LABEL_INDEX;
 
         // do not create layer group
         pnl.noLayerGroupCheckBox = optPnl.add('checkbox', [355, 37, 575, 57], I18n.CHECKBOX_NO_LAYER_GROUP);
+        pnl.noLayerGroupCheckBox.helpTip = I18n.TIP_NO_LAYER_GROUP;
 
         // ppi
         pnl.setPPICheckBox = optPnl.add('checkbox', [20, 62, 120, 82], I18n.CHECKBOX_SET_PPI);
+        pnl.setPPICheckBox.helpTip = I18n.TIP_SET_PPI;
         pnl.setPPICheckBox.onClick = () => {
             pnl.ppiTextBox.enabled = pnl.setPPICheckBox.value;
         }
         pnl.ppiTextBox = optPnl.add('edittext', [125, 62, 175, 82]);
+        pnl.ppiTextBox.helpTip = I18n.TIP_SET_PPI;
         pnl.ppiTextBox.enabled = false;
         pnl.ppiTextBox.text = "300";
         xx = xOfs;
@@ -496,11 +505,13 @@ class LabelPlusInput extends GenericUI {
         let xxx: number = xxxOfs;
         let yyy: number = 10;
         pnll.autoTemplateRb = pnll.add('radiobutton',  [xxx, yyy, xxx + 200, yyy + 20], I18n.RB_TEMPLATE_AUTO); xxx += 220;
+        pnll.autoTemplateRb.helpTip = I18n.TIP_TEMPLATE_AUTO;
         pnll.autoTemplateRb.value = true;
         pnll.noTemplateRb = pnll.add('radiobutton',  [xxx, yyy, xxx + 200, yyy + 20], I18n.RB_TEMPLATE_NO); xxx += 220;
         xxx = xxxOfs;
         yyy += 30;
         pnll.customTemplateRb = pnll.add('radiobutton', [xxx, yyy, xxx + 130, yyy + 20], I18n.RB_TEMPLATE_CUSTOM); xxx += 140;
+        pnll.customTemplateRb.helpTip = I18n.TIP_TEMPLATE_CUSTOM;
         pnll.customTemplateTextbox = pnll.add('edittext', [xxx, yyy, xxx + 440, yyy + 20]); xxx += 450;
         pnll.customTemplateTextButton = pnll.add('button', [xxx, yyy - 2, xxx + 30, yyy + 20]); xxx += 30;
         let rbclick = () => {
@@ -537,6 +548,7 @@ class LabelPlusInput extends GenericUI {
         pnl.textDirLabel = pnl.add('statictext', [xx, yy, xx + 100, yy + 20], I18n.LABEL_TEXT_DIRECTION);
         xx += 110;
         pnl.textDirList = pnl.add('dropdownlist', [xx, yy, xx + 100, yy + 20], I18n.LIST_TEXT_DIT_ITEMS);
+        pnl.textDirList.helpTip = I18n.TIP_TEXT_DIRECTION;
         pnl.textDirList.selection = pnl.textDirList.find(I18n.LIST_TEXT_DIT_ITEMS[0]);
         xx = xOfs;
         yy += 34;
@@ -585,13 +597,16 @@ class LabelPlusInput extends GenericUI {
 
         // vertical roman (left) | leading (right)
         pnl.verticalRomanCheckBox = pnl.add('checkbox', [xx, yy, xx + 230, yy + 20], I18n.CHECKBOX_VERTICAL_ROMAN);
+        pnl.verticalRomanCheckBox.helpTip = I18n.TIP_VERTICAL_ROMAN;
         // leading on the right
         pnl.setTextLeadingCheckBox = pnl.add('checkbox', [colR, yy, colR + 100, yy + 20], I18n.CHECKBOX_SET_LEADING);
+        pnl.setTextLeadingCheckBox.helpTip = I18n.TIP_TEXT_LEADING;
         pnl.setTextLeadingCheckBox.onClick = () => {
             pnl.textLeadingTextBox.enabled = pnl.setTextLeadingCheckBox.value;
         }
         let lx = colR + 105;
         pnl.textLeadingTextBox = pnl.add('edittext', [lx, yy, lx + 60, yy + 20]);
+        pnl.textLeadingTextBox.helpTip = I18n.TIP_TEXT_LEADING;
         pnl.textLeadingTextBox.enabled = false;
         pnl.textLeadingTextBox.text = "120";
         pnl.add('statictext', [lx + 65, yy, lx + 105, yy + 20], "%");
@@ -600,21 +615,26 @@ class LabelPlusInput extends GenericUI {
 
         // tate-chu-yoko (left) | tsume (right)
         pnl.tateChuYokoCheckBox = pnl.add('checkbox', [xx, yy, xx + 130, yy + 20], I18n.CHECKBOX_TATE_CHU_YOKO);
+        pnl.tateChuYokoCheckBox.helpTip = I18n.TIP_TATE_CHU_YOKO;
         pnl.tateChuYokoCheckBox.onClick = () => {
             pnl.tateChuYokoTextBox.enabled = pnl.tateChuYokoCheckBox.value;
         };
         pnl.tateChuYokoTextBox = pnl.add('edittext', [xx + 140, yy, xx + 320, yy + 20]);
+        pnl.tateChuYokoTextBox.helpTip = I18n.TIP_TATE_CHU_YOKO;
         pnl.tateChuYokoTextBox.enabled = false;
         // tsume on the right
         pnl.tsumeCheckBox = pnl.add('checkbox', [colR, yy, colR + 90, yy + 20], I18n.CHECKBOX_TSUME);
+        pnl.tsumeCheckBox.helpTip = I18n.TIP_TSUME;
         pnl.tsumeCheckBox.onClick = () => {
             let en = pnl.tsumeCheckBox.value;
             pnl.tsumeCharsTextBox.enabled = en;
             pnl.tsumePercentTextBox.enabled = en;
         };
         pnl.tsumeCharsTextBox = pnl.add('edittext', [colR + 95, yy, colR + 175, yy + 20]);
+        pnl.tsumeCharsTextBox.helpTip = I18n.TIP_TSUME_CHARS;
         pnl.tsumeCharsTextBox.enabled = false;
         pnl.tsumePercentTextBox = pnl.add('edittext', [colR + 180, yy, colR + 240, yy + 20]);
+        pnl.tsumePercentTextBox.helpTip = I18n.TIP_TSUME_PERCENT;
         pnl.tsumePercentTextBox.enabled = false;
         pnl.tsumePercentTextBox.text = "80";
         pnl.add('statictext', [colR + 245, yy, colR + 265, yy + 20], "%");
@@ -623,16 +643,23 @@ class LabelPlusInput extends GenericUI {
 
         // upright chars in vertical text (per-char standard vertical roman alignment)
         pnl.verticalRomanCharsCheckBox = pnl.add('checkbox', [xx, yy, xx + 130, yy + 20], I18n.CHECKBOX_VERTICAL_ROMAN_CHARS);
+        pnl.verticalRomanCharsCheckBox.helpTip = I18n.TIP_VERTICAL_ROMAN_CHARS;
         pnl.verticalRomanCharsCheckBox.onClick = () => {
             pnl.verticalRomanCharsTextBox.enabled = pnl.verticalRomanCharsCheckBox.value;
         };
         pnl.verticalRomanCharsTextBox = pnl.add('edittext', [xx + 140, yy, xx + 320, yy + 20]);
+        pnl.verticalRomanCharsTextBox.helpTip = I18n.TIP_VERTICAL_ROMAN_CHARS;
         pnl.verticalRomanCharsTextBox.enabled = false;
         pnl.verticalRomanCharsTextBox.text = "?!";
         // kerning = metrics (on the same row, aligned to the right column)
         pnl.kerningMetricsCheckBox = pnl.add('checkbox', [colR, yy, colR + 120, yy + 20], I18n.CHECKBOX_KERNING_METRICS);
+        pnl.kerningMetricsCheckBox.helpTip = I18n.TIP_KERNING_METRICS;
         xx = xOfs;
         yy += 34;
+
+        // 比例间距 / 度量标准 分工说明
+        let typoHint = pnl.add('statictext', [xOfs, yy, xOfs + 662, yy + 20], I18n.TIP_TYPO_NOTE);
+        styleDim(typoHint);
 
         let opts = this.opts;
         if (opts.docTemplate !== undefined) {
@@ -765,13 +792,16 @@ class LabelPlusInput extends GenericUI {
 
         // text replacing(example:"A->B|C->D")
         pnl.textReplaceCheckBox = pnl.add('checkbox', [xx, yy, xx + 250, yy + 20], I18n.CHECKBOX_TEXT_REPLACE);
+        pnl.textReplaceCheckBox.helpTip = I18n.TIP_TEXT_REPLACE;
         pnl.textReplaceCheckBox.onClick = () => {
             pnl.textReplaceTextBox.enabled = pnl.textReplaceCheckBox.value;
         };
         xx += 260;
         pnl.textReplaceTextBox = pnl.add('edittext', [xx, yy, xx + 330, yy + 20]);
+        pnl.textReplaceTextBox.helpTip = I18n.TIP_TEXT_REPLACE;
         xx += 340;
         pnl.textReplacePresetBtn = pnl.add('button', [xx, yy - 2, xx + 90, yy + 20], I18n.BUTTON_TEXT_REPLACE_PRESET);
+        pnl.textReplacePresetBtn.helpTip = I18n.TIP_TEXT_REPLACE_PRESET;
         pnl.textReplacePresetBtn.onClick = () => {
             pnl.textReplaceTextBox.text = "?->？|!->！|!!->！！|～->~|!?->！？";
         }
@@ -806,6 +836,7 @@ class LabelPlusInput extends GenericUI {
 
         // dialog overlay
         pnl.dialogOverlayCheckBox = pnl.add('checkbox', [xx, yy, xx + 300, yy + 20], I18n.CHECKBOX_DIALOG_OVERLAY);
+        pnl.dialogOverlayCheckBox.helpTip = I18n.TIP_DIALOG_OVERLAY;
         pnl.dialogOverlayCheckBox.onClick = () => {
             let enable = pnl.dialogOverlayCheckBox.value;
             pnl.overlayPnl.enabled = enable;
@@ -824,6 +855,7 @@ class LabelPlusInput extends GenericUI {
             doPnl.toleranceLabel = doPnl.add('statictext', [xx, yy, xx + 60, yy + 20], I18n.LABEL_DIALOG_OVERLAY_TOLERANCE);
             xx += 65;
             doPnl.toleranceTextBox = doPnl.add('edittext', [xx, yy, xx + 50, yy + 20]);
+            doPnl.toleranceTextBox.helpTip = I18n.TIP_OVERLAY_TOLERANCE;
             doPnl.toleranceTextBox.text = "16";
 
 
@@ -885,82 +917,109 @@ class LabelPlusInput extends GenericUI {
         return {getOption: getOption};
     }
 
-    // 帮助 / 关于 对话框：点击链接用浏览器打开
+    // 帮助 / 关于 对话框：分组面板 + 双列链接行，点击链接用浏览器打开
     private showHelpDialog = () => {
+        let WIN_W = 540, WIN_H = 330;
+        let X = 16, XR = WIN_W - X;         // 左右内缩 16，与格式页/输出页一致
+        let NAME_COL = 300, HOST_COL = 312; // 链接行双列分界（面板内相对坐标）
+
         /// @ts-ignore
-        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, 500, 290]);
+        let dlg = new Window('dialog', I18n.HELP_TITLE, [0, 0, WIN_W, WIN_H]);
         /// @ts-ignore
         dlg.center();
 
-        let yy = 18;
         /// @ts-ignore
-        let noteText = dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_NOTE);
+        let noteText = dlg.add('statictext', [X, 16, XR, 36], I18n.HELP_NOTE);
         styleBold(noteText);
-        yy += 28;
         /// @ts-ignore
-        let hintText = dlg.add('statictext', [20, yy, 480, yy + 20], I18n.HELP_HINT);
+        let hintText = dlg.add('statictext', [X, 44, XR, 64], I18n.HELP_HINT);
         styleDim(hintText);
-        yy += 28;
 
-        let addLink = (label: string, url: string) => {
-            /// @ts-ignore
-            let t = dlg.add('statictext', [20, yy, 480, yy + 20], label);
-            t.onClick = () => { openUrl(url); };
-            styleLink(t);
-            yy += 24;
-        };
-        addLink(I18n.HELP_LINK_DOCS + "：" + DOCS_URL + I18n.HELP_CLICK, DOCS_URL);
-        addLink(I18n.HELP_LINK_VIDEO + "：" + VIDEO_URL + I18n.HELP_CLICK, VIDEO_URL);
-        addLink(I18n.HELP_LINK_PROJECT + "：" + PROJECT_URL + I18n.HELP_CLICK, PROJECT_URL);
-        yy += 24; // 空一行，与下方版本行拉开距离
-
-        // 版本号 + 更新检测（合并为一行，整体居中）；有新版本时点击可跳转下载，否则点击重新检查
-        let hasNewVersion = false;
-        let versionPrefix = I18n.APP_NAME + " " + VERSION + "  ";
-        let statusY = yy;
+        // 相关链接：名称（链接蓝）+ 短域名（灰）双列，整行可点，悬停提示完整 URL。
+        // 注：CC 对嵌套控件可能重复派发鼠标事件，用时间窗防抖避免打开两次
         /// @ts-ignore
-        let statusText = dlg.add('statictext', [20, statusY, 480, statusY + 20], versionPrefix + I18n.HELP_VERSION_CHECKING);
-        styleBold(statusText);
-        let centerStatus = () => {
-            // 粗略估算文本宽度（中文/全角按 13px，其余 7px），据此让整行居中
+        let linksPnl = dlg.add('panel', [X, 84, XR, 184], I18n.PANEL_HELP_LINKS);
+        let lastOpenTime = 0;
+        let addLinkRow = (name: string, url: string, y: number) => {
+            let open = () => {
+                let now = (new Date()).getTime();
+                if (now - lastOpenTime < 800) {
+                    return;
+                }
+                lastOpenTime = now;
+                openUrl(url);
+            };
+            let nameText = linksPnl.add('statictext', [16, y, NAME_COL, y + 20], "› " + name);
+            nameText.onClick = open;
+            nameText.helpTip = url;
+            styleLink(nameText);
+            let hostText = linksPnl.add('statictext', [HOST_COL, y, 492, y + 20], shortHost(url));
+            hostText.onClick = open;
+            hostText.helpTip = url;
+            styleDim(hostText);
+        };
+        addLinkRow(I18n.HELP_LINK_DOCS, DOCS_URL, 12);
+        addLinkRow(I18n.HELP_LINK_VIDEO, VIDEO_URL, 40);
+        addLinkRow(I18n.HELP_LINK_PROJECT, PROJECT_URL, 68);
+
+        // 版本信息：版本号（默认色加粗）+ 状态行（● + 状态消息，左对齐）
+        /// @ts-ignore
+        let versionPnl = dlg.add('panel', [X, 204, XR, 274], I18n.PANEL_HELP_ABOUT);
+        let versionText = versionPnl.add('statictext', [16, 12, 492, 32], I18n.APP_NAME + " " + VERSION);
+        styleBold(versionText);
+
+        // 有新版本时点击状态行跳转下载，否则点击重新检查；检测中忽略点击
+        let hasNewVersion = false;
+        let checking = false;
+        let statusText = versionPnl.add('statictext', [16, 37, 492, 57], "");
+        let setStatus = (text: string, isNew: boolean) => {
+            statusText.text = "● " + text;
+            statusText.helpTip = isNew ? RELEASE_URL : I18n.HELP_VERSION_RECHECK_TIP;
             try {
-                let w = 0;
-                for (let i = 0; i < statusText.text.length; i++) {
-                    w += (statusText.text.charCodeAt(i) > 255) ? 13 : 7;
-                }
-                if (w > 460) {
-                    w = 460;
-                }
-                statusText.bounds = [250 - w / 2, statusY, 250 + w / 2, statusY + 20];
+                // 显式指定颜色：ScriptUI 无法把已设置的 pen 还原为系统默认色，
+                // 因此各状态都用固定色（灰 / 链接蓝），避免状态切换时颜色残留
+                let g = statusText.graphics;
+                g.foregroundColor = g.newPen(g.PenType.SOLID_COLOR, isNew ? UI_COLOR.link : UI_COLOR.dim, 1);
             } catch (e) { }
-            try { statusText.justify = "center"; } catch (e) { }
         };
         let runCheck = () => {
-            statusText.text = versionPrefix + I18n.HELP_VERSION_CHECKING;
-            centerStatus();
+            if (checking) {
+                return;
+            }
+            checking = true;
+            hasNewVersion = false;
+            setStatus(I18n.HELP_VERSION_CHECKING, false);
             /// @ts-ignore
             dlg.update();
             let latest = fetchLatestReleaseTag();
             if (latest === null) {
-                hasNewVersion = false;
-                statusText.text = versionPrefix + I18n.HELP_VERSION_FAILED;
+                setStatus(I18n.HELP_VERSION_FAILED, false);
             } else if (isVersionNewer(latest, VERSION)) {
                 hasNewVersion = true;
-                statusText.text = versionPrefix + I18n.HELP_VERSION_NEW + " V" + latest + I18n.HELP_VERSION_CLICK;
+                setStatus(I18n.HELP_VERSION_NEW + " V" + latest + I18n.HELP_VERSION_CLICK, true);
             } else {
-                hasNewVersion = false;
-                statusText.text = versionPrefix + I18n.HELP_VERSION_LATEST;
+                setStatus(I18n.HELP_VERSION_LATEST, false);
             }
-            centerStatus();
+            checking = false;
             /// @ts-ignore
             dlg.update();
         };
-        statusText.onClick = () => { if (hasNewVersion) { openUrl(RELEASE_URL); } else { runCheck(); } };
-        centerStatus();
-        yy += 24;
+        statusText.onClick = () => {
+            if (checking) {
+                return;
+            }
+            if (hasNewVersion) {
+                openUrl(RELEASE_URL);
+            } else {
+                runCheck();
+            }
+        };
+        setStatus(I18n.HELP_VERSION_CHECKING, false);
 
-        /// @ts-ignore
-        dlg.add('button', [200, yy + 30, 300, yy + 55], I18n.BUTTON_CLOSE).onClick = () => { dlg.close(); };
+        // 关闭按钮统一为项目规范 90×20，居中；回车等同点击
+        let closeBtn = dlg.add('button', [WIN_W / 2 - 45, 294, WIN_W / 2 + 45, 314], I18n.BUTTON_CLOSE);
+        closeBtn.onClick = () => { dlg.close(); };
+        dlg.defaultElement = closeBtn;
 
         // 打开对话框时自动检测一次更新
         /// @ts-ignore
