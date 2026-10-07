@@ -498,7 +498,7 @@ class LabelPlusInput extends GenericUI {
         pnl.text = I18n.PANEL_STYLE;
 
         // template settings
-        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 662, yy + 106], I18n.PANEL_TEMPLATE_SETTING);
+        pnl.docTemplatePnl = pnl.add('panel', [xx, yy, xx + 662, yy + 76], I18n.PANEL_TEMPLATE_SETTING);
 
         let pnll: any = pnl.docTemplatePnl;
         let xxxOfs: number = 16;
@@ -542,7 +542,7 @@ class LabelPlusInput extends GenericUI {
             }
         };
         xx = xOfs;
-        yy += 126;
+        yy += 96; // 模板面板 H76 + 20 间距（为底部说明行留白对称腾出空间）
 
         // text direction
         pnl.textDirLabel = pnl.add('statictext', [xx, yy, xx + 100, yy + 20], I18n.LABEL_TEXT_DIRECTION);
@@ -655,7 +655,7 @@ class LabelPlusInput extends GenericUI {
         pnl.kerningMetricsCheckBox = pnl.add('checkbox', [colR, yy, colR + 120, yy + 20], I18n.CHECKBOX_KERNING_METRICS);
         pnl.kerningMetricsCheckBox.helpTip = I18n.TIP_KERNING_METRICS;
         xx = xOfs;
-        yy += 34;
+        yy += 40; // 34 + 6：让说明行上下留白对称（上 20 / 下 18，不压 tab 底边框）
 
         // 比例间距 / 度量标准 分工说明
         let typoHint = pnl.add('statictext', [xOfs, yy, xOfs + 662, yy + 20], I18n.TIP_TYPO_NOTE);
@@ -785,28 +785,131 @@ class LabelPlusInput extends GenericUI {
     }
 
     private uiAutomationPanel = (pnl: any): PanelDesc => {
-        let xOfs = 16, yOfs = 85;
+        let xOfs = 16, yOfs = 28; // 与格式页顶部对齐（原来是大块空顶）
         let xx = xOfs,  yy = yOfs;
+        let filling = false; // 回填期置 true：避免下拉 onChange 误弹"未下载数据"提示
+        let ruleFilePath = ""; // 替换规则文件路径（选中后按钮显示文件名，悬停显示完整路径）
+        let updateRuleFileBtn = () => {
+            if (ruleFilePath === "") {
+                pnl.textReplaceFileBtn.text = I18n.BUTTON_RULE_FILE;
+                pnl.textReplaceFileBtn.helpTip = I18n.TIP_RULE_FILE;
+            } else {
+                let name = ruleFilePath;
+                let sep = name.lastIndexOf(dirSeparator);
+                if (sep >= 0) {
+                    name = name.substring(sep + 1);
+                }
+                // 按钮宽 90px：按半角单位截断（CJK 记 2 单位），前缀省略号
+                let units = 0;
+                let cut = 0;
+                for (let i = name.length - 1; i >= 0; i--) {
+                    units += (name.charCodeAt(i) > 255) ? 2 : 1;
+                    if (units > 11) {
+                        cut = i + 1;
+                        break;
+                    }
+                }
+                if (cut > 0) {
+                    name = "…" + name.substring(cut);
+                }
+                pnl.textReplaceFileBtn.text = name;
+                pnl.textReplaceFileBtn.helpTip = ruleFilePath;
+            }
+        };
 
         pnl.text = I18n.PANEL_AUTOMATION;
 
-        // text replacing(example:"A->B|C->D")
-        pnl.textReplaceCheckBox = pnl.add('checkbox', [xx, yy, xx + 250, yy + 20], I18n.CHECKBOX_TEXT_REPLACE);
+        // 文本处理框：文本替换（表达式 + 规则文件）+ 内置转换（全角/半角、简繁）
+        // 排版效仿输出页「输出选项」：复选框 + 同行内联控件、两列网格、右缘收口 640
+        let textPnl = pnl.add('panel', [16, 28, 678, 142], I18n.PANEL_TEXT_PROCESS); // 底边 142 = 高 114（行 14/46/78 + 下留白 16）
+
+        // 行 1：文本替换 + 表达式 + 规则文件
+        pnl.textReplaceCheckBox = textPnl.add('checkbox', [20, 14, 144, 34], I18n.CHECKBOX_TEXT_REPLACE);
         pnl.textReplaceCheckBox.helpTip = I18n.TIP_TEXT_REPLACE;
         pnl.textReplaceCheckBox.onClick = () => {
             pnl.textReplaceTextBox.enabled = pnl.textReplaceCheckBox.value;
         };
-        xx += 260;
-        pnl.textReplaceTextBox = pnl.add('edittext', [xx, yy, xx + 330, yy + 20]);
+        pnl.textReplaceTextBox = textPnl.add('edittext', [152, 14, 542, 34]);
         pnl.textReplaceTextBox.helpTip = I18n.TIP_TEXT_REPLACE;
-        xx += 340;
-        pnl.textReplacePresetBtn = pnl.add('button', [xx, yy - 2, xx + 90, yy + 20], I18n.BUTTON_TEXT_REPLACE_PRESET);
-        pnl.textReplacePresetBtn.helpTip = I18n.TIP_TEXT_REPLACE_PRESET;
-        pnl.textReplacePresetBtn.onClick = () => {
-            pnl.textReplaceTextBox.text = "?->？|!->！|!!->！！|～->~|!?->！？";
-        }
+        // 规则文件（.txt/.yml）：与文本框规则合并生效，同一「源」以文本框为准（文本框规则最后执行）
+        pnl.textReplaceFileBtn = textPnl.add('button', [550, 12, 640, 34], I18n.BUTTON_RULE_FILE);
+        pnl.textReplaceFileBtn.helpTip = I18n.TIP_RULE_FILE;
+        pnl.textReplaceFileBtn.onClick = () => {
+            try {
+                let f = File.openDialog(I18n.BUTTON_RULE_FILE, "*.txt;*.yml;*.yaml");
+                if (f && f.exists) {
+                    ruleFilePath = f.fsName;
+                    updateRuleFileBtn();
+                }
+            } catch (e) {
+                alert(Stdlib.exceptionMessage(e));
+            }
+        };
+
+        // 行 2：全角/半角（勾选 + 按类别三态下拉：数字/字母/标点；勾选并在下拉里选方向后才生效）
+        pnl.widthConvertCheckBox = textPnl.add('checkbox', [20, 46, 124, 66], I18n.CHECKBOX_WIDTH_CONVERT);
+        pnl.widthConvertCheckBox.helpTip = I18n.TIP_WIDTH_CONVERT;
+        textPnl.add('statictext', [132, 46, 186, 66], I18n.LABEL_WIDTH_DIGITS);
+        pnl.textWidthConvertDigits = textPnl.add('dropdownlist', [188, 46, 294, 66], I18n.LIST_WIDTH_CONVERT_ITEMS);
+        pnl.textWidthConvertDigits.helpTip = I18n.TIP_WIDTH_CONVERT;
+        pnl.textWidthConvertDigits.selection = pnl.textWidthConvertDigits.items[OptionWidthConvert.Keep];
+        textPnl.add('statictext', [305, 46, 359, 66], I18n.LABEL_WIDTH_LETTERS);
+        pnl.textWidthConvertLetters = textPnl.add('dropdownlist', [361, 46, 467, 66], I18n.LIST_WIDTH_CONVERT_ITEMS);
+        pnl.textWidthConvertLetters.helpTip = I18n.TIP_WIDTH_CONVERT;
+        pnl.textWidthConvertLetters.selection = pnl.textWidthConvertLetters.items[OptionWidthConvert.Keep];
+        textPnl.add('statictext', [478, 46, 532, 66], I18n.LABEL_WIDTH_SYMBOLS);
+        pnl.textWidthConvertSymbols = textPnl.add('dropdownlist', [534, 46, 640, 66], I18n.LIST_WIDTH_CONVERT_ITEMS);
+        pnl.textWidthConvertSymbols.helpTip = I18n.TIP_WIDTH_CONVERT;
+        pnl.textWidthConvertSymbols.selection = pnl.textWidthConvertSymbols.items[OptionWidthConvert.Keep];
+
+        // 行 3：简繁转换（勾选 + 三态下拉 + 数据…；简繁数据需用户自行下载，脚本不分发字典）
+        pnl.hanConvertCheckBox = textPnl.add('checkbox', [20, 78, 140, 98], I18n.CHECKBOX_HAN_CONVERT);
+        pnl.hanConvertCheckBox.helpTip = I18n.TIP_HAN_CONVERT;
+        pnl.hanConvertList = textPnl.add('dropdownlist', [152, 78, 272, 98], I18n.LIST_HAN_CONVERT_ITEMS);
+        pnl.hanConvertList.helpTip = I18n.TIP_HAN_CONVERT;
+        pnl.hanConvertList.selection = pnl.hanConvertList.items[OptionHanConvert.Keep];
+        pnl.hanDataBtn = textPnl.add('button', [280, 76, 360, 98], I18n.BUTTON_HAN_DATA);
+        pnl.hanDataBtn.helpTip = I18n.TIP_HAN_DATA_BTN;
+        pnl.hanDataBtn.onClick = () => { this.showHanDataDialog(); };
+
+        // 启用态联动：勾选框只管开关，方向由下拉定（会话内记住上次方向，重新勾选不重置）
+        let syncWidthEnable = () => {
+            let en = pnl.widthConvertCheckBox.value;
+            pnl.textWidthConvertDigits.enabled = en;
+            pnl.textWidthConvertLetters.enabled = en;
+            pnl.textWidthConvertSymbols.enabled = en;
+        };
+        let syncHanEnable = () => {
+            pnl.hanConvertList.enabled = pnl.hanConvertCheckBox.value;
+        };
+        let hanNeedData = () => {
+            if (filling || !pnl.hanConvertCheckBox.value) {
+                return;
+            }
+            let it = pnl.hanConvertList.selection;
+            let dir: number = (it !== null) ? it.index : OptionHanConvert.Keep;
+            if (dir === OptionHanConvert.Keep) {
+                return; // 「不转换」无数据依赖
+            }
+            if (!hanConvIsInstalled(dir)) {
+                if (confirm(I18n.HAN_NEED_DOWNLOAD_CONFIRM)) {
+                    this.showHanDataDialog();
+                }
+                // 不打断用户操作：勾选/方向保留，导入前 importFiles 还会再拦一次
+            }
+        };
+        pnl.widthConvertCheckBox.onClick = syncWidthEnable;
+        pnl.hanConvertCheckBox.onClick = () => {
+            syncHanEnable();
+            hanNeedData();
+        };
+        pnl.hanConvertList.onChange = hanNeedData;
+        // 两个下拉初始禁用（未勾选）
+        syncWidthEnable();
+        syncHanEnable();
+
         xx = xOfs;
-        yy += 36;
+        yy = 142 + 30; // 172：执行自动化动作（后续顺延：涂白 208、overlay 子面板 238）
 
         // run action
         pnl.runActionGroupCheckBox = pnl.add('checkbox', [xx, yy, xx + 250, yy + 20],
@@ -885,6 +988,37 @@ class LabelPlusInput extends GenericUI {
             pnl.textReplaceTextBox.text = (opts.textReplace !== "") ? opts.textReplace : "！？->!?|...->…";
             Emit(pnl.textReplaceCheckBox.onClick);
         }
+        if (opts.widthDigits !== undefined || opts.widthLetters !== undefined || opts.widthSymbols !== undefined || opts.widthConvert !== undefined) {
+            // 旧版配置（只有整体 widthConvert）迁移：原方向应用到全部三类
+            let legacy = (opts.widthConvert !== undefined) ? Number(opts.widthConvert) : OptionWidthConvert.Keep;
+            let readWc = (v: any): number => {
+                let n = (v !== undefined) ? Number(v) : legacy;
+                return (n >= OptionWidthConvert.Keep && n <= OptionWidthConvert.ToFull) ? n : OptionWidthConvert.Keep;
+            };
+            let wd = readWc(opts.widthDigits);
+            let wl = readWc(opts.widthLetters);
+            let ws = readWc(opts.widthSymbols);
+            filling = true;
+            pnl.textWidthConvertDigits.selection = pnl.textWidthConvertDigits.items[wd];
+            pnl.textWidthConvertLetters.selection = pnl.textWidthConvertLetters.items[wl];
+            pnl.textWidthConvertSymbols.selection = pnl.textWidthConvertSymbols.items[ws];
+            pnl.widthConvertCheckBox.value = (wd !== OptionWidthConvert.Keep || wl !== OptionWidthConvert.Keep || ws !== OptionWidthConvert.Keep);
+            syncWidthEnable();
+            filling = false;
+        }
+        if (opts.hanConvert !== undefined) {
+            let hc = Number(opts.hanConvert);
+            let hcOk = (hc >= OptionHanConvert.Keep && hc <= OptionHanConvert.T2S);
+            filling = true;
+            pnl.hanConvertList.selection = pnl.hanConvertList.items[hcOk ? hc : OptionHanConvert.Keep];
+            pnl.hanConvertCheckBox.value = hcOk && (hc !== OptionHanConvert.Keep);
+            syncHanEnable();
+            filling = false;
+        }
+        if (opts.textReplaceRuleFile !== undefined && opts.textReplaceRuleFile !== "") {
+            ruleFilePath = opts.textReplaceRuleFile;
+            updateRuleFileBtn();
+        }
         if (opts.actionGroup !== undefined) {
             pnl.runActionGroupCheckBox.value = (opts.actionGroup !== "");
             let item = pnl.runActionGroupList.find(opts.actionGroup);
@@ -903,6 +1037,25 @@ class LabelPlusInput extends GenericUI {
 
         let getOption = (opts: CustomOptions): CustomOptions | null => {
             opts.textReplace = (pnl.textReplaceCheckBox.value) ? pnl.textReplaceTextBox.text : "";
+            // 内置文本转换（全角/半角、简繁）：勾选且下拉选了方向才生效（items 顺序=枚举顺序，索引即枚举值）
+            let wcOn = pnl.widthConvertCheckBox.value;
+            let readWidth = (dd: any): OptionWidthConvert => {
+                let it = dd.selection;
+                let idx: number = (it !== null) ? it.index : OptionWidthConvert.Keep;
+                return (wcOn && idx >= OptionWidthConvert.ToHalf && idx <= OptionWidthConvert.ToFull)
+                    ? <OptionWidthConvert> idx
+                    : OptionWidthConvert.Keep;
+            };
+            opts.widthDigits = readWidth(pnl.textWidthConvertDigits);
+            opts.widthLetters = readWidth(pnl.textWidthConvertLetters);
+            opts.widthSymbols = readWidth(pnl.textWidthConvertSymbols);
+            opts.widthConvert = OptionWidthConvert.Keep; // 旧字段：迁移到 widthDigits/Letters/Symbols 后不再使用
+            let hcSel = pnl.hanConvertList.selection;
+            let hcIdx: number = (hcSel !== null) ? hcSel.index : OptionHanConvert.Keep;
+            opts.hanConvert = (pnl.hanConvertCheckBox.value && hcIdx >= OptionHanConvert.S2T && hcIdx <= OptionHanConvert.T2S)
+                ? <OptionHanConvert> hcIdx
+                : OptionHanConvert.Keep;
+            opts.textReplaceRuleFile = (pnl.textReplaceCheckBox.value) ? ruleFilePath : "";
             if (pnl.runActionGroupCheckBox.value && pnl.runActionGroupList.selection) {
                 opts.actionGroup = pnl.runActionGroupList.selection.text;
             }
@@ -1025,6 +1178,157 @@ class LabelPlusInput extends GenericUI {
         /// @ts-ignore
         dlg.onShow = runCheck;
 
+        /// @ts-ignore
+        dlg.show();
+    }
+
+    // 简繁转换数据管理：从 OpenCC 官方仓库下载 / 重新下载 / 删除（数据不随脚本分发）
+    private showHanDataDialog = () => {
+        let WIN_W = 580, WIN_H = 476;
+        let X = 16, XR = WIN_W - X;
+
+        /// @ts-ignore
+        let dlg = new Window('dialog', I18n.DLG_HAN_TITLE, [0, 0, WIN_W, WIN_H]);
+        /// @ts-ignore
+        dlg.center();
+
+        /// @ts-ignore
+        let introText = dlg.add('statictext', [X, 12, XR, 36], I18n.HAN_INTRO);
+        styleDim(introText);
+
+        /// @ts-ignore
+        let dirPanel = dlg.add('panel', [X, 46, XR, 142], I18n.PANEL_HAN_STATUS);
+        let lblS2T = dirPanel.add('statictext', [16, 8, 96, 28], I18n.HAN_ROW_S2T);
+        let stS2T = dirPanel.add('statictext', [100, 8, 350, 28], "");
+        let dlS2T = dirPanel.add('button', [356, 6, 436, 28], I18n.BUTTON_HAN_DOWNLOAD);
+        dlS2T.helpTip = I18n.TIP_HAN_DL_BTN;
+        let rmS2T = dirPanel.add('button', [444, 6, 524, 28], I18n.BUTTON_HAN_REMOVE);
+        rmS2T.helpTip = I18n.TIP_HAN_RM_BTN;
+        let lblT2S = dirPanel.add('statictext', [16, 38, 96, 58], I18n.HAN_ROW_T2S);
+        let stT2S = dirPanel.add('statictext', [100, 38, 350, 58], "");
+        let dlT2S = dirPanel.add('button', [356, 36, 436, 58], I18n.BUTTON_HAN_DOWNLOAD);
+        dlT2S.helpTip = I18n.TIP_HAN_DL_BTN;
+        let rmT2S = dirPanel.add('button', [444, 36, 524, 58], I18n.BUTTON_HAN_REMOVE);
+        rmT2S.helpTip = I18n.TIP_HAN_RM_BTN;
+
+        /// @ts-ignore
+        let notePnl = dlg.add('panel', [X, 152, XR, 384], I18n.PANEL_HAN_NOTE);
+        /// @ts-ignore
+        let noteText = notePnl.add('statictext', [16, 8, 532, 224], I18n.HAN_NOTE, { multiline: true });
+        styleDim(noteText);
+
+        let bar: any = null;
+        try {
+            /// @ts-ignore
+            bar = dlg.add('progressbar', [16, 392, 564, 406]); // 默认 value=0, min=0, max=100
+        } catch (e) {
+            bar = null; // 个别环境不支持 progressbar 时退化为纯文字状态
+        }
+
+        /// @ts-ignore
+        let statusLine = dlg.add('statictext', [16, 410, 564, 430], "");
+        styleDim(statusLine);
+
+        let busy = false;
+        let setRows = () => {
+            let set = (st: any, dl: any, rm: any, dir: number) => {
+                let info = hanConvGetInfo(dir);
+                if (info !== null) {
+                    st.text = I18n.HAN_STATUS_INSTALLED + " " + HAN_CONV_TAG_DISPLAY + " · " + info.date;
+                    st.helpTip = info.nc + " 字 / " + info.np + " 词 · " + Math.round(info.bytes / 1024) + " KB · " + I18n.HAN_SAVED_AT + hanConvDataDir();
+                    dl.text = I18n.BUTTON_HAN_REDOWNLOAD;
+                    rm.enabled = true;
+                } else {
+                    st.text = I18n.HAN_STATUS_NOT_INSTALLED;
+                    st.helpTip = I18n.HAN_SAVED_AT + hanConvDataDir();
+                    dl.text = I18n.BUTTON_HAN_DOWNLOAD;
+                    rm.enabled = false;
+                }
+            };
+            set(stS2T, dlS2T, rmS2T, OptionHanConvert.S2T);
+            set(stT2S, dlT2S, rmT2S, OptionHanConvert.T2S);
+        };
+
+        let setBusy = (b: boolean) => {
+            busy = b;
+            dlS2T.enabled = rmS2T.enabled = dlT2S.enabled = rmT2S.enabled = !b;
+            if (!b) {
+                setRows();
+            }
+        };
+
+        let doInstall = (dir: number) => {
+            if (busy) {
+                return;
+            }
+            setBusy(true);
+            if (bar) {
+                bar.value = 0;
+            }
+            statusLine.text = "";
+            /// @ts-ignore
+            dlg.update();
+
+            let err = hanConvInstall(dir,
+                (loaded, total) => {
+                    if (bar) {
+                        bar.value = Math.round(loaded / total * 100);
+                    }
+                    statusLine.text = I18n.HAN_DL_DOWNLOADING + Math.round(loaded / 1024) + " / " + Math.round(total / 1024) + " KB" + I18n.HAN_DL_CANCEL_HINT;
+                    /// @ts-ignore
+                    dlg.update();
+                },
+                (msg) => {
+                    statusLine.text = msg + I18n.HAN_DL_CANCEL_HINT;
+                    /// @ts-ignore
+                    dlg.update();
+                },
+                () => {
+                    // 下载期间 ScriptUI 不派发按钮事件，取消统一走 ESC 轮询（同导入中止机制）
+                    try {
+                        return ScriptUI.environment.keyboardState["escape"] === true;
+                    } catch (e) {
+                        return false;
+                    }
+                });
+
+            if (err === null) {
+                statusLine.text = I18n.HAN_DL_DONE + HAN_CONV_TAG_DISPLAY;
+            } else {
+                statusLine.text = err;
+                alert(err, "error", true);
+            }
+            setBusy(false);
+            /// @ts-ignore
+            dlg.update();
+        };
+
+        let doRemove = (dir: number) => {
+            if (busy) {
+                return;
+            }
+            if (confirm(I18n.HAN_REMOVE_CONFIRM)) {
+                hanConvRemove(dir);
+                setRows();
+                statusLine.text = I18n.HAN_REMOVED;
+                /// @ts-ignore
+                dlg.update();
+            }
+        };
+
+        dlS2T.onClick = () => { doInstall(OptionHanConvert.S2T); };
+        dlT2S.onClick = () => { doInstall(OptionHanConvert.T2S); };
+        rmS2T.onClick = () => { doRemove(OptionHanConvert.S2T); };
+        rmT2S.onClick = () => { doRemove(OptionHanConvert.T2S); };
+
+        /// @ts-ignore
+        let closeBtn = dlg.add('button', [WIN_W / 2 - 45, 440, WIN_W / 2 + 45, 460], I18n.BUTTON_CLOSE);
+        closeBtn.onClick = () => { dlg.close(); };
+        /// @ts-ignore
+        dlg.defaultElement = closeBtn;
+
+        /// @ts-ignore
+        dlg.onShow = setRows;
         /// @ts-ignore
         dlg.show();
     }

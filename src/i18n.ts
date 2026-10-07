@@ -11,6 +11,7 @@ namespace I18n {
     export var PANEL_OUTPUT: string = "输出";
     export var PANEL_STYLE: string = "格式";
     export var PANEL_AUTOMATION: string = "自动化";
+    export var PANEL_TEXT_PROCESS: string = "文本处理";
 
     export var PANEL_TEMPLATE_SETTING: string = "文档模板设置";
     export var PANEL_OUTPUT_OPTIONS: string = "输出选项";
@@ -29,7 +30,7 @@ namespace I18n {
 
 
     export var CHECKBOX_OUTPUT_LABEL_INDEX: string = "导出标号";
-    export var CHECKBOX_TEXT_REPLACE: string = "文本替换(格式:\"A->B|C->D\")";
+    export var CHECKBOX_TEXT_REPLACE: string = "文本替换";
     export var CHECKBOX_IGNORE_NO_LABEL_IMG: string = "不输出未标号图片";
     export var CHECKBOX_MATCH_IMG_BY_ORDER: string = "按顺序匹配图片文件";
     export var BUTTON_SOURCE_CHECK_MATCH: string = "检查图源匹配情况";
@@ -69,6 +70,59 @@ namespace I18n {
     export var TIP_TEXT_REPLACE_PRESET: string = "一键填入常用标点转换示例";
     export var TIP_DIALOG_OVERLAY: string = "自动为指定分组的文字生成涂白层（覆盖原文字），实验功能";
     export var TIP_OVERLAY_TOLERANCE: string = "涂白判定容差，越大覆盖范围越宽";
+
+    // 内置文本转换（全角/半角、简繁；简繁数据由用户自行从 OpenCC 下载）
+    export var CHECKBOX_WIDTH_CONVERT: string = "全角/半角";
+    export var LABEL_WIDTH_DIGITS: string = "数字";
+    export var LABEL_WIDTH_LETTERS: string = "字母";
+    export var LABEL_WIDTH_SYMBOLS: string = "标点";
+    // 顺序必须与 OptionWidthConvert {Keep,ToHalf,ToFull} 一致：下标即枚举值
+    export var LIST_WIDTH_CONVERT_ITEMS: string[] = [ "不转换", "全角→半角", "半角→全角" ];
+    export var TIP_WIDTH_CONVERT: string = "勾选后按各类别所选方向转换字符宽度：数字 / 字母 / 标点（含空格）可分别选择「全角→半角」或「半角→全角」；只转所选方向，已是目标宽度的字符不变。先转换，再做文本替换";
+    export var CHECKBOX_HAN_CONVERT: string = "简繁转换";
+    // 顺序必须与 OptionHanConvert {Keep,S2T,T2S} 一致：下标即枚举值
+    export var LIST_HAN_CONVERT_ITEMS: string[] = [ "不转换", "简→繁", "繁→简" ];
+    export var BUTTON_HAN_DATA: string = "数据…";
+    export var TIP_HAN_CONVERT: string = "勾选并在下拉中选择方向后才做简繁转换。数据需自行下载（不随脚本分发），点右侧「数据…」下载；未下载时导入会中止";
+    export var TIP_HAN_DATA_BTN: string = "查看简繁转换数据状态：下载 / 重新下载 / 删除。数据来自 OpenCC 官方仓库，保存在用户配置目录";
+    export var BUTTON_RULE_FILE: string = "文件…";
+    export var TIP_RULE_FILE: string = "选择替换规则文件（.txt / .yml）：txt 每行一条 A->B（也可用 | 分隔）；yml 支持「源: 替换」映射行或「- A->B」列表项。勾选「文本替换」后与文本框同时生效，同一「源」以文本框为准";
+    export var ERROR_RULE_FILE_NOT_FOUND: string = "替换规则文件不存在或无法读取：";
+
+    export var DLG_HAN_TITLE: string = "简繁转换数据";
+    export var HAN_INTRO: string = "转换数据不随脚本分发，需自行从 OpenCC 官方仓库下载（Apache-2.0 许可）。";
+    export var PANEL_HAN_STATUS: string = "数据状态";
+    export var HAN_ROW_S2T: string = "简→繁：";
+    export var HAN_ROW_T2S: string = "繁→简：";
+    export var HAN_STATUS_INSTALLED: string = "已安装";
+    export var HAN_STATUS_NOT_INSTALLED: string = "未安装";
+    export var HAN_SAVED_AT: string = "保存位置：";
+    export var BUTTON_HAN_DOWNLOAD: string = "下载";
+    export var BUTTON_HAN_REDOWNLOAD: string = "重新下载";
+    export var BUTTON_HAN_REMOVE: string = "删除";
+    export var TIP_HAN_DL_BTN: string = "从 GitHub 下载该方向的字典并在本地解析为紧凑缓存（需联网）";
+    export var TIP_HAN_RM_BTN: string = "删除本地缓存，等同卸载；该方向需重新下载后才能使用";
+    export var HAN_DL_DOWNLOADING: string = "正在下载 ";
+    export var HAN_DL_PARSING: string = "正在解析字典…";
+    export var HAN_DL_WRITING: string = "正在写入缓存…";
+    export var HAN_DL_DONE: string = "完成：已安装 ";
+    export var HAN_DL_CANCELLED: string = "已取消下载";
+    export var HAN_DL_CANCEL_HINT: string = "（按 ESC 取消）";
+    export var HAN_REMOVE_CONFIRM: string = "确定删除该方向的转换数据？删除后需重新下载才能使用。";
+    export var HAN_REMOVED: string = "已删除";
+    export var PANEL_HAN_NOTE: string = "说明";
+    export var HAN_NEED_DOWNLOAD_CONFIRM: string = "该方向还没有下载转换数据（简→繁约 1.0 MB / 繁→简约 113 KB，需联网访问 GitHub）。现在打开数据窗口下载？";
+    export var HAN_NOTE: string = "• 体积与联网：简→繁约 1.0 MB、繁→简约 113 KB；需访问 GitHub（raw.githubusercontent.com），可能失败或很慢、可直接重试；脚本除此之外不联网。\n" +
+        "• 保存位置：用户配置目录 labelplus_script\\opencc（点「删除」即卸载）；下载后就地解析为缓存，原始字典文件随即删除。\n" +
+        "• 准确性：用字按 OpenCC 习惯（爲 / 裏 / 麪 / 臺），与台港日常写法（為 / 裡 / 麵 / 台）可能不同；歧义字靠词组消歧，孤立字仍可能不合语境，可用「文本替换」规则修正。\n" +
+        "• 字体缺字：转换后的繁体字可能不在当前字体覆盖范围内（显示为方框或异常字形），排版前请确认所用字体包含所需字符。\n" +
+        "• 数据来源：OpenCC ver.1.4.2（github.com/BYVoid/OpenCC），Apache-2.0 许可。";
+    export var ERROR_HAN_DATA_NOT_INSTALLED: string = "已选择简繁转换，但转换数据尚未下载：请到「自动化」页点击「数据…」下载后再导入。";
+    export var ERROR_HAN_PRELOAD_FAILED: string = "简繁转换数据读取失败（缓存可能已损坏），已删除；请到「自动化」页「数据…」重新下载。";
+    export var ERROR_HAN_DOWNLOAD_FAILED: string = "简繁转换数据下载失败，请重试（直接再点一次「下载」）；若反复失败，请检查网络能否访问 GitHub（raw.githubusercontent.com）。";
+    export var ERROR_HAN_DL_VERIFY_FAILED: string = "下载文件校验失败（大小与预期不符），可能被网络中断截断，请重新下载。";
+    export var ERROR_HAN_PARSE_FAILED: string = "简繁转换数据解析失败，请重新下载。";
+    export var ERROR_HAN_CACHE_WRITE_FAILED: string = "简繁转换缓存写入失败，请检查磁盘空间与目录权限。";
     export var CHECKBOX_SET_PPI: string = "设置PPI";
     export var LABEL_TEXT_DIRECTION: string = "文字方向：";
     export var LIST_TEXT_DIT_ITEMS: string[] = [ "默认", "横向", "纵向" ];
@@ -137,6 +191,7 @@ namespace I18n {
         PANEL_OUTPUT = "Output";
         PANEL_STYLE = "Style";
         PANEL_AUTOMATION = "Automation";
+        PANEL_TEXT_PROCESS = "Text Processing";
         PANEL_TEMPLATE_SETTING = "Document Template Setting";
         PANEL_OUTPUT_OPTIONS = "Output Options";
         RB_TEMPLATE_AUTO = "Auto";
@@ -151,7 +206,7 @@ namespace I18n {
         LABEL_SELECT_GROUP = "Select Group";
         LABEL_SELECT_TIP = "Tip: Push [Ctrl] key to select/cancel one item, push [Shift] key to select multiple items.";
         CHECKBOX_OUTPUT_LABEL_INDEX = "Output Label Number";
-        CHECKBOX_TEXT_REPLACE = "Text Replace(e.g. \"A->B|C->D\")";
+        CHECKBOX_TEXT_REPLACE = "Text Replace";
         CHECKBOX_IGNORE_NO_LABEL_IMG = "Ignore Images With No Label";
         CHECKBOX_MATCH_IMG_BY_ORDER = "Match Image Source By Order";
         BUTTON_SOURCE_CHECK_MATCH = "Check Match Result";
@@ -191,6 +246,56 @@ namespace I18n {
         TIP_TEXT_REPLACE_PRESET = "Fill in common punctuation conversion examples";
         TIP_DIALOG_OVERLAY = "Auto-generate an overlay (whitening) layer for the specified groups; experimental";
         TIP_OVERLAY_TOLERANCE = "Tolerance for overlay detection; higher covers more area";
+
+        CHECKBOX_WIDTH_CONVERT = "Full/Half Width";
+        LABEL_WIDTH_DIGITS = "Digits";
+        LABEL_WIDTH_LETTERS = "Letters";
+        LABEL_WIDTH_SYMBOLS = "Symbols";
+        LIST_WIDTH_CONVERT_ITEMS = [ "None", "Full→Half", "Half→Full" ];
+        TIP_WIDTH_CONVERT = "When checked, converts character width per category and direction: Digits / Letters / Symbols (incl. space) each choose \"Full→Half\" or \"Half→Full\"; one-way only, characters already at the target width are left as-is. Runs before Text Replace";
+        CHECKBOX_HAN_CONVERT = "Han Convert";
+        LIST_HAN_CONVERT_ITEMS = [ "None", "Simp → Trad", "Trad → Simp" ];
+        BUTTON_HAN_DATA = "Data…";
+        TIP_HAN_CONVERT = "Conversion runs only when the box is checked AND a direction is chosen below. The data is not bundled — click \"Data…\" to download it; importing stops while it is missing";
+        TIP_HAN_DATA_BTN = "View, download, re-download or remove the Han conversion data (from the official OpenCC repository, stored in your user config folder)";
+        BUTTON_RULE_FILE = "File…";
+        TIP_RULE_FILE = "Choose a replacement-rule file (.txt / .yml). txt: one A->B per line (| also works); yml: \"source: target\" lines or \"- A->B\" list items. Applies together with the text box when \"Text Replace\" is checked; the text box wins for the same source";
+        ERROR_RULE_FILE_NOT_FOUND = "Replacement rule file not found or unreadable: ";
+
+        DLG_HAN_TITLE = "Han Conversion Data";
+        HAN_INTRO = "The conversion data is not bundled with this script; download it from the official OpenCC repository (Apache-2.0).";
+        PANEL_HAN_STATUS = "Data Status";
+        HAN_ROW_S2T = "Simp → Trad:";
+        HAN_ROW_T2S = "Trad → Simp:";
+        HAN_STATUS_INSTALLED = "Installed";
+        HAN_STATUS_NOT_INSTALLED = "Not installed";
+        HAN_SAVED_AT = "Location: ";
+        BUTTON_HAN_DOWNLOAD = "Download";
+        BUTTON_HAN_REDOWNLOAD = "Re-download";
+        BUTTON_HAN_REMOVE = "Remove";
+        TIP_HAN_DL_BTN = "Download this direction's dictionaries from GitHub and parse them into a local cache (needs internet)";
+        TIP_HAN_RM_BTN = "Delete the local cache (same as uninstalling); download again before using this direction";
+        HAN_DL_DOWNLOADING = "Downloading ";
+        HAN_DL_PARSING = "Parsing dictionaries...";
+        HAN_DL_WRITING = "Writing cache...";
+        HAN_DL_DONE = "Done: installed ";
+        HAN_DL_CANCELLED = "Download cancelled";
+        HAN_DL_CANCEL_HINT = " (ESC to cancel)";
+        HAN_REMOVE_CONFIRM = "Delete the conversion data for this direction? You will need to download it again.";
+        HAN_REMOVED = "Removed";
+        PANEL_HAN_NOTE = "Notes";
+        HAN_NEED_DOWNLOAD_CONFIRM = "No conversion data is installed for this direction (Simp → Trad ≈ 1.0 MB / Trad → Simp ≈ 113 KB, needs internet access to GitHub). Open the data dialog now?";
+        HAN_NOTE = "• Size & network: Simp → Trad ≈ 1.0 MB, Trad → Simp ≈ 113 KB. Downloading needs access to GitHub (raw.githubusercontent.com) and may be slow or fail - just retry. Nothing else in this script goes online.\n" +
+            "• Location: user config folder labelplus_script\\opencc (\"Remove\" uninstalls it). Dictionaries are parsed into a local cache and the raw files are deleted.\n" +
+            "• Accuracy: word choice follows OpenCC conventions (爲 / 裏 / 麪 / 臺), which may differ from everyday Taiwan/HK usage; ambiguous characters are resolved by the phrase table, isolated ones may still come out wrong. Use \"Text Replace\" rules for individual fixes (conversions run first, rules last).\n" +
+            "• Missing glyphs: converted characters may not be covered by the current font (shown as boxes or wrong glyphs) - make sure the font contains them before laying out.\n" +
+            "• Source: OpenCC ver.1.4.2 (github.com/BYVoid/OpenCC), Apache-2.0.";
+        ERROR_HAN_DATA_NOT_INSTALLED = "Han conversion is selected but its data is not installed. Open the \"Data…\" dialog on the Automation tab and download it before importing.";
+        ERROR_HAN_PRELOAD_FAILED = "Failed to read the Han conversion data (the cache may be corrupted); it has been deleted. Please download it again from \"Data…\".";
+        ERROR_HAN_DOWNLOAD_FAILED = "Failed to download the Han conversion data. Please retry (click Download again); if it keeps failing, check that your network can reach GitHub (raw.githubusercontent.com).";
+        ERROR_HAN_DL_VERIFY_FAILED = "Download verification failed (unexpected file size) - the transfer was probably truncated. Please download again.";
+        ERROR_HAN_PARSE_FAILED = "Failed to parse the Han conversion data. Please download it again.";
+        ERROR_HAN_CACHE_WRITE_FAILED = "Failed to write the Han conversion cache. Check disk space and folder permissions.";
         CHECKBOX_SET_PPI = "Set PPI";
         LABEL_TEXT_DIRECTION = "Text Direction:";
         LIST_TEXT_DIT_ITEMS = [ "Default", "Horizontal", "Vertical" ];

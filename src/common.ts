@@ -68,6 +68,46 @@ export function shortHost(url: string): string {
     return s.replace(/^www\./i, "");
 }
 
+// 全角↔半角字符宽度转换：按类别（数字/字母/标点含空格）分别指定方向。
+// 单向语义：「全角→半角」只动全角字符、「半角→全角」只动半角字符，已是目标宽度的字符不变。
+// 覆盖范围：ASCII 0x20–0x7E 与 U+FF01–FF5E / U+3000；。、「」等 CJK 标点不转换
+export function convertWidth(text: string, digits: OptionWidthConvert, letters: OptionWidthConvert, symbols: OptionWidthConvert): string {
+    if (digits === OptionWidthConvert.Keep && letters === OptionWidthConvert.Keep && symbols === OptionWidthConvert.Keep) {
+        return text;
+    }
+    let out = "";
+    for (let i = 0; i < text.length; i++) {
+        let c = text.charCodeAt(i);
+        // 分类：0 数字 / 1 字母 / 2 标点（含空格）
+        let cls = -1;
+        if ((c >= 0x30 && c <= 0x39) || (c >= 0xFF10 && c <= 0xFF19)) {
+            cls = 0;
+        } else if ((c >= 0x41 && c <= 0x5A) || (c >= 0x61 && c <= 0x7A) || (c >= 0xFF21 && c <= 0xFF3A) || (c >= 0xFF41 && c <= 0xFF5A)) {
+            cls = 1;
+        } else if (c === 0x20 || c === 0x3000 || (c >= 0x21 && c <= 0x7E) || (c >= 0xFF01 && c <= 0xFF5E)) {
+            cls = 2;
+        }
+        if (cls >= 0) {
+            let mode = (cls === 0) ? digits : ((cls === 1) ? letters : symbols);
+            if (mode === OptionWidthConvert.ToHalf) {
+                if (c === 0x3000) {
+                    c = 0x20;
+                } else if (c >= 0xFF01 && c <= 0xFF5E) {
+                    c -= 0xFEE0;
+                }
+            } else if (mode === OptionWidthConvert.ToFull) {
+                if (c === 0x20) {
+                    c = 0x3000;
+                } else if (c >= 0x21 && c <= 0x7E) {
+                    c += 0xFEE0;
+                }
+            }
+        }
+        out += String.fromCharCode(c);
+    }
+    return out;
+}
+
 // 用系统默认浏览器打开链接
 export function openUrl(url: string) {
     try {
@@ -81,7 +121,7 @@ export function openUrl(url: string) {
 // 隐藏窗口执行系统命令
 // 注：app.system / File.execute 执行命令行程序会弹出 cmd 黑窗，
 // 这里通过 wscript + VBScript 以隐藏窗口方式运行（wscript 自身无控制台）
-function execCommandHidden(cmd: string): boolean {
+export function execCommandHidden(cmd: string): boolean {
     try {
         let vbsPath = Folder.temp.fsName + dirSeparator + "lp_ps_script_exec.vbs";
         let vbs = new File(vbsPath);

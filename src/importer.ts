@@ -3,6 +3,7 @@
 /// <reference path="common.ts" />
 /// <reference path="text_parser.ts" />
 /// <reference path="dialog_clear.ts" />
+/// <reference path="han_conv.ts" />
 
 namespace LabelPlus {
 
@@ -89,7 +90,19 @@ function importLabel(img: ImageDocInfo, label: LabelInfo): boolean
 {
     assert(opts !== null);
 
-    // 替换文本（split/join 语义，避免替换目标包含原文时死循环）
+    // 内置文本转换（先于自定义替换规则）：全角/半角 → 简繁。
+    // 必须在这里完成：图层内容、applyLabelTypography 的区间计算、原型缓存都基于同一份 label.contents
+    let wd = (opts.widthDigits !== undefined) ? opts.widthDigits : OptionWidthConvert.Keep;
+    let wl = (opts.widthLetters !== undefined) ? opts.widthLetters : OptionWidthConvert.Keep;
+    let ws = (opts.widthSymbols !== undefined) ? opts.widthSymbols : OptionWidthConvert.Keep;
+    if (wd !== OptionWidthConvert.Keep || wl !== OptionWidthConvert.Keep || ws !== OptionWidthConvert.Keep) {
+        label.contents = convertWidth(label.contents, wd, wl, ws);
+    }
+    if (opts.hanConvert !== undefined && opts.hanConvert !== OptionHanConvert.Keep) {
+        label.contents = hanConvConvert(label.contents, opts.hanConvert); // 未载入时原样返回（导入前已预载）
+    }
+
+    // 替换文本（split/join 语义，避免替换目标包含原文时死循环）——自定义规则最后执行，可修正上面的转换结果
     if (opts.textReplace) {
         for (let k = 0; k < textReplace.length; k++) {
             label.contents = label.contents.split(textReplace[k].from).join(textReplace[k].to);
@@ -541,16 +554,59 @@ export function importFiles(custom_opts: CustomOptions): boolean
         }
         log("parse lptext done...");
 
-        // 替换文本解析
-        if (opts.textReplace) {
-            let tmp = textReplaceReader(opts.textReplace);
-            if (tmp === null) {
-                log_err("error: " + I18n.ERROR_TEXT_REPLACE_EXPRESSION);
+        // 替换文本解析：文本框表达式 + 规则文件（同一「源」以文本框为准：文件规则先执行、同源丢弃，文本框规则最后执行）
+        if (opts.textReplace || opts.textReplaceRuleFile) {
+            let exprRules: TextReplaceInfo = [];
+            if (opts.textReplace) {
+                let tmp = textReplaceReader(opts.textReplace);
+                if (tmp === null) {
+                    log_err("error: " + I18n.ERROR_TEXT_REPLACE_EXPRESSION);
+                    return false;
+                }
+                exprRules = tmp;
+            }
+            let fileRules: TextReplaceInfo = [];
+            if (opts.textReplaceRuleFile && opts.textReplaceRuleFile !== "") {
+                let fr = textReplaceReaderFromFile(opts.textReplaceRuleFile);
+                if (fr === null) {
+                    log_err("error: " + I18n.ERROR_RULE_FILE_NOT_FOUND + " " + opts.textReplaceRuleFile);
+                    alert(I18n.ERROR_RULE_FILE_NOT_FOUND + "\n" + opts.textReplaceRuleFile, "error", true);
+                    return false;
+                }
+                fileRules = fr;
+            }
+            let exprSources: { [k: string]: boolean } = {};
+            for (let i = 0; i < exprRules.length; i++) {
+                exprSources[exprRules[i].from] = true;
+            }
+            let merged: TextReplaceInfo = [];
+            for (let i = 0; i < fileRules.length; i++) {
+                if (exprSources[fileRules[i].from] !== true) {
+                    merged.push(fileRules[i]);
+                }
+            }
+            for (let i = 0; i < exprRules.length; i++) {
+                merged.push(exprRules[i]);
+            }
+            textReplace = merged;
+            log("parse textreplace done (" + merged.length + " rules" + (opts.textReplaceRuleFile ? ", file: " + opts.textReplaceRuleFile : "") + ")");
+        }
+
+        // 简繁转换：选了方向但数据未安装/损坏 → 中止导入（数据由用户自行下载）
+        if (opts.hanConvert !== undefined && opts.hanConvert !== OptionHanConvert.Keep) {
+            if (!hanConvIsInstalled(opts.hanConvert)) {
+                log_err("error: " + I18n.ERROR_HAN_DATA_NOT_INSTALLED);
+                alert(I18n.ERROR_HAN_DATA_NOT_INSTALLED, "error", true);
                 return false;
             }
-            textReplace = tmp;
+            let hanErr = hanConvPreload(opts.hanConvert);
+            if (hanErr !== null) {
+                log_err("error: " + hanErr);
+                alert(hanErr, "error", true);
+                return false;
+            }
+            log("han convert data ready (dir=" + opts.hanConvert + ")");
         }
-        log("parse textreplace done...");
 
         // 枚举动作组内实际存在的动作名（不存在的动作直接跳过）
         // 注：doAction 对不存在的动作播放失败一次约耗时 1~2 秒
@@ -1184,6 +1240,87 @@ function textReplaceReader(str: string): TextReplaceInfo | null
         arr.push({ from: strss[0], to: strss[1] });
     }
     return arr;
+}
+
+// 单条 "A->B" 规则解析（宽松：非法则跳过该条，不整体失败）
+function pushReplaceRule(expr: string, out: TextReplaceInfo): void {
+    let strss = expr.split("->");
+    if ((strss.length != 2) || (strss[0] == ""))
+        return;
+    out.push({ from: strss[0], to: strss[1] });
+}
+
+// 去掉 YAML 标量的成对引号
+function stripYamlQuotes(s: string): string {
+    if (s.length >= 2) {
+        let a = s.charAt(0);
+        let b = s.charAt(s.length - 1);
+        if ((a === "\"" && b === "\"") || (a === "'" && b === "'")) {
+            return s.substring(1, s.length - 1);
+        }
+    }
+    return s;
+}
+
+// 从规则文件读取替换规则：.txt（每行 A->B，也允许 | 分隔）/ .yml、.yaml（"源: 替换" 映射行或 "- A->B" 列表项，# 注释）。
+// 文件不存在/打不开返回 null；单行非法则跳过（宽松）。
+function textReplaceReaderFromFile(path: string): TextReplaceInfo | null {
+    let f = new File(path);
+    if (!f.exists || !f.open("r", "TEXT", "????")) {
+        return null;
+    }
+    f.lineFeed = "unix";
+    f.encoding = "UTF-8";
+    let text = "";
+    try {
+        text = f.read();
+    } finally {
+        try { f.close(); } catch (e) { }
+    }
+    text = text.replace(/^\uFEFF/, "");
+    let isYaml = /\.ya?ml$/i.test(path);
+    let out: TextReplaceInfo = [];
+    let lines = text.split(/\r\n|\n|\r/);
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        if (line === "" || line.charAt(0) === "#") {
+            continue;
+        }
+        if (isYaml) {
+            // 行内注释：YAML 规则为 " #"（# 前有空白）起截断；无空白的 # 视为普通字符
+            let hi = line.indexOf(" #");
+            if (hi >= 0) {
+                line = line.substring(0, hi).trim();
+                if (line === "") {
+                    continue;
+                }
+            }
+            if (line.charAt(0) === "-") {
+                // 列表项 "- A->B"
+                pushReplaceRule(stripYamlQuotes(line.substring(1).trim()), out);
+                continue;
+            }
+            // 映射行 "源: 替换"（取第一个冒号；值为空的行如 "rules:" 自动跳过）
+            let ci = line.indexOf(":");
+            if (ci <= 0) {
+                continue;
+            }
+            let key = stripYamlQuotes(line.substring(0, ci).trim());
+            let val = stripYamlQuotes(line.substring(ci + 1).trim());
+            if (key !== "" && val !== "") {
+                out.push({ from: key, to: val });
+            }
+            continue;
+        }
+        // txt：每行 A->B，也允许 | 分隔
+        let parts = line.split("|");
+        for (let k = 0; k < parts.length; k++) {
+            if (parts[k] !== "") {
+                pushReplaceRule(parts[k], out);
+            }
+        }
+    }
+    return out;
 }
 
 } // namespace LabelPlus
