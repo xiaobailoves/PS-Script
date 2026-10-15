@@ -828,7 +828,7 @@ class LabelPlusInput extends GenericUI {
         // help bar
         xx = this.winRect.w - 220;
         yy = 5;
-        this.HelpPnl = pnl.add('panel', [ , 0, "", [xx, yy, xx + 200, yy + 25]]);
+        this.HelpPnl = pnl.add('panel', [xx, yy, xx + 200, yy + 25]);
         ret = this.uiHelpPanel(this.HelpPnl);
 
         this.allPanelEnable(this.lpFile != null);

@@ -86,7 +86,7 @@ function importLabel(img: ImageInfo, label: LabelInfo): boolean
 
     // 使用模板时，用户不设置字体大小，不做更改；不使用模板时，如果用户不设置大小，自动调整到合适的大小
     if (opts.docTemplate === OptionDocTemplate.No) {
-        let proper_size = UnitValue(min(img.ws.doc.height.as("pt"), img.ws.doc.height.as("pt")) / 90.0, "pt");
+        let proper_size = UnitValue(min(img.ws.doc.width.as("pt"), img.ws.doc.height.as("pt")) / 90.0, "pt");
         o.size = (opts.fontSize !== 0) ? UnitValue(opts.fontSize, "pt") : proper_size;
     } else {
         o.size = (opts.fontSize !== 0) ? UnitValue(opts.fontSize, "pt") : undefined;
@@ -97,7 +97,7 @@ function importLabel(img: ImageInfo, label: LabelInfo): boolean
     if (opts.actionGroup) {
         img.ws.doc.activeLayer = textLayer;
         let result = doAction(label.group, opts.actionGroup);
-        log("run action " + label.group + "[" + opts.actionGroup + "]..." + result ? "done" : "fail");
+        log("run action " + label.group + "[" + opts.actionGroup + "]..." + (result ? "done" : "fail"));
     }
     return true;
 }
@@ -110,7 +110,7 @@ function importImage(img: ImageInfo): boolean
     if (opts.actionGroup) {
         img.ws.doc.activeLayer = img.ws.doc.layers[img.ws.doc.layers.length - 1];
         let result = doAction("_start", opts.actionGroup);
-        log("run action _start[" + opts.actionGroup + "]..." + result ? "done" : "fail");
+        log("run action _start[" + opts.actionGroup + "]..." + (result ? "done" : "fail"));
     }
 
     // 找出需要涂白的标签,记录他们的坐标,执行涂白
@@ -171,12 +171,12 @@ function importImage(img: ImageInfo): boolean
     if (opts.actionGroup) {
         img.ws.doc.activeLayer = img.ws.doc.layers[img.ws.doc.layers.length - 1];
         let result = doAction("_end", opts.actionGroup);
-        log("run action _end[" + opts.actionGroup + "]..." + result ? "done" : "fail");
+        log("run action _end[" + opts.actionGroup + "]..." + (result ? "done" : "fail"));
     }
     return true;
 }
 
-function openImageWorkspace(img_filename: string, template_path: string): ImageWorkspace | null
+function openImageWorkspace(img_filename: string, template_path: string, name_pair: string): ImageWorkspace | null
 {
     assert(opts !== null);
 
@@ -194,6 +194,7 @@ function openImageWorkspace(img_filename: string, template_path: string): ImageW
         let bgFile = new File(opts.source + dirSeparator + img_filename);
         bgDoc = app.open(bgFile);
     } catch {
+        log_err(name_pair + ": " + I18n.ERROR_FILE_OPEN_FAIL);
         return null; //note: do not exit if image not exist
     }
 
@@ -203,8 +204,14 @@ function openImageWorkspace(img_filename: string, template_path: string): ImageW
         wsDoc = app.documents.add(bgDoc.width, bgDoc.height, bgDoc.resolution, bgDoc.name, NewDocumentMode.RGB, DocumentFill.TRANSPARENT);
         wsDoc.activeLayer.name = TEMPLATE_LAYER.IMAGE;
     } else {
-        let docFile = new File(template_path);  //note: if template must do not exist, crash
-        wsDoc = app.open(docFile);
+        let docFile = new File(template_path);
+        try {
+            wsDoc = app.open(docFile);
+        } catch {
+            log_err(name_pair + ": " + I18n.ERROR_TEMPLATE_OPEN_FAIL);
+            bgDoc.close(SaveOptions.DONOTSAVECHANGES);
+            return null;
+        }
         wsDoc.resizeImage(undefined, undefined, bgDoc.resolution);
         wsDoc.resizeCanvas(bgDoc.width, bgDoc.height);
     }
@@ -225,7 +232,7 @@ function openImageWorkspace(img_filename: string, template_path: string): ImageW
         try { bgLayer = wsDoc.artLayers.getByName(TEMPLATE_LAYER.IMAGE); }
         catch {
             bgLayer = wsDoc.artLayers.add();
-            bgLayer.name = TEMPLATE_LAYER.DIALOG_OVERLAY;
+            bgLayer.name = TEMPLATE_LAYER.IMAGE;
         }
         // text layer template
         try { textTemplateLayer = wsDoc.artLayers.getByName(TEMPLATE_LAYER.TEXT); }
@@ -422,9 +429,8 @@ export function importFiles(custom_opts: CustomOptions): boolean
             log('no label, ignored...');
             continue;
         }
-        let ws = openImageWorkspace(matched_name, template_path);
+        let ws = openImageWorkspace(matched_name, template_path, name_pair);
         if (ws == null) {
-            log_err(name_pair + ": " + I18n.ERROR_FILE_OPEN_FAIL);
             continue;
         }
 

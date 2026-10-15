@@ -56,6 +56,7 @@ namespace I18n {
     export var ERROR_NOT_FOUND_TARGET: string = "未找到目标文件夹";
     export var ERROR_NOT_FOUND_LPTEXT: string = "未找到LabelPlus文本文件";
     export var ERROR_NOT_FOUND_TEMPLATE: string = "未找到Photoshop模板文件";
+    export var ERROR_TEMPLATE_OPEN_FAIL: string = "Photoshop模板文件打开失败，请检查PS是否能正确打开该文件！";
     export var ERROR_CREATE_NEW_FOLDER: string = "无法创建新文件夹";
     export var ERROR_PARSER_LPTEXT_FAIL: string = "解析LabelPlus文本失败";
     export var ERROR_NO_IMG_CHOOSED: string = "未选择输出图片";
@@ -67,7 +68,7 @@ namespace I18n {
     export var ERROR_OPT_FONT_NOT_FOUND: string = "找不到配置中保存的字体";
 
     declare var app: any;
-    // if (true) {
+
     if (!(app.locale in {"zh_CN":1, "zh_TW":1, "zh_HK":1})) {
         BUTTON_RUN = "Run";
         BUTTON_CANCEL = "Cancel";
@@ -116,6 +117,7 @@ namespace I18n {
         ERROR_NOT_FOUND_TARGET = "Output PSD Folder Not Found!";
         ERROR_NOT_FOUND_LPTEXT = "LabelPlus Text File Not Found!";
         ERROR_NOT_FOUND_TEMPLATE = "Photoshop template file not found!";
+        ERROR_TEMPLATE_OPEN_FAIL = "Photoshop template file open failed, please confirm whether Photoshop can open the file.";
         ERROR_CREATE_NEW_FOLDER = "Could not build new folder";
         ERROR_PARSER_LPTEXT_FAIL = "Fail To Load LabelPlus Text File";
         ERROR_NO_IMG_CHOOSED = "Please select more than one image";
