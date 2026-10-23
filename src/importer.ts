@@ -82,6 +82,8 @@ function importLabel(img: ImageInfo, label: LabelInfo): boolean
         direction: textDir,
         lgroup: img.ws.groups[label.group].layerSet,
         lending: opts.textLeading ? opts.textLeading : undefined,
+        color: (opts.textColor !== "") ? hexToColor(opts.textColor) : undefined,
+        antiAlias: (opts.antiAlias > 0) ? opts.antiAlias : undefined,
     };
 
     // 使用模板时，用户不设置字体大小，不做更改；不使用模板时，如果用户不设置大小，自动调整到合适的大小
@@ -246,6 +248,7 @@ function openImageWorkspace(img_filename: string, template_path: string, name_pa
         catch {
             dialogOverlayLayer = wsDoc.artLayers.add();
             dialogOverlayLayer.name = TEMPLATE_LAYER.DIALOG_OVERLAY;
+            pendingDelLayerList.push(dialogOverlayLayer);
         }
     }
 
@@ -267,6 +270,13 @@ function openImageWorkspace(img_filename: string, template_path: string, name_pa
             item = bgDoc.layers[i].duplicate(item, ElementPlacement.PLACEAFTER);
         }
     }
+
+    // set PPI
+    if (opts.ppi > 0) {
+        wsDoc.resizeImage(undefined, undefined, opts.ppi, ResampleMethod.NONE);
+        log("override PPI to " + opts.ppi);
+    }
+
     bgDoc.close(SaveOptions.DONOTSAVECHANGES);
 
     // 若文档类型为索引色模式 更改为RGB模式
@@ -418,6 +428,10 @@ export function importFiles(custom_opts: CustomOptions): boolean
         break;
     }
 
+    // 文字颜色格式预检
+    if (opts.textColor !== "" && hexToColor(opts.textColor) === undefined)
+        log_err(I18n.ERROR_INVALID_TEXT_COLOR + " " + opts.textColor);
+
     // 遍历所选图片
     for (let i = 0; i < opts.imageSelected.length; i++) {
         let orgin_name :string = opts.imageSelected[i].file; // 翻译文件中的图片文件名
@@ -461,7 +475,21 @@ interface TextInputOptions {
     direction?: Direction;
     lgroup?: LayerSet;
     lending?: number;        // 自动行距
+    color?: SolidColor;      // 文本颜色
+    antiAlias?: number;      // 消除锯齿 1=None 2=Sharp 3=Crisp 4=Strong 5=Smooth
 };
+
+// hex颜色字符串转SolidColor, 如 "#ff0000" 或 "ff0000"
+function hexToColor(hex: string): SolidColor | undefined {
+    hex = hex.replace("#", "");
+    if (!/^[0-9a-fA-F]{6}$/.test(hex))
+        return undefined;
+    let color = new SolidColor();
+    color.rgb.red   = parseInt(hex.substring(0, 2), 16);
+    color.rgb.green = parseInt(hex.substring(2, 4), 16);
+    color.rgb.blue  = parseInt(hex.substring(4, 6), 16);
+    return color;
+}
 
 // 创建文本图层
 function newTextLayer(doc: Document, text: string, x: number, y: number, topts: TextInputOptions = {}): ArtLayer
@@ -498,6 +526,18 @@ function newTextLayer(doc: Document, text: string, x: number, y: number, topts: 
     if ((topts.lending) && (topts.lending != 0)) {
         textItemRef.useAutoLeading = true;
         textItemRef.autoLeadingAmount = topts.lending;
+    }
+
+    if (topts.color) {
+        textItemRef.color = topts.color;
+    }
+
+    if (topts.antiAlias) {
+        let aaMap = [undefined, AntiAlias.NONE, AntiAlias.SHARP, AntiAlias.CRISP, AntiAlias.STRONG, AntiAlias.SMOOTH];
+        let aa = aaMap[topts.antiAlias];
+        if (aa !== undefined) {
+            textItemRef.antiAliasMethod = aa;
+        }
     }
 
     artLayerRef.name     = text;

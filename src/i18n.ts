@@ -37,6 +37,9 @@ namespace I18n {
     export var CHECKBOX_NOT_CLOSE: string = "导入后不关闭文档";
     export var CHECKBOX_SET_FONT: string = "字体";
     export var CHECKBOX_SET_LEADING: string = "行距";
+    export var CHECKBOX_SET_TEXT_COLOR: string  = "文字颜色";
+    export var CHECKBOX_SET_ANTI_ALIAS: string  = "消除锯齿";
+    export var CHECKBOX_SET_PPI: string = "设置PPI";
     export var LABEL_TEXT_DIRECTION: string = "文字方向：";
     export var LIST_TEXT_DIT_ITEMS: string[] = [ "默认", "横向", "纵向" ];
     export var CHECKBOX_NO_LAYER_GROUP: string = "不对图层进行分组";
@@ -66,6 +69,7 @@ namespace I18n {
     export var ERROR_PRESET_TEMPLATE_NOT_FOUND: string = "无法自动匹配模板文件，请确认脚本所在目录是否存在ps_script_res目录";
     export var ERROR_TEXT_REPLACE_EXPRESSION: string = "文本替换表达式解析错误，请检查！";
     export var ERROR_OPT_FONT_NOT_FOUND: string = "找不到配置中保存的字体";
+    export var ERROR_INVALID_TEXT_COLOR: string = "文字颜色格式不正确(应为 #RRGGBB)，已忽略该设置";
 
     declare var app: any;
 
@@ -101,6 +105,9 @@ namespace I18n {
         CHECKBOX_NOT_CLOSE = "Do Not Close File";
         CHECKBOX_SET_FONT = "Font";
         CHECKBOX_SET_LEADING = "Leading";
+        CHECKBOX_SET_TEXT_COLOR = "Text Color";
+        CHECKBOX_SET_ANTI_ALIAS = "Anti-Alias";
+        CHECKBOX_SET_PPI = "Set PPI";
         LABEL_TEXT_DIRECTION = "Text Direction:";
         LIST_TEXT_DIT_ITEMS = [ "Default", "Horizontal", "Vertical" ];
         CHECKBOX_NO_LAYER_GROUP = "Layer Not Grouping";
@@ -127,5 +134,6 @@ namespace I18n {
         ERROR_PRESET_TEMPLATE_NOT_FOUND = "Cannot match template file, please make sure \"ps_script_res\" folder exsit.";
         ERROR_TEXT_REPLACE_EXPRESSION = "Expression of text replacing is wrong, please check again.";
         ERROR_OPT_FONT_NOT_FOUND = "Cannot found the font";
+        ERROR_INVALID_TEXT_COLOR = "Invalid text color (#RRGGBB expected), setting ignored";
     }
 }
