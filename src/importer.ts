@@ -82,7 +82,7 @@ function importLabel(img: ImageInfo, label: LabelInfo): boolean
         direction: textDir,
         lgroup: img.ws.groups[label.group].layerSet,
         lending: opts.textLeading ? opts.textLeading : undefined,
-        color: (opts.textColor !== "") ? hexToColor(opts.textColor) : undefined,
+        color: opts.textColor ? hexToColor(opts.textColor) : undefined,
         antiAlias: (opts.antiAlias > 0) ? opts.antiAlias : undefined,
     };
 
@@ -273,8 +273,15 @@ function openImageWorkspace(img_filename: string, template_path: string, name_pa
 
     // set PPI
     if (opts.ppi > 0) {
-        wsDoc.resizeImage(undefined, undefined, opts.ppi, ResampleMethod.NONE);
-        log("override PPI to " + opts.ppi);
+        try {
+            wsDoc.resizeImage(undefined, undefined, opts.ppi, ResampleMethod.NONE);
+            log("override PPI to " + opts.ppi);
+        } catch {
+            log_err(name_pair + ": " + I18n.ERROR_PPI_RESIZE_FAIL);
+            wsDoc.close(SaveOptions.DONOTSAVECHANGES);
+            bgDoc.close(SaveOptions.DONOTSAVECHANGES);
+            return null;
+        }
     }
 
     bgDoc.close(SaveOptions.DONOTSAVECHANGES);
@@ -429,7 +436,7 @@ export function importFiles(custom_opts: CustomOptions): boolean
     }
 
     // 文字颜色格式预检
-    if (opts.textColor !== "" && hexToColor(opts.textColor) === undefined)
+    if (opts.textColor && hexToColor(opts.textColor) === undefined)
         log_err(I18n.ERROR_INVALID_TEXT_COLOR + " " + opts.textColor);
 
     // 遍历所选图片
@@ -481,7 +488,7 @@ interface TextInputOptions {
 
 // hex颜色字符串转SolidColor, 如 "#ff0000" 或 "ff0000"
 function hexToColor(hex: string): SolidColor | undefined {
-    hex = hex.replace("#", "");
+    hex = hex.trim().replace(/^#/, "");
     if (!/^[0-9a-fA-F]{6}$/.test(hex))
         return undefined;
     let color = new SolidColor();

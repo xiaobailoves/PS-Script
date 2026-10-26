@@ -455,6 +455,7 @@ class LabelPlusInput extends GenericUI {
         pnl.ppiTextBox = pnl.add('edittext', [xx, yy, xx + 50, yy + 20]);
         pnl.ppiTextBox.enabled = false;
         pnl.ppiTextBox.text = "300";
+        pnl.ppiTextBox.onChanging = GenericUI.numericKeystrokeFilter; // 只允许输入正整数
         xx = xOfs;
         yy += 23;
 
@@ -595,10 +596,10 @@ class LabelPlusInput extends GenericUI {
             pnl.antiAliasList.enabled = pnl.setAntiAliasCheckBox.value;
         }
         xx += 100;
-        let aaItems = ["无", "锐利", "犀利", "浑厚", "平滑"];
+        let aaItems = I18n.LIST_ANTI_ALIAS_ITEMS;
         pnl.antiAliasList = pnl.add('dropdownlist', [xx, yy, xx + 80, yy + 20], aaItems);
         pnl.antiAliasList.enabled = false;
-        pnl.antiAliasList.selection = pnl.antiAliasList.items[0];
+        pnl.antiAliasList.selection = pnl.antiAliasList.items[4]; // 默认“平滑”
         xx += 160;
 
         // text color
@@ -762,7 +763,7 @@ class LabelPlusInput extends GenericUI {
         }
 
         // pnl
-        xx += 10;
+        xx = xOfs;
         yy += 23;
         pnl.overlayPnl = pnl.add('panel', [xx, yy, xx + 460, yy + 75]);
 
@@ -948,6 +949,9 @@ class LabelPlusInput extends GenericUI {
                 return true; // continue, will not close the indow
             }
         }
+
+        if (!tofile && this.outputPnl.setPPICheckBox.value && opts.ppi === 0)
+            log_err(I18n.ERROR_INVALID_PPI + " " + this.outputPnl.ppiTextBox.text);
 
         return opts; // go process()
     };
